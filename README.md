@@ -48,3 +48,11 @@ Build an **outcome-owning educational digital colleague**, not a generic chatbot
 - MCP: https://modelcontextprotocol.io/
 
 The license in this repository is MIT. That **does not grant permission to copy code from BobSwarm**, which did not declare an explicit repository license at the time of this review. Reuse architectural ideas and independently authored implementations unless rights are confirmed.
+
+## Editable system maps
+
+- **[Editable diagrams.net architecture](diagrams/TACE-Architecture.drawio)** — two pages: 00 Gate Map and 01 Education Goal; open in [diagrams.net](https://app.diagrams.net/) using **File → Open From → GitHub** or import the raw file.
+- **[Gate registry](docs/gates/GATE-INDEX.md)** — numbered G01–G12, current approval states and gate outputs.
+- **[Gate 01 deep research](docs/gates/GATE-01-EDUCATION-GOAL.md)** — sourced educational problem and proposed goal; no later gates started.
+
+**Current active gate: G01 EDUCATION GOAL (research only).** Downstream gate design remains blocked until G01 exit criteria and a formal approval ADR are met.

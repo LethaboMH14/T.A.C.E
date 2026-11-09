@@ -20,13 +20,12 @@ flowchart TD
  P --> G[Graph Runtime / State and Policies]
  G --> W1[Data / Assessment specialist]
  G --> W2[Curriculum / Research specialist]
- G --> W3[Intervention / Content specialist]
  W1 --> M[Evidence and dependency merger]
  W2 --> M
- W3 --> M
- M --> V[Independent Reviewer + deterministic checks]
+ M --> W3[Intervention / Content specialist]
+ W3 --> V[Independent Reviewer + deterministic checks]
  V -->|Failed, remaining budget| R[Repair task with structured critique]
- R --> G
+ R --> W3
  V -->|Passed| A{Approval required?}
  A -->|Yes| H[Human approval gate]
  A -->|No| E[Tool executor]

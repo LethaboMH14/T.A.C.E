@@ -1,0 +1,28 @@
+name: T.A.C.E Gate 02.01 intake contract tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/gate02/**'
+      - '.github/workflows/gate02-intake.yml'
+  pull_request:
+    paths:
+      - 'tools/gate02/**'
+      - '.github/workflows/gate02-intake.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  intake:
+    name: G02.01 normalization and revision checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # checkout v4, pinned
+      - name: Node runtime
+        run: node --version
+      - name: Deterministic intake tests
+        run: node --test tools/gate02/normalize-turn.test.mjs

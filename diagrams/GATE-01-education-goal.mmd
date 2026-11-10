@@ -1,24 +1,21 @@
 flowchart TD
- G01["G01 Education goal - IN RESEARCH"]
- G01 --> A["G01.01 Research question"]
- A --> B["G01.02 Evidence landscape"]
- B --> C["G01.03 Compare 5 workflow candidates"]
- C --> D{"G01.04 Flagship workflow selected?"}
- D -->|"Not yet"| R["Review A vs B and revise"]
- R --> C
- D -->|"Approved"| E["G01.05 Primary actor and job"]
- E --> F["G01.06 Inputs and artifact set"]
- F --> H["G01.07 Completion evidence"]
- H --> I["G01.08 Permissions and boundaries"]
- I --> J["G01.09 Correction scenario"]
- J --> K["G01.10 Acceptance metrics"]
- K --> L["G01.11 Limitations and decisions"]
- L --> M{"G01.12 All exit conditions met?"}
- M -->|"No"| R
- M -->|"Yes - ADR-0002"| PASS["G01 APPROVED - may enter G02"]
+ A["G01.01 Any incoming natural-language or API goal"]
+ B["G01.02 Actor and domain"]
+ C["G01.03 Outcome"]
+ D["G01.04 Format and action modality"]
+ E["G01.05 Real capabilities and permissions"]
+ F["G01.06 Task proportionality"]
+ G["G01.07 Autonomy ceiling"]
+ H["G01.08 Completion tests"]
+ I["G01.09 Dynamic graph semantics"]
+ J["G01.10 Education domain pack"]
+ K["G01.11 Choose flagship EdTech demo"]
+ L["G01.12 Judging proof"]
+ M["G01.13 Dashboard"]
+ N["G01.14 API envelope"]
+ O{"G01.15 Approve education proof and generic goal boundary?"}
+ A --> B --> C --> D --> E --> F --> G --> H --> I --> J --> K --> L --> M --> N --> O
+ O -->|"Not yet"| E
+ O -->|"Signed ADR"| Q["Unlock G02"]
  classDef active fill:#541551,stroke:#c46aab,color:#fff
- classDef check fill:#f7edf6,stroke:#974878,color:#222
- classDef wait fill:#e9f0fc,stroke:#9eaec6,color:#233
- class G01 active
- class D,M check
- class PASS wait
+ class O active

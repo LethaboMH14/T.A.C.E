@@ -7,6 +7,7 @@
 import {assessTurnRevision} from './normalize-turn.mjs';
 import {isDeepStrictEqual} from 'node:util';
 import {Buffer} from 'node:buffer';
+import {createHash} from 'node:crypto';
 
 const ROOT=['schemaVersion','intent','relationToPrior','deliverables','subgoals','sourceSlots','capabilityNeeds','effectClaims','acceptanceCriteria','uncertainties'];
 const MODES=new Set(['CREATE','ANALYZE','TRANSFORM','COORDINATE','COMMUNICATE','UNKNOWN']);
@@ -54,17 +55,60 @@ const enumVal=(v,set)=>typeof v==='string' && set.has(v);
 const freezeList=a=>Object.freeze(a.map(x=>Object.freeze(x)));
 const fail=code=>Object.freeze({status:'REJECTED_PROPOSAL',code});
 const intakeId=s=>typeof s==='string' && /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(s);
-const validIntake=i=>dataRecord(i) && i.schemaVersion==='g02-intake-v0.2' &&
+const intakeKeys=['schemaVersion','goalId','turnId','parentTurnId','revision','actorRef','tenantRef',
+  'rawGoal','interpretationText','localeHint','timeZoneHint','deadlineText','budgetHint','sourceRefs','flags'];
+const validIntake=i=>exact(i,intakeKeys) && i.schemaVersion==='g02-intake-v0.2' &&
   intakeId(i.goalId) && intakeId(i.turnId) &&
   intakeId(i.actorRef) && intakeId(i.tenantRef) &&
   Number.isSafeInteger(i.revision) && i.revision>=1 &&
   (i.revision===1 ? i.parentTurnId===null :
     intakeId(i.parentTurnId) && i.parentTurnId!==i.turnId) &&
+  typeof i.rawGoal==='string' && validUtf16(i.rawGoal) &&
+  Buffer.byteLength(i.rawGoal,'utf8')<=6000 &&
+  typeof i.interpretationText==='string' &&
+  i.interpretationText===i.rawGoal.normalize('NFC').replace(/\r\n?/g,'\n') &&
+  exact(i.localeHint,['tag','source']) &&
+  typeof i.localeHint.tag==='string' &&
+  ['client_preference','server_default','unknown'].includes(i.localeHint.source) &&
+  exact(i.timeZoneHint,['id','source']) &&
+  (i.timeZoneHint.id===null || typeof i.timeZoneHint.id==='string') &&
+  ['server_context','unknown'].includes(i.timeZoneHint.source) &&
+  (i.timeZoneHint.source==='unknown' ? i.timeZoneHint.id===null : typeof i.timeZoneHint.id==='string') &&
+  (i.deadlineText===null || typeof i.deadlineText==='string') &&
+  exact(i.budgetHint,['maxCostCents','source']) &&
+  (i.budgetHint.maxCostCents===null ||
+    (Number.isSafeInteger(i.budgetHint.maxCostCents) && i.budgetHint.maxCostCents>=0)) &&
+  ['client_cap','unspecified'].includes(i.budgetHint.source) &&
+  (i.budgetHint.source==='unspecified' ? i.budgetHint.maxCostCents===null :
+    i.budgetHint.maxCostCents!==null) &&
+  exact(i.flags,['nfcChanged','lineEndingsChanged','bidiControlsPresent',
+    'invisibleFormattingPresent','requiresSemanticClarification']) &&
+  Object.values(i.flags).every(v=>typeof v==='boolean') &&
+  i.flags.nfcChanged===(i.rawGoal.normalize('NFC')!==i.rawGoal) &&
+  i.flags.lineEndingsChanged===/\r/.test(i.rawGoal) &&
+  i.flags.bidiControlsPresent===/[\u202A-\u202E\u2066-\u2069]/u.test(i.rawGoal) &&
+  i.flags.invisibleFormattingPresent===/[\u200B-\u200D\u2060\uFEFF]/u.test(i.rawGoal) &&
+  i.flags.requiresSemanticClarification===
+    (!/[\p{L}\p{N}]/u.test(i.interpretationText)) &&
   denseArray(i.sourceRefs,0,24) &&
   i.sourceRefs.every(s=>exact(s,['kind','ref','trust']) &&
     s.trust==='UNVERIFIED_REFERENCE' &&
     ['upload','public','connector'].includes(s.kind) && intakeId(s.ref)) &&
   uniq(i.sourceRefs.map(s=>s.kind+':'+s.ref));
+
+function intakeFingerprint(i) {
+  // Internal correlation checksum, NOT a MAC, signature, proof of authentication,
+  // anonymization or permission. Never expose it in the model projection.
+  const manifest={
+    schemaVersion:i.schemaVersion,goalId:i.goalId,turnId:i.turnId,
+    parentTurnId:i.parentTurnId,revision:i.revision,
+    actorRef:i.actorRef,tenantRef:i.tenantRef,rawGoal:i.rawGoal,
+    interpretationText:i.interpretationText,localeHint:i.localeHint,
+    timeZoneHint:i.timeZoneHint,deadlineText:i.deadlineText,
+    budgetHint:i.budgetHint,sourceRefs:i.sourceRefs,flags:i.flags
+  };
+  return createHash('sha256').update(JSON.stringify(manifest)).digest('hex');
+}
 
 function topo(subgoals) {
   const map=new Map(subgoals.map(s=>[s.id,s]));
@@ -227,7 +271,8 @@ function validate(p,intake) {
   });
   // Limits the serialized allowlist; transport must independently cap raw JSON.
   if(Buffer.byteLength(JSON.stringify(frozen),'utf8')>32768)return fail('PROPOSAL_TOO_LARGE');
-  const binding=Object.freeze({goalId:intake.goalId,turnId:intake.turnId,revision:intake.revision});
+  const binding=Object.freeze({goalId:intake.goalId,turnId:intake.turnId,revision:intake.revision,
+    intakeFingerprint:intakeFingerprint(intake)});
   const unknown=p.intent.modes.includes('UNKNOWN') || caps.has('UNKNOWN') ||
     kinds.has('UNKNOWN') || p.uncertainties.some(u=>u.blocking);
   const consequential=kinds.has('SHARED_WRITE') || kinds.has('EXTERNAL_SEND');

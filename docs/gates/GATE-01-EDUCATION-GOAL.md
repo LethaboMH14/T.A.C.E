@@ -153,3 +153,10 @@ The user explicitly chose **not** to integrate KAIRO into this direction. Existi
 **Evidence versus hypothesis:** OECD TALIS 2024 South Africa directly measures reported marking and admin workload; OECD's 2026 General Education Certificate review cites Grade 9 Mathematics benchmark gaps; DBE MTbBE documents language-access needs; OECD's Digital Education Outlook documents fragmented digital tools and inefficient manual data interchange. That T.A.C.E improves outcomes is **a testable hypothesis, not an established result**.
 
 See [the full evidence-backed problem statement, public pitch variants, mappings to all seven goal families, input/file/connector boundaries, and proof metrics](GATE-01-PROBLEM-STATEMENT.md). **Any requested file format may be presented for feasibility inspection; only formats actually supported by validated tools can be ingested/exported, and connected accounts require explicit authorization.** G01 remains IN_RESEARCH.
+
+
+## G01 Approved Problem Definition, Consequences and Architecture (2026-11-10)
+
+**Formal and simple problem wording is approved** by the user and preserved exactly in [ADR-0003](../decisions/ADR-0003-education-problem-statement-approval.md). The [source-backed problem dossier](GATE-01-PROBLEM-STATEMENT.md) now explicitly connects teacher workload, learning needs, language access and interoperability to plausible **risk-labelled** downstream consequences, separately from T.A.C.E's untested solution hypothesis. The [Gate 01 problem-to-goal architecture](GATE-01-PROBLEM-ARCHITECTURE.md) maps evidence and actors to any-goal intake, file/connector permission boundaries, an illustrative outcome envelope and successor gate responsibilities. [Editable FigJam](https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi) and [editable diagrams.net source](../../diagrams/TACE-Architecture.drawio) are the visual source maps.
+
+**IMPORTANT:** This approval concerns **problem framing**, not the full Gate 01 completion. User has not yet selected a final flagship, data fixtures, authenticated connections or specific acceptance tests. G01 remains IN_RESEARCH; G02 BLOCKED.

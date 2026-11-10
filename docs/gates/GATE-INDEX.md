@@ -1,11 +1,11 @@
-# T.A.C.E numbered gate registry — v0.2
+# T.A.C.E numbered gate registry — v1.0
 
 **Date:** 2026-11-10. **Product scope:** universal goal-to-execution engine; **judged deployment:** adaptable education domain pack with task families and optional app/API connectors.
 
 | Gate | Name | Current state | Exit artifact |
 | --- | --- | --- | --- |
-| G01 | **Universal Goal Boundary + EdTech Proof Case** | **IN_RESEARCH** | accepted goal classes, output semantics, authority, objective proof, selected EdTech case |
-| G02 | Prompt Engineering and Adaptive Clarification | BLOCKED | structured goal interpretation and clarity contract |
+| G01 | **Universal Goal Boundary + EdTech Proof Case** | **DESIGN_COMPLETE** | accepted goal classes, output semantics, authority, objective proof, selected EdTech case |
+| G02 | Prompt Engineering and Adaptive Clarification | **IN_RESEARCH** | structured goal interpretation and clarity contract |
 | G03 | Context Engineering and Retrieval | BLOCKED | trusted context compiler / evidence scopes |
 | G04 | Skill, Tool and Agent Capability Planning | BLOCKED | feasible dynamic roster / task DAG |
 | G05 | Graph Orchestration, State and Recovery | BLOCKED | validated dependencies, retries, stop/ask policy |
@@ -32,7 +32,7 @@
 - [Scope decision ADR-0002](../decisions/ADR-0002-universal-engine-education-demo.md)
 - [Editable architecture map](../../diagrams/TACE-Architecture.drawio)
 
-**G01 remains IN_RESEARCH. Do not begin G02 detailed design until the goal boundary and an EdTech flagship are formally reviewed and approved.**
+**G01 design scope completed under ADR-0004; G02 research is now open. No runtime and no impact/security claim.**
 
 
 ## Gate 01 detailed work streams
@@ -42,9 +42,21 @@
 - [Editable architecture and connector maps](../../diagrams/TACE-Architecture.drawio)
 - **Explicitly excluded from this design track:** KAIRO reuse. The separate historical review is not an approved dependency.
 
-**Decision still open:** select one competition flagship, supported integrations, exact test fixtures and observable metrics. G02 remains blocked.
+**Decision recorded:** Education Recovery Mission selected as bounded synthetic *reference fixture* (not a fixed engine domain); exact connectors, test fixture bytes, implementation and measured outcomes remain pending. G02 research is open.
 
 
 ## G01 researched problem definition
 
-[Primary umbrella education problem statement and source audit](GATE-01-PROBLEM-STATEMENT.md) describes the information-to-action gap across educators, programmes and learners without hardcoding any single task. Sources and proof metrics are explicit; no time savings, human interviews or educational improvement have yet been established. **Status: formal/simple problem wording APPROVED (ADR-0003); the overall G01 gate is still IN_RESEARCH.**
+[Primary umbrella education problem statement and source audit](GATE-01-PROBLEM-STATEMENT.md) describes the information-to-action gap across educators, programmes and learners without hardcoding any single task. Sources and proof metrics are explicit; no time savings, human interviews or educational improvement have yet been established. **Status: formal/simple problem wording APPROVED (ADR-0003); the G01 design is complete; runtime, security and impact evidence remain pending.**
+
+
+## G01 design completion and G02 handoff
+
+- [ADR-0004 design signoff](../decisions/ADR-0004-g01-requirements-signoff-and-g02-handoff.md) and [full requirement spec](GATE-01-FINAL-SPECIFICATION.md)
+- [Impact measurement — pending empirically](GATE-01-IMPACT-EVALUATION-PLAN.md) / [issue #5](https://github.com/LethaboMH14/T.A.C.E/issues/5)
+- [Security threats and POPIA boundaries](GATE-01-SECURITY-THREAT-MODEL.md) / [implementation issue #4](https://github.com/LethaboMH14/T.A.C.E/issues/4)
+- [48 edge cases](GATE-01-EDGE-CASE-MATRIX.md) with implementation and test assignments
+- [16 passing local goal admission tests](../checks/G01-BOUNDARY-TEST-20261110.md); tests and source in [tools/gate01](../../tools/gate01/)
+- [G02 in-research charter](GATE-02-INTENT-AND-CLARIFICATION-RESEARCH.md) / [issue #3](https://github.com/LethaboMH14/T.A.C.E/issues/3)
+
+**Design is not production approval: runtime G07 security, G09 correctness, G11 evaluation and G12 full integration remain pending.**

@@ -5,6 +5,8 @@
  * See goal-proposal.schema.json and ADR-0006.
  */
 import {assessTurnRevision} from './normalize-turn.mjs';
+import {isDeepStrictEqual} from 'node:util';
+import {Buffer} from 'node:buffer';
 
 const ROOT=['schemaVersion','intent','relationToPrior','deliverables','subgoals','sourceSlots','capabilityNeeds','effectClaims','acceptanceCriteria','uncertainties'];
 const MODES=new Set(['CREATE','ANALYZE','TRANSFORM','COORDINATE','COMMUNICATE','UNKNOWN']);
@@ -42,21 +44,27 @@ const validUtf16=s=>{
   }
   return true;
 };
-const safeString=(s,max)=>typeof s==='string' && s.length>=1 && s.length<=max &&
-  s.trim().length>0 && validUtf16(s) &&
-  !/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/u.test(s);
+// JSON Schema 2020-12 string length counts Unicode code points, not UTF-16 units.
+const safeString=(s,max)=>typeof s==='string' && s.length>=1 && s.length<=max*2 &&
+  validUtf16(s) && [...s].length<=max && s.trim().length>0 &&
+  !/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u202A-\u202E\u2066-\u2069]/u.test(s);
 const id=s=>safeString(s,32) && /^[a-z][a-z0-9_-]{0,31}$/.test(s);
 const uniq=a=>new Set(a).size===a.length;
 const enumVal=(v,set)=>typeof v==='string' && set.has(v);
 const freezeList=a=>Object.freeze(a.map(x=>Object.freeze(x)));
 const fail=code=>Object.freeze({status:'REJECTED_PROPOSAL',code});
+const intakeId=s=>typeof s==='string' && /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(s);
 const validIntake=i=>dataRecord(i) && i.schemaVersion==='g02-intake-v0.2' &&
-  typeof i.goalId==='string' && typeof i.turnId==='string' &&
-  typeof i.actorRef==='string' && typeof i.tenantRef==='string' &&
+  intakeId(i.goalId) && intakeId(i.turnId) &&
+  intakeId(i.actorRef) && intakeId(i.tenantRef) &&
   Number.isSafeInteger(i.revision) && i.revision>=1 &&
+  (i.revision===1 ? i.parentTurnId===null :
+    intakeId(i.parentTurnId) && i.parentTurnId!==i.turnId) &&
   denseArray(i.sourceRefs,0,24) &&
-  i.sourceRefs.every(s=>dataRecord(s) && s.trust==='UNVERIFIED_REFERENCE' &&
-    ['upload','public','connector'].includes(s.kind) && typeof s.ref==='string');
+  i.sourceRefs.every(s=>exact(s,['kind','ref','trust']) &&
+    s.trust==='UNVERIFIED_REFERENCE' &&
+    ['upload','public','connector'].includes(s.kind) && intakeId(s.ref)) &&
+  uniq(i.sourceRefs.map(s=>s.kind+':'+s.ref));
 
 function topo(subgoals) {
   const map=new Map(subgoals.map(s=>[s.id,s]));
@@ -86,7 +94,7 @@ export function validateGoalProposal(proposal,intake) {
 function validate(p,intake) {
   if(!validIntake(intake))return fail('INVALID_INTAKE_CONTEXT');
   if(!exact(p,ROOT))return fail('INVALID_PROPOSAL_SHAPE');
-  if(p.schemaVersion!=='g02-goal-proposal-v0.1')return fail('UNSUPPORTED_SCHEMA_VERSION');
+  if(p.schemaVersion!=='g02-goal-proposal-v0.2')return fail('UNSUPPORTED_SCHEMA_VERSION');
   if(!exact(p.intent,['summary','modes']) || !safeString(p.intent.summary,400) ||
      !denseArray(p.intent.modes,1,4) || !p.intent.modes.every(x=>enumVal(x,MODES)) ||
      !uniq(p.intent.modes) || (p.intent.modes.includes('UNKNOWN') && p.intent.modes.length>1))
@@ -105,10 +113,13 @@ function validate(p,intake) {
   const deliverables=new Set(p.deliverables.map(d=>d.id));
 
   if(!denseArray(p.subgoals,1,12) ||
-     !p.subgoals.every(s=>exact(s,['id','outcome','dependsOn','deliverableIds']) &&
+     !p.subgoals.every(s=>exact(s,['id','outcome','dependsOn','deliverableIds','sourceSlots','capabilityKinds','effectKinds']) &&
        id(s.id) && safeString(s.outcome,400) &&
        denseArray(s.dependsOn,0,11) && s.dependsOn.every(id) && uniq(s.dependsOn) &&
-       denseArray(s.deliverableIds,0,8) && s.deliverableIds.every(id) && uniq(s.deliverableIds)) ||
+       denseArray(s.deliverableIds,0,8) && s.deliverableIds.every(id) && uniq(s.deliverableIds) &&
+       denseArray(s.sourceSlots,0,24) && s.sourceSlots.every(n=>Number.isSafeInteger(n) && n>=0 && n<24) && uniq(s.sourceSlots) &&
+       denseArray(s.capabilityKinds,0,12) && s.capabilityKinds.every(k=>enumVal(k,CAPABILITIES)) && uniq(s.capabilityKinds) &&
+       denseArray(s.effectKinds,1,8) && s.effectKinds.every(k=>enumVal(k,EFFECTS)) && uniq(s.effectKinds)) ||
      !uniq(p.subgoals.map(s=>s.id)))return fail('INVALID_SUBGOALS');
   const subgoalIds=new Set(p.subgoals.map(s=>s.id));
   if(p.subgoals.some(s=>s.dependsOn.some(d=>!subgoalIds.has(d) || d===s.id) ||
@@ -118,6 +129,12 @@ function validate(p,intake) {
     return fail('UNMAPPED_DELIVERABLE');
   const order=topo(p.subgoals);
   if(!order)return fail('CYCLIC_CANDIDATE_DAG');
+  // Every intermediate node must contribute to an eventual deliverable.
+  const useful=new Set();
+  const byId=new Map(p.subgoals.map(s=>[s.id,s]));
+  function mark(id){if(useful.has(id))return;useful.add(id);for(const d of byId.get(id).dependsOn)mark(d);}
+  for(const s of p.subgoals)if(s.deliverableIds.length)mark(s.id);
+  if(p.subgoals.some(s=>!useful.has(s.id)))return fail('ORPHAN_SUBGOAL');
 
   if(!denseArray(p.sourceSlots,0,24) ||
      !p.sourceSlots.every(s=>Number.isSafeInteger(s) && s>=0 && s<24) ||
@@ -126,17 +143,19 @@ function validate(p,intake) {
 
   if(!denseArray(p.capabilityNeeds,0,12) ||
      !p.capabilityNeeds.every(c=>exact(c,['kind','reason']) &&
-       enumVal(c.kind,CAPABILITIES) && safeString(c.reason,240)))
+       enumVal(c.kind,CAPABILITIES) && safeString(c.reason,240)) ||
+     !uniq(p.capabilityNeeds.map(c=>c.kind)))
     return fail('INVALID_CAPABILITY_NEEDS');
   if(!denseArray(p.effectClaims,1,8) ||
      !p.effectClaims.every(e=>exact(e,['kind','description']) &&
-       enumVal(e.kind,EFFECTS) && safeString(e.description,240)))
+       enumVal(e.kind,EFFECTS) && safeString(e.description,240)) ||
+     !uniq(p.effectClaims.map(e=>e.kind)))
     return fail('INVALID_EFFECT_CLAIMS');
 
   if(!denseArray(p.acceptanceCriteria,1,16) ||
-     !p.acceptanceCriteria.every(a=>exact(a,['id','deliverableId','check','method']) &&
+     !p.acceptanceCriteria.every(a=>exact(a,['id','deliverableId','check','method','evidenceExpectation']) &&
        id(a.id) && id(a.deliverableId) && safeString(a.check,400) &&
-       enumVal(a.method,METHODS)) ||
+       enumVal(a.method,METHODS) && safeString(a.evidenceExpectation,240)) ||
      !uniq(p.acceptanceCriteria.map(a=>a.id)))return fail('INVALID_ACCEPTANCE_CRITERIA');
   if(p.acceptanceCriteria.some(a=>!deliverables.has(a.deliverableId)) ||
      p.deliverables.some(d=>!p.acceptanceCriteria.some(a=>a.deliverableId===d.id)))
@@ -149,6 +168,32 @@ function validate(p,intake) {
 
   const kinds=new Set(p.effectClaims.map(e=>e.kind));
   const caps=new Set(p.capabilityNeeds.map(c=>c.kind));
+  const slots=new Set(p.sourceSlots);
+  if(p.subgoals.some(s=>s.sourceSlots.some(n=>!slots.has(n)) ||
+       s.capabilityKinds.some(k=>!caps.has(k)) ||
+       s.effectKinds.some(k=>!kinds.has(k))))
+    return fail('INVALID_SUBGOAL_MAPPING');
+  const usedSlots=new Set(p.subgoals.flatMap(s=>s.sourceSlots));
+  const usedCaps=new Set(p.subgoals.flatMap(s=>s.capabilityKinds));
+  const usedEffects=new Set(p.subgoals.flatMap(s=>s.effectKinds));
+  if([...slots].some(n=>!usedSlots.has(n)) ||
+      [...caps].some(k=>!usedCaps.has(k)) ||
+      [...kinds].some(k=>!usedEffects.has(k)))
+    return fail('UNMAPPED_GLOBAL_CLAIM');
+  for(const s of p.subgoals) {
+    const sc=new Set(s.capabilityKinds),se=new Set(s.effectKinds);
+    if(sc.has('MESSAGE_SEND') && !se.has('EXTERNAL_SEND') && !se.has('UNKNOWN'))
+      return fail('EFFECT_CAPABILITY_CONFLICT');
+    if(sc.has('CONNECTOR_WRITE') && !se.has('SHARED_WRITE') &&
+       !se.has('EXTERNAL_SEND') && !se.has('UNKNOWN'))
+      return fail('EFFECT_CAPABILITY_CONFLICT');
+    if(sc.has('WRITE_ARTIFACT') && !se.has('LOCAL_ARTIFACT') &&
+       !se.has('SHARED_WRITE') && !se.has('UNKNOWN'))
+      return fail('EFFECT_CAPABILITY_CONFLICT');
+    if(sc.has('MESSAGE_DRAFT') && !se.has('LOCAL_ARTIFACT') &&
+       !se.has('SHARED_WRITE') && !se.has('UNKNOWN'))
+      return fail('EFFECT_CAPABILITY_CONFLICT');
+  }
   if(kinds.has('DESTRUCTIVE'))return fail('DESTRUCTIVE_EFFECT_UNSUPPORTED');
   if(caps.has('MESSAGE_SEND') && !kinds.has('EXTERNAL_SEND') && !kinds.has('UNKNOWN'))
     return fail('EFFECT_CAPABILITY_CONFLICT');
@@ -164,18 +209,24 @@ function validate(p,intake) {
     deliverables:freezeList(p.deliverables.map(d=>({id:d.id,description:d.description,formatHint:d.formatHint}))),
     subgoals:freezeList(p.subgoals.map(s=>({
       id:s.id,outcome:s.outcome,dependsOn:Object.freeze([...s.dependsOn]),
-      deliverableIds:Object.freeze([...s.deliverableIds])
+      deliverableIds:Object.freeze([...s.deliverableIds]),
+      sourceSlots:Object.freeze([...s.sourceSlots]),
+      capabilityKinds:Object.freeze([...s.capabilityKinds]),
+      effectKinds:Object.freeze([...s.effectKinds])
     }))),
     sourceSlots:Object.freeze([...p.sourceSlots]),
     capabilityNeeds:freezeList(p.capabilityNeeds.map(c=>({kind:c.kind,reason:c.reason}))),
     effectClaims:freezeList(p.effectClaims.map(e=>({kind:e.kind,description:e.description}))),
     acceptanceCriteria:freezeList(p.acceptanceCriteria.map(a=>({
-      id:a.id,deliverableId:a.deliverableId,check:a.check,method:a.method
+      id:a.id,deliverableId:a.deliverableId,check:a.check,method:a.method,
+      evidenceExpectation:a.evidenceExpectation
     }))),
     uncertainties:freezeList(p.uncertainties.map(u=>({
       code:u.code,question:u.question,blocking:u.blocking
     })))
   });
+  // Limits the serialized allowlist; transport must independently cap raw JSON.
+  if(Buffer.byteLength(JSON.stringify(frozen),'utf8')>32768)return fail('PROPOSAL_TOO_LARGE');
   const binding=Object.freeze({goalId:intake.goalId,turnId:intake.turnId,revision:intake.revision});
   const unknown=p.intent.modes.includes('UNKNOWN') || caps.has('UNKNOWN') ||
     kinds.has('UNKNOWN') || p.uncertainties.some(u=>u.blocking);
@@ -183,7 +234,7 @@ function validate(p,intake) {
   const status=unknown?'NEEDS_CLARIFICATION':consequential?'POLICY_REVIEW_REQUIRED':'PROPOSAL_VALID';
   const code=unknown?'UNRESOLVED_PROPOSAL':consequential?'EFFECT_REQUIRES_POLICY':'STRUCTURALLY_VALID';
   return Object.freeze({status,code,binding,proposal:frozen,candidateOrder:order,
-    policyAuthority:'NONE'});
+    policyAuthority:'NONE',semanticStatus:'UNVERIFIED',verificationStatus:'NOT_RUN'});
 }
 
 /**
@@ -195,25 +246,32 @@ export function assessGoalProposalRevision(previous,next,previousIntake,nextInta
     if(!dataRecord(previous) || !dataRecord(next) ||
        !dataRecord(previous.binding) || !dataRecord(next.binding) ||
        !dataRecord(previous.proposal) || !dataRecord(next.proposal) ||
-       previous.binding.goalId!==previousIntake?.goalId ||
-       next.binding.goalId!==nextIntake?.goalId ||
-       previous.binding.turnId!==previousIntake?.turnId ||
-       next.binding.turnId!==nextIntake?.turnId ||
-       previous.binding.revision!==previousIntake?.revision ||
-       next.binding.revision!==nextIntake?.revision ||
-       validateGoalProposal(previous.proposal,previousIntake).status==='REJECTED_PROPOSAL' ||
-       validateGoalProposal(next.proposal,nextIntake).status==='REJECTED_PROPOSAL' ||
        assessTurnRevision(previousIntake,nextIntake).status!=='REVISION_REQUIRES_INTERPRETATION')
+      return Object.freeze({status:'REJECTED_PROPOSAL',code:'INVALID_PROPOSAL_REVISION'});
+    // Compare *all* fields with fresh canonical results. A forged status, order,
+    // revision binding or policy flag cannot pass merely because the proposal parses.
+    // This is not a signature: G07 must persist and authenticate ledger snapshots.
+    const checkedPrevious=validateGoalProposal(previous.proposal,previousIntake);
+    const checkedNext=validateGoalProposal(next.proposal,nextIntake);
+    if(checkedPrevious.status==='REJECTED_PROPOSAL' ||
+       checkedNext.status==='REJECTED_PROPOSAL' ||
+       !isDeepStrictEqual(previous,checkedPrevious) ||
+       !isDeepStrictEqual(next,checkedNext))
       return Object.freeze({status:'REJECTED_PROPOSAL',code:'INVALID_PROPOSAL_REVISION'});
     const effectClaimsChanged=JSON.stringify(previous.proposal.effectClaims)!==
       JSON.stringify(next.proposal.effectClaims);
     const deliverablesChanged=JSON.stringify(previous.proposal.deliverables)!==
       JSON.stringify(next.proposal.deliverables);
+    const capabilityNeedsChanged=JSON.stringify(previous.proposal.capabilityNeeds)!==
+      JSON.stringify(next.proposal.capabilityNeeds);
+    const sourceSlotsChanged=JSON.stringify(previous.proposal.sourceSlots)!==
+      JSON.stringify(next.proposal.sourceSlots);
     return Object.freeze({
       status:'REVISION_REQUIRES_INTERPRETATION',
       code:'NEW_GOAL_PROPOSAL_REVISION',
       relationClaim:next.proposal.relationToPrior,
-      effectClaimsChanged,deliverablesChanged,
+      effectClaimsChanged,deliverablesChanged,capabilityNeedsChanged,sourceSlotsChanged,
+      semanticContinuity:'UNVERIFIED',
       invalidatePriorApprovals:true,recheckDependentPlan:true,
       policyAuthority:'NONE'
     });

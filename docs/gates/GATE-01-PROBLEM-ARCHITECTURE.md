@@ -1,7 +1,7 @@
 # Gate 01 — Problem-to-goal architecture and evidence boundary
 
 **Version:** 0.1 — 2026-11-10  
-**Gate status:** IN_RESEARCH  
+**Gate status:** DESIGN_COMPLETE for requirements under ADR-0004; implementation and measurements pending  
 **Problem wording status:** APPROVED by user, ADR-0003  
 **Scope:** General T.A.C.E goal-to-execution engine; education domain is a judged use case. **No KAIRO dependency.**  
 **Visuals:** [Editable FigJam G01 board](https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi) and [multi-page diagrams.net source](../../diagrams/TACE-Architecture.drawio).
@@ -126,3 +126,8 @@ FigJam diagrams and diagrams.net are authoring artifacts for researchers and dev
 - [OECD Digital Education Outlook 2023 — Interoperability](https://www.oecd.org/en/publications/oecd-digital-education-outlook-2023_c74f03de-en/full-report/interoperability-unifying-and-maximising-data-reuse-within-digital-education-ecosystems_660f8da1.html)
 - [UNESCO on generative AI in education](https://www.unesco.org/en/articles/guidance-generative-ai-education-and-research)
 - [Colleague Zero](https://hackathon-26.melsoft.org/)
+
+
+## Final architecture handoff
+
+For the complete signed-off *requirements* boundary, consult [G01 final specification](GATE-01-FINAL-SPECIFICATION.md) and [ADR-0004](../decisions/ADR-0004-g01-requirements-signoff-and-g02-handoff.md). The security/threat design, 48 edge cases, and measured-impact plan were added after this original architecture summary. The **Figma FigJam board** now includes a distinct editable security boundary and G01-to-G02 roadmap diagram. [G02](GATE-02-INTENT-AND-CLARIFICATION-RESEARCH.md) is open for research. No claim of working agents or verified privacy is made by this architecture.

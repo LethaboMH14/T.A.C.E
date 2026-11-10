@@ -1,10 +1,11 @@
 # Gate 01 — Evidence-based problem statement and user goal boundary
 
-**Version:** 0.1 | **Date:** 10 November 2026  
-**Review status:** RESEARCHED DRAFT — problem framing **NOT YET APPROVED**. G01 remains IN_RESEARCH; G02 remains BLOCKED.  
+**Version:** 0.2 | **Date:** 10 November 2026  
+**Problem statement approval:** **APPROVED by the user** — wording and root problem only, recorded in [ADR-0003](../decisions/ADR-0003-education-problem-statement-approval.md).  
+**Architecture and gate status:** G01 **IN_RESEARCH**; G02 **BLOCKED**. No implementation or measured impact claimed.  
 **Scope:** General-purpose T.A.C.E goal-to-execution engine, with an educational Colleague Zero deployment. **KAIRO explicitly excluded from this track.**
 
-## G01-P01 — Primary problem statement (recommended)
+## G01-P01 — Primary problem statement (APPROVED, wording frozen)
 
 > **Educators and training providers are expected to do more than teach. They must assess learning, identify difficulties, adapt materials, coordinate support and manage communication—often under significant time and resource constraints.**
 >
@@ -18,7 +19,7 @@ This is a problem, **not** a product feature list. It does not mention AI, agent
 
 Alternative short header: **The gap between knowing what needs to be done and getting it done.**
 
-## G01-P03 — 20-second human story
+## G01-P03 — 20-second simple problem statement (APPROVED, wording frozen)
 
 > A teacher can see that learners need help but still has assessments to mark, lessons to prepare, a timetable to manage and parents to update. A learner may need a different explanation or language, yet that support takes additional work to prepare and coordinate. The central challenge is not just finding information; it is turning information into the right action, reliably and on time.
 
@@ -116,6 +117,59 @@ A practical demo hypothesis: **a single Education Recovery Mission** addressing 
 - [ ] Which exact authorized files/connectors and formats will be supported in the demo?
 - [ ] What first-goal acceptance tests and error/correction fixture will be run?
 - [ ] What education expert/stakeholder feedback and validation can be obtained?
-- [ ] Has a separate G01 approval decision been recorded?
+- [x] Problem statement wording approved in ADR-0003; full G01 acceptance is still separate.
 
-**Status:** RESEARCHED DRAFT. G01 still IN_RESEARCH; G02 BLOCKED.
+**Status:** Problem statement wording APPROVED in ADR-0003; the larger G01 architecture and demonstration acceptance are still IN_RESEARCH. G02 BLOCKED.
+
+
+## G01-P12 — The fourth problem: fragmented information, tools and decision flow (source-backed)
+
+**The missing fourth piece is interoperability and coordination:** an educator's goal can require reading a syllabus, checking an Excel mark sheet, reviewing a student-support record, finding an official curriculum reference, drafting a Word document and preparing a calendar/email action. The source data and tools may be separated by file format, application, access role or incomplete synchronization. Even when the information exists, combining it and *acting correctly* can require many manual steps.
+
+OECD's *Digital Education Outlook 2023* explains that insufficient interoperability between educational tools can lead to duplicate data entry, error-prone data exchange, wasted staff time and difficulty turning collected data into decisions. **That is general evidence of a known education systems problem; it is not a finding about Melsoft Academy's private software stack or a measured prevalence rate for South Africa.**
+
+**Source:** [OECD, Interoperability: unifying and maximising data reuse within digital education ecosystems (2023)](https://www.oecd.org/en/publications/oecd-digital-education-outlook-2023_c74f03de-en/full-report/interoperability-unifying-and-maximising-data-reuse-within-digital-education-ecosystems_660f8da1.html).
+
+The product problem is not "schools need another AI chatbot." It is that **information, resources and intentions do not reliably translate into coordinated, completed and verifiable work.**
+
+## G01-P13 — Why failure to address the problem matters
+
+The following **downstream risks are inferences requiring institution-specific testing**, not percentages or conclusions proved by the workload, TIMSS or interoperability research:
+
+| Unresolved issue | Plausible human / operational consequence | How we could verify the consequence |
+| --- | --- | --- |
+| Marking/administration volume | Less staff capacity for prompt, personalized support; stress, after-hours work or delayed feedback | teacher time logs; actual feedback cycle time; interviews |
+| Learning difficulties not turned into action | Repeated misconceptions and slower intervention, with learners continuing to struggle | days from assessment to support; independently reviewed work |
+| Inaccessible language/format | Content remains harder to understand or participate in for some learners | comprehension/user tests; fluent educator and accessibility review |
+| Duplicate manual cross-system work | Staff repeat entries, transcribe errors, miss updates or struggle to reconcile records | duplicate-action counts; error ledger; before/after process observation |
+| Changing timetables/staff capacity | Resource clashes, postponed sessions and incomplete follow-ups | constraint feasibility tests; missed-session records |
+| Unchecked educational or AI-generated claims | Incorrect answer keys, flawed learning resources and diminished trust in the output | independent expert review; validator false-negative rate; correction audit |
+| Missed deadlines or inconsistent communication | Learners miss timely opportunities or receive confusing updates | documented workflow/notification outcomes, not estimated savings |
+
+**Careful causal claim:** The approved statement says these conditions create *risk* of delayed or ill-matched support. It does not claim that all South African education outcomes are caused by admin work or that an agentic system can automatically prevent them.
+
+## G01-P14 — The research problem versus our proposed solution
+
+| Question | Status | Statement |
+| --- | --- | --- |
+| What is the observed problem? | **RESEARCH-BACKED** | Workload and stress, serious learning gaps, language access needs, and digital interoperability challenges are supported by official evidence |
+| What links the different user goals? | **PROBLEM SYNTHESIS / PRODUCT INFERENCE** | The recurring *information-to-action gap*: turning facts and intentions into timely, personalized, reliable completed work |
+| What are the consequences? | **PLAUSIBLE RISKS, NOT MEASURED CAUSATION** | Delay, duplication, inconsistent support, preventable mistakes and resource pressure |
+| What might solve part of it? | **PROPOSED SOLUTION** | A universal goal-to-verified-outcome system, with dynamically selected specialists, real connectors, approvals and independent checks |
+| Does T.A.C.E solve it yet? | **NOT ESTABLISHED** | The universal runtime and these benefits have not been demonstrated in this research gate |
+| What would prove it? | **ACCEPTANCE HYPOTHESES** | Measured time to verified outcome, correctness, file and API receipts, replan under constraint, human approval fidelity, user testing and cost |
+
+Avoid turning the general interoperability evidence into a specific factual claim that Melsoft Academy uses a particular LMS or office suite. The connectors listed in G01 are possibilities, not confirmed connections.
+
+## G01-P15 — Accepted wording, approved scope and editable architecture
+
+The user has approved **both the formal and simple problem statements**, along with the concise spoken pitch. Their exact approved text is preserved in [ADR-0003](../decisions/ADR-0003-education-problem-statement-approval.md). The full problem-to-goal architecture is specified in [G01 Problem Architecture](GATE-01-PROBLEM-ARCHITECTURE.md).
+
+- [**Figma FigJam — live editable architecture, evidence and consequence diagrams**](https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi)
+- [**diagrams.net — editable six-plus-page architecture source**](../../diagrams/TACE-Architecture.drawio)
+- [**G01 universal task-family catalogue**](GATE-01-UNIVERSAL-TASK-CATALOGUE.md)
+- [**G01 connector capability and authorization contract**](GATE-01-CONNECTOR-CAPABILITIES.md)
+
+**Approved:** problem wording, simple relatable version, the fourth interoperability strand as a researched theme, and preservation of clear research/hypothesis boundaries. **Still open:** exact example actors, dataset, education flagship, goal-envelope schema, technical coverage and objective test cases.
+
+A user can **request** arbitrary file formats, but reading and exporting must be limited to actual safely supported/validated capabilities. No undocumented app or account access is presumed.

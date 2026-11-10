@@ -1,10 +1,10 @@
 # G02.01 — Input normalization, conversation intent and provenance
 
 **Date:** 2026-11-10
-**Research state:** RESEARCHED / RECOMMENDATION RECORDED / USER REVIEW PENDING
-**Implementation:** Limited deterministic spike only; NOT a model interpreter or production API.
+**Research state:** **DESIGN_ACCEPTED (hardened v0.2)** / deterministic prototype verified / production pending
+**Implementation:** Hardened v0.2 deterministic spike with **54/54 GitHub Actions tests passing**; NOT a model interpreter or production API.
 **Predecessor:** [G01 final specification](GATE-01-FINAL-SPECIFICATION.md).
-**Decision:** [ADR-0005](../decisions/ADR-0005-g02-01-normalization-and-turn-precedence.md) — PROPOSED.
+**Decision:** [ADR-0005](../decisions/ADR-0005-g02-01-normalization-and-turn-precedence.md) — **ACCEPTED DESIGN ONLY**.
 **Figma:** [Gate 02 editable design](https://www.figma.com/design/28egBAkhQHExkqUinyimtM), page **04 — G02.01 Intake & Corrections**.
 
 ## 1. Simple explanation
@@ -173,7 +173,7 @@ A small pure-JavaScript intake spike and tests are located under [tools/gate02](
 - **G03/G07:** source admission, identity, connected apps, action permissions.
 - **G08/G11:** memory retention and multilingual/security evaluation.
 
-**Decision for user:** approve the G02.01 dual-text, server-versioned, provenance-first **design baseline**, or request changes. Do not approve any vendor, model, skills framework or memory product in this subsection.
+**Decision recorded:** owner approved the hardened G02.01 dual-text, server-versioned, provenance-first **design baseline** on 2026-11-10. Do not approve any vendor, model, skills framework or memory product in this subsection.
 
 ## Primary references
 
@@ -186,7 +186,7 @@ A small pure-JavaScript intake spike and tests are located under [tools/gate02](
 
 ## Critical review and verified v0.2 changes — 2026-11-10
 
-**State: HARDENED PROPOSAL / USER APPROVAL PENDING.** The initial 22-test design was not sufficient.
+**Historical review state before owner decision: HARDENED PROPOSAL.** The initial 22-test design was not sufficient.
 
 | Weakness | Correction | Test |
 | --- | --- | --- |
@@ -207,4 +207,11 @@ A small pure-JavaScript intake spike and tests are located under [tools/gate02](
 
 **Remaining P0:** authenticated server context, atomic replay protection, scoped source resolution, exact approval fingerprints, privacy-safe storage/telemetry and retention controls (G03/G07/G08/G11). **Remaining P1:** semantic correction evaluation, multilingual/emoji clarification, adversarial Unicode and concurrency tests (G02.02/G02.11/G02.13/G11).
 
-**Decision:** ADR-0005 remains PROPOSED, not accepted. G02.02 remains blocked until owner design approval. Figma page 04 has been updated with v0.2 model privacy boundary and verified CI evidence.
+**Decision (superseded by owner approval below):** G02.01 was proposed pending owner review. Figma page 04 has been updated with v0.2 model privacy boundary and verified CI evidence.
+
+
+## 10. Owner approval and G02.02 handoff — 2026-11-10
+
+**APPROVED: G02.01 hardened v0.2 design baseline only.** [ADR-0005](../decisions/ADR-0005-g02-01-normalization-and-turn-precedence.md) records the explicit owner approval. Verified test evidence: [54/54 deterministic GitHub Actions tests](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42867607839). Figma page 04 is synchronized.
+
+**Not approved or implemented:** server authentication, replay protection, actual source authorization, external writes, privacy compliance, live LLM interpretation, verified outcome delivery or business impact. G02.02 may now start as **IN_RESEARCH / limited prototype**, subject to its own ADR and signoff. No automatic signoff of G02.02 or G02 overall.

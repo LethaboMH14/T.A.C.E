@@ -41,3 +41,10 @@ No actual authentication, atomic compare-and-swap, secure parser, source ownersh
 - [G02.02 dossier](../../docs/gates/GATE-02-02-GOAL-SCHEMA-AND-DECOMPOSITION.md) and [ADR-0006](../../docs/decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md).
 
 **Do not overclaim:** No LLM interpreter, independent full JSON Schema engine, real authentication, tool registry, effect enforcement, secure source resolution, privacy controls, executable graph or measured semantic accuracy is included.
+
+
+### G02.02 hardened v0.2 review
+
+The original 88-test v0.1 proposal is superseded by **v0.2**. Every candidate subgoal now lists its source slots, capability kinds and effect kinds; all must map to global claims. Unmapped effects, orphaned nodes, inconsistent per-node send/write effects, unsafe bidi controls, forged revision snapshots and inconsistent intake fixtures fail closed. Criteria include proposed evidence expectations. Validated results are internally bound to a SHA-256 intake fingerprint; this is **not authentication**. Explicit `semanticStatus: UNVERIFIED`, `verificationStatus: NOT_RUN` and `policyAuthority: NONE` avoid accidental execution claims.
+
+**Verified GitHub Actions:** [run 42882371606](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42882371606), 143 G02.02 tests + 54 G02.01 tests = **197 pass, 0 fail, 0 skipped**, commit `315357c2a9583bee84a480489e98ce2dfaf773e5`. ADR-0006 remains PROPOSED and G02.03 is BLOCKED. v0.1 inputs are deliberately rejected; migration requires explicit conversion. No live LLM, authorization, full independent JSON Schema validation, secure transport parser, signed ledger, semantic accuracy or real tools are proven.

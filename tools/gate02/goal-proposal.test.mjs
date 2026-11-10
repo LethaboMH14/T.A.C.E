@@ -100,7 +100,7 @@ test('P57 external send claim requires later policy review',()=>{const p=simple(
 test('P58 shared write claim requires later policy review',()=>{const p=simple();setEffects(p,['SHARED_WRITE']);assert.equal(run(p).status,'POLICY_REVIEW_REQUIRED');});
 test('P59 destructive effect claim rejected by prototype',()=>{const p=simple();setCapabilities(p,[]);setEffects(p,['DESTRUCTIVE']);reject(run(p),'DESTRUCTIVE_EFFECT_UNSUPPORTED');});
 test('P60 message send capability with local-only effect rejected',()=>{const p=simple();setCapabilities(p,['MESSAGE_SEND']);reject(run(p),'EFFECT_CAPABILITY_CONFLICT');});
-test('P61 message send capability with unknown effect requires clarification',()=>{const p=simple();p.capabilityNeeds=[{kind:'MESSAGE_SEND',reason:'Send email'}];setEffects(p,['UNKNOWN']);assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
+test('P61 message send capability with unknown effect requires clarification',()=>{const p=simple();setCapabilities(p,['MESSAGE_SEND']);setEffects(p,['UNKNOWN']);assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
 test('P62 connector write with read-only effect rejected',()=>{const p=simple();setCapabilities(p,['CONNECTOR_WRITE']);setEffects(p,['READ_ONLY']);reject(run(p),'EFFECT_CAPABILITY_CONFLICT');});
 test('P63 connector write with shared effect requires policy review',()=>{const p=simple();setCapabilities(p,['CONNECTOR_WRITE']);setEffects(p,['SHARED_WRITE']);assert.equal(run(p).status,'POLICY_REVIEW_REQUIRED');});
 test('P64 a risky effect plus blocking uncertainty clarifies first',()=>{const p=simple();setCapabilities(p,['MESSAGE_SEND']);setEffects(p,['EXTERNAL_SEND']);p.uncertainties=[{code:'MISSING_RECIPIENT',question:'To whom?',blocking:true}];assert.equal(run(p).status,'NEEDS_CLARIFICATION');});

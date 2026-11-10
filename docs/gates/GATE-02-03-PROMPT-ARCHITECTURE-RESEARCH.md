@@ -136,3 +136,13 @@ These are **proposed cases, not passing tests**. G02.03 needs isolated assembler
 ## 8. Editable Figma research architecture
 
 [Editable G02.03 prompt trust architecture — page 06](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=18-2) created with 58 editable Figma nodes, including 42 editable text labels. Shows T0–T5 authority/data partitions, prompt assembly stages, G02.02 acceptance, G02.03 research status and negative-test obligations. The screenshot preview was generated, but the diagram remains **proposed design**, not runtime proof.
+
+## Forward requirement — adaptive clarification and OpenDots assessment (2026-11-10)
+
+User requested an **optional guided-alignment setting** that opens a sequence of multiple-choice questions to reduce ambiguity before the engine does the wrong work. Implementation belongs to **G02.04** (clarification policy), with the editable user experience later in **G10**. G02.03 must support injecting no question/decision as a privileged role, and preserve the clarification answer as a new G02.01 turn with revision lineage.
+
+Modes proposed for later owner decision: **Adaptive** default (ask only material questions); **Guided alignment** opt-in (step-by-step MCQ wizard with Other/Not sure/Skip optional/Back/Review); **Quick start** (reversible assumptions only). All modes retain mandatory clarification and explicit approval when needed for consequential effects. No user setting grants tool permissions.
+
+External candidate [CopilotKit/OpenDots](https://github.com/CopilotKit/OpenDots): MIT-licensed alpha single-owner agent workspace with specialist Dots, Spaces/editor, chat, human approvals, per-Dot computers, MCP/Composio, schedules, voice, Slack and memory. **Not a complete T.A.C.E engine**: no automatic multi-Dot delegation, complete event-triggered lifecycle, or included team editing; CopilotKit Intelligence requires hosted service, local evaluation or separately licensed deployment. Its readOnlyHint trust and initially enabled tool behavior do not meet T.A.C.E's proposed deny-by-default G07 policy without further hardening. The maintained [OpenBot](https://github.com/CopilotKit/OpenBot) plus OpenDots skin and AG-UI is a candidate alternative. No fork or integration implemented/approved.
+
+See [full source-based adoption and guided clarification analysis](../research/OPENDOTS-ADOPTION-AND-CLARIFICATION-UX-20261110.md). G02.04 remains BLOCKED until G02.03 design approval; capture of the requirement does not advance it.

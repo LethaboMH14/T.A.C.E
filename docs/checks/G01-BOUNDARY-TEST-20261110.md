@@ -30,3 +30,13 @@ References:
 - [Boundary code](../../tools/gate01/goal-boundary.mjs)
 - [Tests](../../tools/gate01/goal-boundary.test.mjs)
 - [Security threat model](../gates/GATE-01-SECURITY-THREAT-MODEL.md)
+
+
+## Verified GitHub Actions regression
+
+Two GitHub Actions runs on 10 November 2026 **completed successfully** for the isolated `tools/gate01/goal-boundary.test.mjs` test job:
+
+- [Run 42839741035](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42839741035), head `4a8e3db1828c6cd16b1a0427c25aab68629db70c`.
+- [Run 42839749139](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42839749139), head `6dfcdd7ca2dfdb9cf59208fd682bc0dd87a14b3d`.
+
+The workflow conclusion is **success**, independently reported by GitHub, not just a local test claim. It still proves only these 16 contract branches, not production authentication, POPIA compliance or a working agent execution chain.

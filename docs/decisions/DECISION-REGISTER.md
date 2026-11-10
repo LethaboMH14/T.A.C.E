@@ -26,6 +26,10 @@
 | D-020 | Any goal can be interpreted, but unsupported or unauthorized execution must be declined or partial | LOCKED principle | ADR-0002 |
 | D-021 | Editable graph visualization / agent event console | PROPOSED | Detailed UI review is G10 |
 | D-022 | API-first goal intake and execution | LOCKED objective, schemas still OPEN | ADR-0002 |
+| D-023 | Education domain pack accepts diverse natural-language task families, not fixed commands | LOCKED product direction; evaluation OPEN | G01.16–G01.22 task catalogue |
+| D-024 | Connectors are dynamically discovered, capability-checked and least-privilege; not presumed installed | LOCKED product principle; implementation OPEN | G01 connector policy |
+| D-025 | KAIRO reuse is explicitly excluded from current competition design | LOCKED user direction | Gate 01 v0.3 |
+| D-026 | Combined Education Recovery mission | PROPOSED, NOT SELECTED | compare vs simpler options and event feasibility |
 
 ## Review rule
 

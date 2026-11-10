@@ -2,7 +2,7 @@
 
 **Version:** 0.2 | **Date:** 10 November 2026  
 **Problem statement approval:** **APPROVED by the user** — wording and root problem only, recorded in [ADR-0003](../decisions/ADR-0003-education-problem-statement-approval.md).  
-**Architecture and gate status:** G01 **IN_RESEARCH**; G02 **BLOCKED**. No implementation or measured impact claimed.  
+**Architecture and gate status:** G01 **DESIGN_COMPLETE** (requirements only); G02 **IN_RESEARCH**. No implementation or measured impact claimed.  
 **Scope:** General-purpose T.A.C.E goal-to-execution engine, with an educational Colleague Zero deployment. **KAIRO explicitly excluded from this track.**
 
 ## G01-P01 — Primary problem statement (APPROVED, wording frozen)
@@ -170,6 +170,11 @@ The user has approved **both the formal and simple problem statements**, along w
 - [**G01 universal task-family catalogue**](GATE-01-UNIVERSAL-TASK-CATALOGUE.md)
 - [**G01 connector capability and authorization contract**](GATE-01-CONNECTOR-CAPABILITIES.md)
 
-**Approved:** problem wording, simple relatable version, the fourth interoperability strand as a researched theme, and preservation of clear research/hypothesis boundaries. **Still open:** exact example actors, dataset, education flagship, goal-envelope schema, technical coverage and objective test cases.
+**Approved:** problem wording, simple relatable version, the fourth interoperability strand as a researched theme, and preservation of clear research/hypothesis boundaries. **G01 design decisions completed in ADR-0004:** adult educator/coordinator actor, synthetic Education Recovery reference fixture, goal contract requirements and negative-case/evaluation specs. **Implementation/empirical tests remain open** in G07/G09/G11/G12.
 
 A user can **request** arbitrary file formats, but reading and exporting must be limited to actual safely supported/validated capabilities. No undocumented app or account access is presumed.
+
+
+## G01 documented completion — no measured impact yet
+
+This research dossier is evidence backing for [ADR-0003's approved wording](../decisions/ADR-0003-education-problem-statement-approval.md); Gate 01 design/requirements signoff is recorded separately in [ADR-0004](../decisions/ADR-0004-g01-requirements-signoff-and-g02-handoff.md). [Impact evaluation](GATE-01-IMPACT-EVALUATION-PLAN.md) remains empirically pending; [security](GATE-01-SECURITY-THREAT-MODEL.md) and [edge cases](GATE-01-EDGE-CASE-MATRIX.md) must be implemented/tested before real-data deployment. The FigJam architecture is editable, not an implemented system.

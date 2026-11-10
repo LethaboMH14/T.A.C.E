@@ -16,6 +16,6 @@ The module `assessGoalBoundary(request, trusted)` accepts a **server-attested tr
 - It does not perform natural-language intent parsing or validate output correctness; those need G02/G09.
 - An approved email or grade change is **never** executed by this tool.
 
-**Tests:** 16 deterministic checks passed in a local Node 22.16.0 run on 2026-11-10. See [test receipt](../../docs/checks/G01-BOUNDARY-TEST-20261110.md). GitHub Actions workflow is provided but its run requires separate confirmation.
+**Tests:** 16 deterministic checks passed in a local Node 22.16.0 run on 2026-11-10. See [test receipt](../../docs/checks/G01-BOUNDARY-TEST-20261110.md). GitHub Actions has now reported a **successful** run; [CI run 42839749139](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42839749139). This verifies the isolated unit suite, not actual identity/OAuth/permissions.
 
 Read [G01 final requirements](../../docs/gates/GATE-01-FINAL-SPECIFICATION.md), [G01 threat model](../../docs/gates/GATE-01-SECURITY-THREAT-MODEL.md), [G02 research charter](../../docs/gates/GATE-02-INTENT-AND-CLARIFICATION-RESEARCH.md).

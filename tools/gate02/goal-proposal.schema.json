@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/LethaboMH14/T.A.C.E/blob/main/tools/gate02/goal-proposal.schema.json",
-  "title": "T.A.C.E G02.02 GoalContractProposal v0.1 (UNTRUSTED MODEL PROPOSAL)",
-  "description": "Provider-neutral bounded proposal; never an approval, verified result or executable plan. Server binding is deliberately excluded.",
+  "title": "T.A.C.E G02.02 GoalContractProposal v0.2 — UNTRUSTED MODEL PROPOSAL",
+  "description": "Domain-neutral candidate outcomes only; no approval, execution, source authorization or verified result. Cross-field invariants require the companion deterministic validator.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
-      "const": "g02-goal-proposal-v0.1"
+      "const": "g02-goal-proposal-v0.2"
     },
     "intent": {
       "type": "object",
@@ -16,7 +16,8 @@
         "summary": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 400
+          "maxLength": 400,
+          "pattern": "^(?!\\s*$)[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u202A-\\u202E\\u2066-\\u2069]+$"
         },
         "modes": {
           "type": "array",
@@ -32,7 +33,8 @@
             ]
           },
           "minItems": 1,
-          "maxItems": 4
+          "maxItems": 4,
+          "uniqueItems": true
         }
       },
       "required": [
@@ -64,7 +66,8 @@
           "description": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 400
+            "maxLength": 400,
+            "pattern": "^(?!\\s*$)[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u202A-\\u202E\\u2066-\\u2069]+$"
           },
           "formatHint": {
             "type": [
@@ -72,7 +75,8 @@
               "null"
             ],
             "minLength": 1,
-            "maxLength": 80
+            "maxLength": 80,
+            "pattern": "^(?!\\s*$)[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u202A-\\u202E\\u2066-\\u2069]+$"
           }
         },
         "required": [
@@ -99,7 +103,8 @@
           "outcome": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 400
+            "maxLength": 400,
+            "pattern": "^(?!\\s*$)[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u202A-\\u202E\\u2066-\\u2069]+$"
           },
           "dependsOn": {
             "type": "array",
@@ -110,7 +115,8 @@
               "maxLength": 32
             },
             "minItems": 0,
-            "maxItems": 11
+            "maxItems": 11,
+            "uniqueItems": true
           },
           "deliverableIds": {
             "type": "array",
@@ -121,14 +127,66 @@
               "maxLength": 32
             },
             "minItems": 0,
-            "maxItems": 8
+            "maxItems": 8,
+            "uniqueItems": true
+          },
+          "sourceSlots": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 23
+            },
+            "minItems": 0,
+            "maxItems": 24,
+            "uniqueItems": true
+          },
+          "capabilityKinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "READ_SOURCE",
+                "WRITE_ARTIFACT",
+                "SEARCH_PUBLIC",
+                "CONNECTOR_READ",
+                "CONNECTOR_WRITE",
+                "MESSAGE_DRAFT",
+                "MESSAGE_SEND",
+                "SCHEDULING",
+                "UNKNOWN"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 12,
+            "uniqueItems": true
+          },
+          "effectKinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "READ_ONLY",
+                "LOCAL_ARTIFACT",
+                "SHARED_WRITE",
+                "EXTERNAL_SEND",
+                "DESTRUCTIVE",
+                "UNKNOWN"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true
           }
         },
         "required": [
           "id",
           "outcome",
           "dependsOn",
-          "deliverableIds"
+          "deliverableIds",
+          "sourceSlots",
+          "capabilityKinds",
+          "effectKinds"
         ]
       },
       "minItems": 1,
@@ -142,7 +200,8 @@
         "maximum": 23
       },
       "minItems": 0,
-      "maxItems": 24
+      "maxItems": 24,
+      "uniqueItems": true
     },
     "capabilityNeeds": {
       "type": "array",
@@ -167,7 +226,8 @@
           "reason": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 240
+            "maxLength": 240,
+            "pattern": "^(?!\\s*$)[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u202A-\\u202E\\u2066-\\u2069]+$"
           }
         },
         "required": [
@@ -198,7 +258,8 @@
           "description": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 240
+            "maxLength": 240,
+            "pattern": "^(?!\\s*$)[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u202A-\\u202E\\u2066-\\u2069]+$"
           }
         },
         "required": [
@@ -230,7 +291,8 @@
           "check": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 400
+            "maxLength": 400,
+            "pattern": "^(?!\\s*$)[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u202A-\\u202E\\u2066-\\u2069]+$"
           },
           "method": {
             "type": "string",
@@ -242,13 +304,20 @@
               "HUMAN_REVIEW",
               "OTHER"
             ]
+          },
+          "evidenceExpectation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240,
+            "pattern": "^(?!\\s*$)[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u202A-\\u202E\\u2066-\\u2069]+$"
           }
         },
         "required": [
           "id",
           "deliverableId",
           "check",
-          "method"
+          "method",
+          "evidenceExpectation"
         ]
       },
       "minItems": 1,
@@ -275,7 +344,8 @@
           "question": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 240
+            "maxLength": 240,
+            "pattern": "^(?!\\s*$)[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u202A-\\u202E\\u2066-\\u2069]+$"
           },
           "blocking": {
             "type": "boolean"
@@ -302,5 +372,6 @@
     "effectClaims",
     "acceptanceCriteria",
     "uncertainties"
-  ]
+  ],
+  "$comment": "The runtime validator additionally checks DAG acyclicity, reference coverage, effect/capability consistency, trusted-intake source-slot bounds, total UTF-8 bytes and revision semantics. JSON Schema alone is insufficient."
 }

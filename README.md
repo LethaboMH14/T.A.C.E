@@ -1,6 +1,6 @@
 # T.A.C.E — Universal Goal-to-Execution Engine
 
-**Status:** Architecture baseline v0.2 (research/design only; no working universal engine)
+**Status:** Gate 01 design requirements complete; Gate 02 in research; no working universal multi-agent engine
 **Last reviewed:** 2026-11-10
 **Repository purpose:** Durable source of truth for the Colleague Zero project: product definition, agent architecture, design decisions, research, interfaces, tests and development.
 
@@ -65,7 +65,7 @@ The license in this repository is MIT. That **does not grant permission to copy 
 - [Judge/company evidence](docs/gates/GATE-01-judge-alignment.md)
 - [Editable multi-page architecture](diagrams/TACE-Architecture.drawio)
 
-The core can accept any natural-language goal for **capability assessment**. It executes only supported, authorized tasks; missing models, tools, approvals or sources result in a clear blocker or partial deliverable rather than false claims. Simple goals need not spawn a swarm. More involved goals can create dynamic typed graphs and use appropriate agents, tools and outputs. **Gate 01 remains IN RESEARCH; Gate 02 remains BLOCKED.**
+The core can accept any natural-language goal for **capability assessment**. It executes only supported, authorized tasks; missing models, tools, approvals or sources result in a clear blocker or partial deliverable rather than false claims. Simple goals need not spawn a swarm. More involved goals can create dynamic typed graphs and use appropriate agents, tools and outputs. **Gate 01 design complete; Gate 02 in research.**
 
 
 ## Gate 01 v0.3 — any education goal, adaptive capabilities
@@ -81,9 +81,19 @@ T.A.C.E accepts widely varying natural-language tasks—not fixed templates—ev
 
 ### Evidence-backed education problem (G01 research)
 
-**[Read the APPROVED formal and simple education problem statements, verified research and risks](docs/gates/GATE-01-PROBLEM-STATEMENT.md).** It covers workload, learning gaps, language access and disconnected educational information-to-action workflows, with official OECD, DBE and UNESCO evidence. The proposed T.A.C.E outcome improvement is a hypothesis requiring a measured demo and user validation. Any file format may be requested for intake feasibility, but only tested supported parsers/exporters and authorized connectors may actually execute. KAIRO is not part of this design direction. Gate 01 remains IN_RESEARCH.
+**[Read the APPROVED formal and simple education problem statements, verified research and risks](docs/gates/GATE-01-PROBLEM-STATEMENT.md).** It covers workload, learning gaps, language access and disconnected educational information-to-action workflows, with official OECD, DBE and UNESCO evidence. The proposed T.A.C.E outcome improvement is a hypothesis requiring a measured demo and user validation. Any file format may be requested for intake feasibility, but only tested supported parsers/exporters and authorized connectors may actually execute. KAIRO is not part of this design direction. Gate 01 design is complete.
 
 
 ### G01 problem wording approved / architecture still under research
 
 The formal problem statement, simple human-centred description and concise spoken pitch were explicitly approved on 2026-11-10 and frozen verbatim in [ADR-0003](docs/decisions/ADR-0003-education-problem-statement-approval.md). [Full Gate 01 architecture](docs/gates/GATE-01-PROBLEM-ARCHITECTURE.md) maps evidence, the fourth interoperability issue, the plausible risks if unresolved, universal goal intake, and format/connector boundaries to the downstream gates. [**Editable FigJam architecture and evidence board**](https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi). **G01 IN_RESEARCH; G02 BLOCKED.**
+
+## Gate 01 design signoff / Gate 02 opened (10 November 2026)
+
+**Gate 01 DESIGN_COMPLETE (requirements/architecture only)** through [ADR-0004](docs/decisions/ADR-0004-g01-requirements-signoff-and-g02-handoff.md). The accepted education problem wording remains [ADR-0003](docs/decisions/ADR-0003-education-problem-statement-approval.md).
+
+**Gate 02 IN_RESEARCH:** [intent and clarification charter](docs/gates/GATE-02-INTENT-AND-CLARIFICATION-RESEARCH.md) / [issue #3](https://github.com/LethaboMH14/T.A.C.E/issues/3). G01's [complete specification](docs/gates/GATE-01-FINAL-SPECIFICATION.md), [impact plan](docs/gates/GATE-01-IMPACT-EVALUATION-PLAN.md), [security threat model](docs/gates/GATE-01-SECURITY-THREAT-MODEL.md) and [48 edge cases](docs/gates/GATE-01-EDGE-CASE-MATRIX.md) are the source requirements.
+
+**Implementation status:** a narrow [goal-boundary spike](tools/gate01/goal-boundary.mjs) passed 16 **local** tests; this is **not** production authentication or proof of POPIA compliance. Full security implementation [issue #4](https://github.com/LethaboMH14/T.A.C.E/issues/4) and empirical benefit testing [issue #5](https://github.com/LethaboMH14/T.A.C.E/issues/5) remain mandatory release blockers. No measured impact or live multi-agent engine is claimed.
+
+[Editable Figma/FigJam architecture](https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi) · [Editable diagrams.net source](diagrams/TACE-Architecture.drawio).

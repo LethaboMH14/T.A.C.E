@@ -51,7 +51,7 @@ The license in this repository is MIT. That **does not grant permission to copy 
 
 ## Editable system maps
 
-- **[Editable diagrams.net architecture](diagrams/TACE-Architecture.drawio)** — two pages: 00 Gate Map and 01 Education Goal; open in [diagrams.net](https://app.diagrams.net/) using **File → Open From → GitHub** or import the raw file.
+- **[Editable diagrams.net architecture](diagrams/TACE-Architecture.drawio)** — four pages: 00 Gate Map, 01 Universal Goal Boundary, 02 Mission Console, plus archived prior EdTech concept; open in [diagrams.net](https://app.diagrams.net/) using **File → Open From → GitHub** or import the raw file.
 - **[Gate registry](docs/gates/GATE-INDEX.md)** — numbered G01–G12, current approval states and gate outputs.
 - **[Gate 01 deep research](docs/gates/GATE-01-EDUCATION-GOAL.md)** — sourced educational problem and proposed goal; no later gates started.
 

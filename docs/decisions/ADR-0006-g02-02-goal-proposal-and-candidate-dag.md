@@ -34,4 +34,4 @@ The proposal may be structurally valid but factually wrong, omit a dangerous act
 
 ## Evidence and status
 
-Implementation and CI evidence will be linked after the test run. **Owner approval required before marking G02.02 DESIGN_ACCEPTED or starting G02.03.** G02.01 acceptance does not approve this ADR.
+**Verified evidence:** [GitHub Actions run 42870978038](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42870978038) completed successfully at commit `11cdbe7e34f1c3a412fcffd602edd7f350cbb79f`: 142 pass, 0 fail, 0 skipped (88 G02.02 + 54 G02.01). [Editable Figma page 05](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2) synchronized. These are structural unit tests, not real-world interpretation, authorization or execution tests. **Owner approval required before marking G02.02 DESIGN_ACCEPTED or starting G02.03.** G02.01 acceptance does not approve this ADR.

@@ -43,7 +43,8 @@
 | D-035 | G01 fail-closed boundary spike, local 16/16 tests | **LIMITED TESTED PROTOTYPE** | tools/gate01; no auth or effects |
 | D-036 | Gate 02 prompt/intent/clarification research may begin | **IN_RESEARCH** | G02 charter and issue #3 |
 | D-037 | G02.01 hardened dual-text intake, server goal lineage and restricted interpreter view | **DESIGN_ACCEPTED / RUNTIME_PENDING** | Owner approval ADR-0005; 54/54 deterministic tests verified |
-| D-038 | G02.02 strict versioned goal proposal, candidate DAG, source slots and uncertainty/effect claims | **PROPOSED / USER_REVIEW_PENDING** | ADR-0006; 142/142 combined deterministic tests; G07 security pending |
+| D-038 | G02.02 hardened v0.2 goal proposal, candidate DAG, per-subgoal source/capability/effect claims | **DESIGN_ACCEPTED / RUNTIME_PENDING** | Owner approval 2026-11-10 in ADR-0006; 197/197 deterministic tests verified; G07 security and semantic evaluation pending |
+| D-039 | G02.03 provider-neutral prompt assembly, instruction/data trust partition, no privileged role promotion | **IN_RESEARCH / ADR-0007 PROPOSED** | G02.03 dossier and issue #6; no prompt assembler or G02.03 tests yet; G02.04 blocked |
 
 ## Review rule
 
@@ -59,4 +60,4 @@
 - Decision: ACCEPTED / REJECTED / DEFERRED:
 - Link to superseding ADR or PR:
 
-**D-038 review amendment (2026-11-10):** G02.02 v0.1 is superseded by hardened **v0.2** (per-subgoal effect/source/capability mappings, expected evidence, intake fingerprint and full snapshot comparison). **PROPOSED / OWNER SIGNOFF PENDING**; [197/197 deterministic tests verified](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42882371606). G02.03 remains blocked. No production approval.
+**D-038 review amendment (2026-11-10):** G02.02 v0.1 is superseded by hardened **v0.2** (per-subgoal effect/source/capability mappings, expected evidence, intake fingerprint and full snapshot comparison). **DESIGN_ACCEPTED BY OWNER 2026-11-10**; [197/197 deterministic tests verified](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42882371606). G02.03 IN_RESEARCH under proposed ADR-0007; G02.04 blocked. No production approval.

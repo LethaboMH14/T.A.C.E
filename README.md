@@ -66,3 +66,14 @@ The license in this repository is MIT. That **does not grant permission to copy 
 - [Editable multi-page architecture](diagrams/TACE-Architecture.drawio)
 
 The core can accept any natural-language goal for **capability assessment**. It executes only supported, authorized tasks; missing models, tools, approvals or sources result in a clear blocker or partial deliverable rather than false claims. Simple goals need not spawn a swarm. More involved goals can create dynamic typed graphs and use appropriate agents, tools and outputs. **Gate 01 remains IN RESEARCH; Gate 02 remains BLOCKED.**
+
+
+## Gate 01 v0.3 — any education goal, adaptive capabilities
+
+T.A.C.E accepts widely varying natural-language tasks—not fixed templates—even without attached data. It must assess missing information, retrieve trusted public or connected data when permitted, determine if a swarm is needed, choose real supported output formats, and verify every file/action. Education capability families cover workload, gaps, language access, continuity, cohort rescue, educational truth auditing and administration.
+
+- [Adaptive task catalogue](docs/gates/GATE-01-UNIVERSAL-TASK-CATALOGUE.md)
+- [Plugin/app/API integration contracts](docs/gates/GATE-01-CONNECTOR-CAPABILITIES.md)
+- [Editable architecture diagrams](diagrams/TACE-Architecture.drawio)
+
+**KAIRO is not part of the current design track.** No external app has been connected to T.A.C.E. Gate 01 remains IN RESEARCH, not an implemented engine; Gate 02 is blocked pending review.

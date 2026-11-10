@@ -1,7 +1,7 @@
 # ADR-0006 — G02.02 versioned goal proposal and candidate outcome DAG
 
 **Date:** 2026-11-10
-**Status:** HARDENED v0.2 PROPOSAL — USER REVIEW PENDING; NOT ACCEPTED
+**Status:** DESIGN_ACCEPTED — hardened v0.2; RUNTIME / SECURITY / SEMANTIC EVALUATION PENDING
 **Scope:** G02.02 only. No model, execution engine or production permission decision.
 **Dossier:** [G02.02](../gates/GATE-02-02-GOAL-SCHEMA-AND-DECOMPOSITION.md).
 **Predecessor:** [ADR-0005](ADR-0005-g02-01-normalization-and-turn-precedence.md) — G02.01 design ACCEPTED.
@@ -34,11 +34,11 @@ The proposal may be structurally valid but factually wrong, omit a dangerous act
 
 ## Evidence and status
 
-**Verified evidence:** [GitHub Actions run 42870978038](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42870978038) completed successfully at commit `11cdbe7e34f1c3a412fcffd602edd7f350cbb79f`: 142 pass, 0 fail, 0 skipped (88 G02.02 + 54 G02.01). [Editable Figma page 05](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2) synchronized. These are structural unit tests, not real-world interpretation, authorization or execution tests. **Owner approval required before marking G02.02 DESIGN_ACCEPTED or starting G02.03.** G02.01 acceptance does not approve this ADR.
+**Verified evidence:** [GitHub Actions run 42870978038](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42870978038) completed successfully at commit `11cdbe7e34f1c3a412fcffd602edd7f350cbb79f`: 142 pass, 0 fail, 0 skipped (88 G02.02 + 54 G02.01). [Editable Figma page 05](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2) synchronized. These are structural unit tests, not real-world interpretation, authorization or execution tests. **Historical checkpoint:** Owner approval was required before marking G02.02 DESIGN_ACCEPTED or starting G02.03. That approval is recorded in the acceptance addendum below.
 
 ## Critical review amendment — v0.2, 2026-11-10
 
-**Status remains PROPOSED.** The project owner requested an independent critical review and fixes, **not design approval**. The original v0.1 was under-specified for security and semantic traceability.
+**Historical review state:** At this critical review checkpoint, the status remained PROPOSED; the project owner requested review and fixes, **not design approval at that time**. The subsequent acceptance is recorded below. The original v0.1 was under-specified for security and semantic traceability.
 
 ### Corrected recommendation
 
@@ -59,4 +59,14 @@ The proposal may be structurally valid but factually wrong, omit a dangerous act
 
 **Still unproven / P0 downstream:** authenticated server identity and atomic event ledger, tenant-scoped source ownership, independently derived action effects, exact user approval binding, secure parsing and duplicate-key policy, prompt injection controls, privacy and retention, real model semantic accuracy, actual connector execution and independent output verification. **P1 downstream:** independent full JSON Schema implementation comparison, fuzz/property-based tests, multilingual held-out review, semantic correction detection, explicit v0.1 migration policy, latency/cost measurements.
 
-**Decision requested:** approve or revise **G02.02 hardened v0.2 design only**. Do not mark ACCEPTED until explicit owner approval. G02.03 remains BLOCKED.
+**Decision requested at the review checkpoint:** approve or revise **G02.02 hardened v0.2 design only**. The owner subsequently approved it in the acceptance addendum below. G02.03 is now open for research.
+
+## Acceptance record — 2026-11-10
+
+**Decision: ACCEPTED for design only.** After the hardened v0.2 critical review, the project owner replied **"i approve next"** in response to the request to approve G02.02 and advance to the next subsection. This records explicit approval of the **hardened G02.02 v0.2 architecture, contract, validator research spike and limited test evidence**. The prior v0.1 proposal is **superseded**, not independently approved.
+
+**Accepted design baseline:** `g02-goal-proposal-v0.2` strict versioning; per-subgoal source/capability/effect claims; bounded candidate DAG and evidence expectations; Unicode/shape/size checks; non-authoritative internal intake fingerprint; full revision snapshot comparison; and statuses that explicitly deny execution, semantic verification and policy authority. See the critical review findings and CI evidence above.
+
+**Not approved:** a deployed or secure service, authenticated principal/tenant, source access, independent tool-effect enforcement, model-generated semantic accuracy, live external actions, real approvals, full JSON Schema conformance, privacy compliance, prompt-injection resistance, human impact or final Gate 02 completion. The 197 passing tests are deterministic structural regression evidence only.
+
+**Next permitted work:** **G02.03 Prompt Architecture — IN_RESEARCH**, to produce a versioned, provider-neutral, instruction/data-separated prompt assembly specification, threat/negative-test plan, and its own proposed ADR. G02.03 has **no inherited design approval** and cannot begin external execution. G02.04–G02.15 remain BLOCKED until separately reviewed.

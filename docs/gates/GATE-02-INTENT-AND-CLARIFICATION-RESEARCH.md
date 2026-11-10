@@ -81,3 +81,10 @@ Three editable pages were created:
 - [Figma editable G02.01 page](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=6-2)
 - G02.02–G02.15 remain **NOT REVIEWED / NOT IMPLEMENTED**. G02 overall remains **IN_RESEARCH**.
 - **Known limitation:** G02.01 is a deterministic intake spike with caller-supplied test metadata, not real authentication, semantic LLM interpretation, approved skills, secure parser, runtime or verified business impact.
+
+
+## G02.01 critical review checkpoint — 2026-11-10
+
+**HARDENED PROPOSAL / USER APPROVAL PENDING.** The v0.2 deterministic intake spike passed **54/54** GitHub Actions tests: https://github.com/LethaboMH14/T.A.C.E/actions/runs/42867607839 . Fixes include goal-scoped revision IDs, strict source handles, explicit-null handling, Unicode byte safety, budget preservation and an allowlisted model projection. See the G02.01 dossier and ADR-0005 for detail. Figma G02.01 page is updated.
+
+**Do not infer production security:** authenticated gateway, atomic event ledger, source ownership, privacy controls, real LLM interpretation and integration tests are still pending. G02.02–G02.15 are not yet started.

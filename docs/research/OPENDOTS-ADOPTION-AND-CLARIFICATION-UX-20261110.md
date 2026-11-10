@@ -97,3 +97,13 @@ AG-UI is a UI event protocol, **not** an execution-security boundary. The T.A.C.
 6. Evaluate real deploy/license/cost and dependency status before any adoption.
 
 **This is a research recommendation, not a claim that the project currently uses OpenDots, OpenBot or CopilotKit.**
+
+## D. Owner authorization to evaluate — 2026-11-10
+
+**Decision:** The owner explicitly approved **evaluating** CopilotKit + AG-UI for T.A.C.E's interactive clarification and mission interface, selected OpenDots UX patterns, and OpenBot's execution infrastructure, **while keeping T.A.C.E's own GoalContract validation, independently enforced permissions, exact approval checks and verified receipts**. Crucially, a remote MCP server's `readOnlyHint` or tool description cannot by itself authorize actions.
+
+**Approval boundaries:** This is authority for an engineering/research proof of concept, technical comparison and isolated integration tests — **not** approval to replace T.A.C.E's architecture, adopt dependencies irrevocably, deploy OpenBot, connect user credentials, execute external actions or switch on broad computer/shell permissions. Any production adoption needs a later explicit ADR with licensing, security and CI evidence.
+
+**Evaluation acceptance targets:** AG-UI stream mapping for `INTAKE` → `CLARIFICATION_REQUIRED` → `ANSWERED` → `PROPOSAL_VALID/NEEDS_CLARIFICATION` → `POLICY_REVIEW_REQUIRED` → `VERIFIED` (only after real verification); accessible guided three-question prototype; tested stale-answer and revision fences; independent effect classification despite inaccurate read-only hints; pinned dependency/commit and separate CopilotKit Intelligence licensing/cost review; no real execution or PII in initial fixture tests.
+
+**Status:** EVALUATION_APPROVED; IMPLEMENTATION_PENDING. G02.03 remains in research, G02.04 is not yet approved, G10 UI integration remains a downstream option.

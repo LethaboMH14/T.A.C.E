@@ -60,3 +60,10 @@
 - [G02 in-research charter](GATE-02-INTENT-AND-CLARIFICATION-RESEARCH.md) / [issue #3](https://github.com/LethaboMH14/T.A.C.E/issues/3)
 
 **Design is not production approval: runtime G07 security, G09 correctness, G11 evaluation and G12 full integration remain pending.**
+
+
+## Gate 02 subsection states — 2026-11-10
+
+- **G02.01: DESIGN_ACCEPTED** by explicit owner approval in [ADR-0005](../decisions/ADR-0005-g02-01-normalization-and-turn-precedence.md); hardened v0.2 unit spike verified [54/54](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42867607839). Not production acceptance.
+- **G02.02: IN_RESEARCH / PROPOSED** — [goal schema and candidate DAG dossier](GATE-02-02-GOAL-SCHEMA-AND-DECOMPOSITION.md), [ADR-0006](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md), schema, validator, [142/142 combined deterministic tests](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42870978038), [Figma architecture](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2). Owner review pending; no G02.03 work started.
+- **G02.03–G02.15: BLOCKED** pending numbered review and approval. G02 overall stays IN_RESEARCH; G07/G11 production security and evaluation remain pending.

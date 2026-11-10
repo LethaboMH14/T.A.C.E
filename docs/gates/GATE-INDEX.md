@@ -67,3 +67,8 @@
 - **G02.01: DESIGN_ACCEPTED** by explicit owner approval in [ADR-0005](../decisions/ADR-0005-g02-01-normalization-and-turn-precedence.md); hardened v0.2 unit spike verified [54/54](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42867607839). Not production acceptance.
 - **G02.02: IN_RESEARCH / PROPOSED** — [goal schema and candidate DAG dossier](GATE-02-02-GOAL-SCHEMA-AND-DECOMPOSITION.md), [ADR-0006](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md), schema, validator, [142/142 combined deterministic tests](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42870978038), [Figma architecture](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2). Owner review pending; no G02.03 work started.
 - **G02.03–G02.15: BLOCKED** pending numbered review and approval. G02 overall stays IN_RESEARCH; G07/G11 production security and evaluation remain pending.
+
+
+### G02.02 critical review — 2026-11-10
+
+**G02.02 remains PROPOSED / owner review pending.** Hardened `g02-goal-proposal-v0.2` adds per-subgoal effect/capability/source mapping, orphan-DAG rejection, expected evidence, Unicode/schema alignment, canonical intake fingerprint and full snapshot revision checks. [ADR-0006](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md), [dossier](GATE-02-02-GOAL-SCHEMA-AND-DECOMPOSITION.md), [editable Figma page 05](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2). [Verified CI](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42882371606): **197 pass, 0 fail, 0 skipped** (143 G02.02 + 54 G02.01). G02.03 remains BLOCKED pending explicit v0.2 design approval; no production claims.

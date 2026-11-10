@@ -3,6 +3,8 @@
 **Status:** High-level boundaries ACCEPTED; implementation choices PROPOSED.
 **Version:** 0.1 / 2026-11-10.
 
+> **v0.2 scope refinement — ADR-0002:** T.A.C.E is a domain-agnostic goal-to-execution engine. Education examples below are proposed Colleague Zero deployments, not a general engine restriction. Gate 01 now defines any-goal boundaries, completion and capability semantics; Gate 02 will define adaptive prompt interpretation only after G01 approval. See [Gate 01](gates/GATE-01-EDUCATION-GOAL.md).
+
 ## Design principle
 
 **The graph owns transitions and permissions. The agents own bounded reasoning and work.** No agent may bypass the runtime by claiming its own tools ran, enlarging its permission scope, silently changing the acceptance criteria, or treating retrieved text as authoritative instructions.
@@ -11,7 +13,7 @@
 
 ~~~mermaid
 flowchart TD
- U[User: educational outcome] --> UI[Mission Console: goal + artifacts + live trace]
+ U[User: any permitted goal] --> UI[Mission Console: goal + artifacts + live trace]
  UI --> API[Application API and run service]
  API --> I[Intent / ambiguity gate]
  I --> C[Validated GoalContract]
@@ -36,7 +38,7 @@ flowchart TD
  O -->|Verified| D[Artifact delivery / report]
  D --> Q[Memory curator + retention checks]
  Q --> DB[(Scoped long-term memory)]
- SRC[(Curriculum / data / policies)] --> X
+ SRC[(Task-specific trusted sources / domain pack)] --> X
  DB --> X
  T[MCP / bounded tool gateway] <--> E
  G <--> CHK[(Checkpoint and event store)]
@@ -108,7 +110,7 @@ Only the memory curator can promote memories, following provenance, tenant/learn
 
 ## Proposed deployment boundary
 
-- **UI:** React + TypeScript + Vite; independent implementation informed by BobSwarm's visual patterns.
+- **UI:** React + TypeScript + Vite; React Flow / XYFlow is proposed for an editable node graph, with server-validated graph changes and real event state.
 - **Control API:** FastAPI/Python plus LangGraph as first candidate, subject to technical review.
 - **Demo state:** SQLite, with a persistent local artifact directory and optional SQLite lexical search.
 - **Scale-up state:** PostgreSQL/pgvector, object storage and hosted queues only when justified.

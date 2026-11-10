@@ -55,3 +55,17 @@ No provider/model names, prompt templates, confidence scales or tool-discovery a
 G02.01–G02.15 researched; exact stable input/output schema and versioning; prompt/clarification decision policy; negative/security cases; measured evaluation including unseen paraphrases and invalid fields; explicit design decision/ADR; checked mapping to G01, G03 and G07.
 
 **Nothing here claims a working or authorized autonomous engine.**
+
+
+## G02 editable Figma design workspace (2026-11-10)
+
+[**Open T.A.C.E Gate 02 — Intent, Skills & Memory Architecture + Mission Console**](https://www.figma.com/design/28egBAkhQHExkqUinyimtM)
+
+Three editable pages were created:
+1. **01 — Intent & Trust Architecture:** any-goal intake, server-attested identity, untrusted source data, typed intent proposal, minimal clarification, skill discovery, deterministic policy gate, receipts and verification.
+2. **02 — Mission Console Concept:** synthetic 36-trainee recovery scenario, proposed adaptive specialists, source checks, approval queue, draft artifacts and honest not-yet-executed status.
+3. **03 — Skills & Memory Policy:** separation of AGENTS.md/RULES.md, SKILL.md, versioned prompts, episodic/semantic/procedural memory, Honcho-style profile candidate, optional Obsidian authoring, trust and retention rules.
+
+**Status:** editable *design concepts only*, not a functioning interface or approved Gate 02 architecture. Model selection, library adoption, memory vendors, schema, and real tool access are pending the active deep research and G02 review. Security controls remain assigned to G07 and testing to G11. Preserve the original [Gate 01 FigJam board](https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi) as the earlier architecture reference.
+
+**Design synchronization rule (proposed):** Each accepted architectural change should update its source-of-truth Markdown/ADR and the relevant editable Figma page. The diagrams must display the current status (proposed/accepted/implemented/tested) and should not be treated as proof of implementation.

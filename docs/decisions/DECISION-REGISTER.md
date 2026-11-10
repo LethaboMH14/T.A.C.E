@@ -33,8 +33,15 @@
 
 | D-027 | Formal, simple and spoken problem statement wording | **APPROVED** | ADR-0003; wording frozen 2026-11-10 |
 | D-028 | Fourth problem: interoperability as source-backed theme, associated risks labelled as hypotheses | **APPROVED research framing** | OECD Digital Education Outlook 2023; ADR-0003 |
-| D-029 | Gate 01 architecture / education demonstration acceptance | **IN_RESEARCH** | G01 problem architecture; only problem wording accepted |
+| D-029 | Gate 01 architecture and education proof requirements | **DESIGN_COMPLETE** | ADR-0004, G01 final spec; implementation pending |
 | D-030 | Editable FigJam G01 evidence, impact and architecture diagrams | **DOCUMENTED** | https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi |
+
+| D-031 | G01 impact hypotheses, baseline metrics and honesty boundary | **DESIGN_ACCEPTED, EMPIRICAL_PENDING** | G01 impact plan; issue #5 |
+| D-032 | G01 20-risk security threat model, POPIA/child-data, exact approval policy | **DESIGN_ACCEPTED, IMPLEMENTATION_PENDING** | G01 threat model; issue #4 |
+| D-033 | G01 48 edge/adversarial case suite and explicit completion taxonomy | **DESIGN_ACCEPTED, TESTS_PENDING** | G01 edge matrix; issue #4 |
+| D-034 | G01 universal outcome boundary and Education Recovery Mission reference fixture | **DESIGN_ACCEPTED** | ADR-0004 and G01 final spec |
+| D-035 | G01 fail-closed boundary spike, local 16/16 tests | **LIMITED TESTED PROTOTYPE** | tools/gate01; no auth or effects |
+| D-036 | Gate 02 prompt/intent/clarification research may begin | **IN_RESEARCH** | G02 charter and issue #3 |
 
 ## Review rule
 

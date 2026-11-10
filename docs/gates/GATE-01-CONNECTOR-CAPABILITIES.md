@@ -1,6 +1,6 @@
 # Gate 01 — App and Tool Connector Policy (v0.1)
 
-**Status:** PROPOSED design only, not an operational T.A.C.E integration. **Date:** 2026-11-10. **KAIRO excluded.**
+**Status:** DESIGN CONTRACT ACCEPTED UNDER ADR-0004, not an operational T.A.C.E integration. **Date:** 2026-11-10. **KAIRO excluded.**
 
 ## Principle
 
@@ -52,4 +52,4 @@ Public sources may support a general task, with assumptions visible. Private stu
 
 G01 establishes the required connector *capability and risk contract*. G02 handles natural-language goal understanding. G04 chooses feasible tools and skills; G07 implements secure adapters and side effects; G10 renders the connection and approval interfaces.
 
-**Approval:** NOT APPROVED. No connector installed by this document.
+**G01 requirements accepted** under ADR-0004. **No connector has been installed or authenticated by this document.** Production support depends on G07 security implementation and verification.

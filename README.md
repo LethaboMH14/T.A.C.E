@@ -97,3 +97,8 @@ The formal problem statement, simple human-centred description and concise spoke
 **Implementation status:** a narrow [goal-boundary spike](tools/gate01/goal-boundary.mjs) passed 16 **local** tests; this is **not** production authentication or proof of POPIA compliance. Full security implementation [issue #4](https://github.com/LethaboMH14/T.A.C.E/issues/4) and empirical benefit testing [issue #5](https://github.com/LethaboMH14/T.A.C.E/issues/5) remain mandatory release blockers. No measured impact or live multi-agent engine is claimed.
 
 [Editable Figma/FigJam architecture](https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi) · [Editable diagrams.net source](diagrams/TACE-Architecture.drawio).
+
+
+## Current handoff — G02.02 accepted, G02.03 research opened (2026-11-10)
+
+The owner approved the **hardened G02.02 v0.2 design**, recorded in [ADR-0006](docs/decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md). The [197 passing predecessor contract tests](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42882371606) verify **only** G02.01/G02.02 deterministic structural behavior. **G02.03 Prompt Architecture is now IN_RESEARCH**, with a [new trust-boundary dossier](docs/gates/GATE-02-03-PROMPT-ARCHITECTURE-RESEARCH.md), [proposed ADR-0007](docs/decisions/ADR-0007-g02-03-prompt-trust-architecture.md) and [issue #6](https://github.com/LethaboMH14/T.A.C.E/issues/6). G02.04–G02.15 remain blocked pending their own approvals. No production model, authorized tools, external actions or semantic evaluation is claimed.

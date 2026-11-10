@@ -182,3 +182,29 @@ A small pure-JavaScript intake spike and tests are located under [tools/gate02](
 - IETF BCP 47 / RFC 5646: https://www.rfc-editor.org/info/bcp47/
 - OWASP Prompt Injection Prevention: https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html
 - [G01 security model](GATE-01-SECURITY-THREAT-MODEL.md)
+
+
+## Critical review and verified v0.2 changes — 2026-11-10
+
+**State: HARDENED PROPOSAL / USER APPROVAL PENDING.** The initial 22-test design was not sufficient.
+
+| Weakness | Correction | Test |
+| --- | --- | --- |
+| No stable goal identity for revisions | Server goalId included; cross-goal revision rejected | T39 |
+| Inherited properties and accessor getters | Plain data-only JSON-shaped input validation | T23–T24, T50–T51 |
+| Explicit null fields silently defaulted | Absent and explicit null distinguished | T25–T27 |
+| Permissive source references | Unique, bounded, syntactically opaque handles; no URLs/paths/content | T28–T29, T33, T49 |
+| Unsafe Unicode and length assumptions | Reject unpaired surrogates and unsafe controls; 6000 UTF-8-byte cap | T30–T32 |
+| Client budget silently dropped | Preserve maxCostCents including zero as hint, not permission | T34–T36 |
+| Raw user goal and identity could be forwarded to model | Allowlisted projectForInterpreter() removes rawGoal, actorRef, tenantRef, goalId, turnId and real source handles | T41–T43 |
+| No verified test result | GitHub Actions run 42867607839 succeeded at commit 4c41e29ba4862b23a8e2443b42052b4208626ca4 | 54 pass, 0 fail, 0 skipped |
+
+**Verified GitHub Actions run:** https://github.com/LethaboMH14/T.A.C.E/actions/runs/42867607839 . The workflow logs explicitly show 54 tests passed. An independent in-session V8 harness also ran the 54 deterministic assertions successfully.
+
+**Revised design:** trusted gateway (G07, not yet built) issues goalId, turnId, parent, revision, actor and tenant; deterministic G02.01 produces internal NormalizedIntakeRecord v0.2; restricted projectForInterpreter() emits g02-interpreter-view-v0.2 with interpretation text, locale/time/deadline/budget hints and numbered source slots only. Source handles remain unverified. A new turn always triggers approval and plan recheck.
+
+**Important caveats:** The trusted argument is a test fixture, NOT actual authentication. Comparing two records does not prevent concurrent replay or enforce atomic current-head revision; G07 must implement compare-and-swap in a real event ledger. A syntactically opaque handle is not proof of source ownership. The interpreter view still contains interpretationText and therefore can still contain sensitive information; it is not anonymization. Raw text is exact decoded JavaScript string, not a guarantee of original HTTP bytes. No real authorization, prompt-injection integration, secure parser, memory retention, POPIA compliance, LLM intent accuracy or external effects are proven.
+
+**Remaining P0:** authenticated server context, atomic replay protection, scoped source resolution, exact approval fingerprints, privacy-safe storage/telemetry and retention controls (G03/G07/G08/G11). **Remaining P1:** semantic correction evaluation, multilingual/emoji clarification, adversarial Unicode and concurrency tests (G02.02/G02.11/G02.13/G11).
+
+**Decision:** ADR-0005 remains PROPOSED, not accepted. G02.02 remains blocked until owner design approval. Figma page 04 has been updated with v0.2 model privacy boundary and verified CI evidence.

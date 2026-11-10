@@ -1,6 +1,6 @@
-# T.A.C.E — Education Digital Colleague
+# T.A.C.E — Universal Goal-to-Execution Engine
 
-**Status:** Architecture baseline v0.1 (design, not an implemented application)
+**Status:** Architecture baseline v0.2 (research/design only; no working universal engine)
 **Last reviewed:** 2026-11-10
 **Repository purpose:** Durable source of truth for the Colleague Zero project: product definition, agent architecture, design decisions, research, interfaces, tests and development.
 
@@ -8,9 +8,9 @@
 
 ## North star
 
-Build an **outcome-owning educational digital colleague**, not a generic chatbot or a decorative agent swarm. It takes an educational goal, asks for clarification only when necessary, creates an executable goal contract, retrieves trustworthy context, assembles specialist agents as needed, executes a dependency-aware workflow, checks and repairs its work, produces real artifacts and records verified outcomes.
+Build a **domain-agnostic outcome-owning execution engine**. Education is the first domain deployment for Colleague Zero, not a restriction on possible goals. T.A.C.E should make proportional decisions about skills, tools, agents, graph topology, output format, costs, and authorization based on each goal. It takes an educational goal, asks for clarification only when necessary, creates an executable goal contract, retrieves trustworthy context, assembles specialist agents as needed, executes a dependency-aware workflow, checks and repairs its work, produces real artifacts and records verified outcomes.
 
-**Provisional flagship workflow:** learner-success intervention (synthetic assessment/attendance/curriculum inputs → evidence-backed catch-up plans → review and correction → teacher-approved communication drafts and follow-ups). This workflow is proposed, not yet approved as the sole use case.
+**Provisional education demo workflow (NOT the universal product):** learner-success intervention (synthetic assessment/attendance/curriculum inputs → evidence-backed catch-up plans → review and correction → teacher-approved communication drafts and follow-ups). This workflow is proposed, not yet approved as the sole use case.
 
 ## Agreed architectural principles
 
@@ -56,3 +56,13 @@ The license in this repository is MIT. That **does not grant permission to copy 
 - **[Gate 01 deep research](docs/gates/GATE-01-EDUCATION-GOAL.md)** — sourced educational problem and proposed goal; no later gates started.
 
 **Current active gate: G01 EDUCATION GOAL (research only).** Downstream gate design remains blocked until G01 exit criteria and a formal approval ADR are met.
+
+
+## Scope v0.2 — universal engine / education demonstration
+
+- [ADR-0002: universal engine scope](docs/decisions/ADR-0002-universal-engine-education-demo.md)
+- [Gate 01: Universal Goal Boundary and Education Proof Case](docs/gates/GATE-01-EDUCATION-GOAL.md)
+- [Judge/company evidence](docs/gates/GATE-01-judge-alignment.md)
+- [Editable multi-page architecture](diagrams/TACE-Architecture.drawio)
+
+The core can accept any natural-language goal for **capability assessment**. It executes only supported, authorized tasks; missing models, tools, approvals or sources result in a clear blocker or partial deliverable rather than false claims. Simple goals need not spawn a swarm. More involved goals can create dynamic typed graphs and use appropriate agents, tools and outputs. **Gate 01 remains IN RESEARCH; Gate 02 remains BLOCKED.**

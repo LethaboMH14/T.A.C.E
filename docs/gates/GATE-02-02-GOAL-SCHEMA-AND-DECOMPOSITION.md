@@ -1,12 +1,12 @@
 # G02.02 — Versioned GoalContract Proposal, outcome decomposition and correction semantics
 
 **Date:** 2026-11-10
-**State:** IN_RESEARCH / DESIGN PROPOSED / DETERMINISTIC PROTOTYPE IN PROGRESS / USER SIGNOFF PENDING
+**State:** IN_RESEARCH / DESIGN PROPOSED / DETERMINISTIC PROTOTYPE IMPLEMENTED AND TESTED / USER SIGNOFF PENDING
 **Predecessor:** [G02.01 design ACCEPTED](GATE-02-01-INPUT-NORMALIZATION.md), [ADR-0005](../decisions/ADR-0005-g02-01-normalization-and-turn-precedence.md).
 **Decision:** [ADR-0006](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md) — PROPOSED.
 **Contract:** [goal-proposal.schema.json](../../tools/gate02/goal-proposal.schema.json).
 **Code and tests:** [tools/gate02](../../tools/gate02/).
-**Figma:** [Gate 02 editable workspace](https://www.figma.com/design/28egBAkhQHExkqUinyimtM); G02.02 page to be synchronized.
+**Figma:** [Gate 02 editable workspace](https://www.figma.com/design/28egBAkhQHExkqUinyimtM); page **05 — G02.02 Goal Proposal & Candidate DAG** [open editable page](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2), synchronized.
 **Scope:** Typed interpretation **proposal** and candidate outcome DAG only, not authorized GoalContract, LLM model, execution planner, tool invocation or policy.
 
 ## 1. Why this subsection exists
@@ -97,7 +97,7 @@ A model may claim CORRECTION or REFINEMENT, but **cannot** establish that claim 
 
 ## 7. Tests and acceptance conditions
 
-Required tests: simple goal, mixed-domain DAG, duplicate/unknown/cyclic dependencies, missing acceptance checks, unbound source slots, client-forged authority fields, malformed or oversized values, invalid unicode, unknown/consequential/destructive effect routing, correction/root mismatch, cross-goal/tenant revision, immutable snapshots, schema drift and adversarial input. Tests must run in GitHub Actions and report explicit pass/fail totals; until observed, treat CI as pending.
+Required tests: simple goal, mixed-domain DAG, duplicate/unknown/cyclic dependencies, missing acceptance checks, unbound source slots, client-forged authority fields, malformed or oversized values, invalid unicode, unknown/consequential/destructive effect routing, correction/root mismatch, cross-goal/tenant revision, immutable snapshots, schema drift and adversarial input. Tests ran in [GitHub Actions run 42870978038](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42870978038) on commit `11cdbe7e34f1c3a412fcffd602edd7f350cbb79f`: **142 pass, 0 fail, 0 skipped** (88 G02.02 + 54 G02.01). This proves only the deterministic test assertions, not semantic intent accuracy or production security.
 
 **G02.02 proposed design exit:** versioned JSON Schema and deterministic implementation; test evidence; Figma synchronized; owner reviews ADR-0006. **Not sufficient for production:** LLM-held-out semantic accuracy, authorization, actual tool execution, graph scheduling, privacy and impact tests.
 
@@ -114,3 +114,14 @@ Required tests: simple goal, mixed-domain DAG, duplicate/unknown/cyclic dependen
 - **G03/G04/G05/G07/G09/G11:** context evidence, actual tool feasibility, graph execution, permission enforcement, independent verification and evaluation.
 
 **Decision requested:** review and approve/revise G02.02 schema and candidate DAG **after** verified tests. Do not approve later gates implicitly.
+
+
+## 9. Verified prototype checkpoint — 2026-11-10
+
+**GitHub Actions:** [run 42870978038](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42870978038), commit `11cdbe7e34f1c3a412fcffd602edd7f350cbb79f`, 142/142 passing. The 88 new G02.02 tests cover strict schema fields, malformed and spoofed inputs, source-slot provenance, duplicate/missing references, DAG cycles, acceptance coverage, unknown effects, claimed send/write effects, root/correction consistency, cross-tenant/cross-goal revisions, defensive frozen copies and schema spot-checks. The 54 previous G02.01 tests also passed.
+
+**Figma:** [editable G02.02 architecture page 05](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2), with proposal trust boundary, candidate DAG, outcome dispositions and explicit security limitations. G02.01 Figma page 04 now marks design accepted.
+
+**Open issues:** The validator is hand-written and the JSON Schema is not independently evaluated by a full schema engine; a model may omit or misclassify real effects; the G02.01 intake fixture is caller supplied and not authenticated; revision comparison is not atomic; source slots do not prove ownership; no real prompt/LLM or multilingual accuracy evaluation. All are later gates' acceptance requirements.
+
+**Decision:** ADR-0006 remains **PROPOSED** pending owner review. G02.03 must not begin without that approval.

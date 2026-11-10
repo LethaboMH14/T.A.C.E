@@ -77,3 +77,8 @@ T.A.C.E accepts widely varying natural-language tasks—not fixed templates—ev
 - [Editable architecture diagrams](diagrams/TACE-Architecture.drawio)
 
 **KAIRO is not part of the current design track.** No external app has been connected to T.A.C.E. Gate 01 remains IN RESEARCH, not an implemented engine; Gate 02 is blocked pending review.
+
+
+### Evidence-backed education problem (G01 research)
+
+**[Read the primary umbrella problem statement, short pitch and research boundaries](docs/gates/GATE-01-PROBLEM-STATEMENT.md).** It covers workload, learning gaps, language access and disconnected educational information-to-action workflows, with official OECD, DBE and UNESCO evidence. The proposed T.A.C.E outcome improvement is a hypothesis requiring a measured demo and user validation. Any file format may be requested for intake feasibility, but only tested supported parsers/exporters and authorized connectors may actually execute. KAIRO is not part of this design direction. Gate 01 remains IN_RESEARCH.

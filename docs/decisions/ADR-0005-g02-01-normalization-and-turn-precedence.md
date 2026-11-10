@@ -35,3 +35,16 @@ Positive: auditable raw evidence, canonical comparison, stable provenance, low v
 Limited prototype under [tools/gate02](../../tools/gate02/), deterministic unit tests and CI. This does not test LLM interpretation, actual auth, file safety or integration. See the G02.01 dossier and pending G07/G11 work.
 
 **Approval required before marking ACCEPTED and beginning G02.02.**
+
+
+## Critical review amendment — v0.2, 2026-11-10
+
+**Status: HARDENED PROPOSAL — OWNER APPROVAL PENDING.**
+
+The original design omitted stable goal-scoped revision identity, had permissive source handles, accepted some explicit nulls as absent, lost client budget hints and lacked a restricted interpreter projection. These were defects in a research prototype, not in a deployed production service.
+
+**Amended technical recommendation:** require server goalId, actor, tenant, turnId, parent and revision; preserve raw decoded goal internally and derive NFC+LF interpretation; validate UTF-8 size, surrogate pairs and controls; accept only unique opaque source handles; preserve a user cost cap as a hint; pass only an allowlisted projection to the model (no rawGoal, actor/tenant/goal/turn IDs or source handles). Every new authenticated turn must recheck prior plans and approvals. The interpretation text may itself contain personal data; no anonymization claim.
+
+**Verified test evidence:** https://github.com/LethaboMH14/T.A.C.E/actions/runs/42867607839 — GitHub Actions success, 54/54 deterministic tests at commit 4c41e29ba4862b23a8e2443b42052b4208626ca4.
+
+**Unresolved P0:** real server authentication, atomic event-ledger replay and concurrency protection, source ownership, authorization, privacy-safe storage and audit. **Not yet approved.**

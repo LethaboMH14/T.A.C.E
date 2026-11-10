@@ -1,6 +1,6 @@
 # Gate 01 — Universal Education Task Catalogue (v0.3)
 
-**Status:** DESIGN CANDIDATES, G01 still IN RESEARCH. **Date:** 2026-11-10.
+**Status:** DESIGN BASELINE UNDER ADR-0004; implementation and impact tests pending. **Date:** 2026-11-10.
 **Scope:** T.A.C.E is the universal, API-first, goal-to-execution engine. Education is its first domain capability pack for Colleague Zero; it is NOT hardwired to one type of prompt. **KAIRO is excluded from this design path.**
 
 ## G01.16 — Problem families and evidence
@@ -82,4 +82,4 @@ Illustrative prompt: "Our fictional academy has 36 learners struggling with Math
 
 The official brief judges five things: REASONS, SELF-CORRECTS, EXECUTES, COLLABORATES, SERVES EDUCATION. https://hackathon-26.melsoft.org/ . A generic architecture alone cannot satisfy the event; the demonstrated outcome must solve a real educational task.
 
-**Gate 01 is OPEN.** Do not claim the flagship above is chosen, or begin G02. The exact demo fixture, user, goals, tools, rubric, failure-injection tests and authorization must still be agreed, and a later ADR must record approval.
+**G01 DESIGN_COMPLETE (ADR-0004).** Education Recovery Mission is the selected synthetic reference fixture; not hardcoded to the engine. G02 research has begun. Actual fixture files, connectors, test executions and release security remain pending.

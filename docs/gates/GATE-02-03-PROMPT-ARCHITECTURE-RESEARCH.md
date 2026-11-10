@@ -132,3 +132,7 @@ These are **proposed cases, not passing tests**. G02.03 needs isolated assembler
 - **G07:** real identity, tenant scopes, effect classification, exact approval binding, event store and actual tool permissions.
 
 **Current outcome:** research proposal recorded; **no G02.03 prompt assembler, provider call, unit test or security guarantee is implemented or verified yet**. Request owner review after the design and evidence are completed.
+
+## 8. Editable Figma research architecture
+
+[Editable G02.03 prompt trust architecture — page 06](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=18-2) created with 58 editable Figma nodes, including 42 editable text labels. Shows T0–T5 authority/data partitions, prompt assembly stages, G02.02 acceptance, G02.03 research status and negative-test obligations. The screenshot preview was generated, but the diagram remains **proposed design**, not runtime proof.

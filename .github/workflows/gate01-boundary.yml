@@ -1,0 +1,28 @@
+name: T.A.C.E Gate 01 boundary tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/gate01/**'
+      - '.github/workflows/gate01-boundary.yml'
+  pull_request:
+    paths:
+      - 'tools/gate01/**'
+      - '.github/workflows/gate01-boundary.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  goal-admission:
+    name: G01 fail-closed contract tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 verified existing repo reference
+      - name: Verify Node runtime
+        run: node --version
+      - name: Test G01 boundary spike
+        run: node --test tools/gate01/goal-boundary.test.mjs

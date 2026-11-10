@@ -1,6 +1,6 @@
 # T.A.C.E numbered gate registry — v0.2
 
-**Date:** 2026-11-10. **Product scope:** universal goal-to-execution engine; **judged deployment:** education domain pack.
+**Date:** 2026-11-10. **Product scope:** universal goal-to-execution engine; **judged deployment:** adaptable education domain pack with task families and optional app/API connectors.
 
 | Gate | Name | Current state | Exit artifact |
 | --- | --- | --- | --- |
@@ -33,3 +33,13 @@
 - [Editable architecture map](../../diagrams/TACE-Architecture.drawio)
 
 **G01 remains IN_RESEARCH. Do not begin G02 detailed design until the goal boundary and an EdTech flagship are formally reviewed and approved.**
+
+
+## Gate 01 detailed work streams
+
+- [Seven adaptive education task families, varied inputs and outputs](GATE-01-UNIVERSAL-TASK-CATALOGUE.md)
+- [Application connectors, authorization and capability checks](GATE-01-CONNECTOR-CAPABILITIES.md)
+- [Editable architecture and connector maps](../../diagrams/TACE-Architecture.drawio)
+- **Explicitly excluded from this design track:** KAIRO reuse. The separate historical review is not an approved dependency.
+
+**Decision still open:** select one competition flagship, supported integrations, exact test fixtures and observable metrics. G02 remains blocked.

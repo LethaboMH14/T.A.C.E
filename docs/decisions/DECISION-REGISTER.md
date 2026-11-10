@@ -4,14 +4,14 @@
 
 | ID | Topic | Status | Basis / next action |
 | --- | --- | --- | --- |
-| D-001 | Education-focused, outcome-owning digital colleague (not chatbot) | LOCKED principle | ADR-0001 |
+| D-001 | **Universal outcome-owning execution engine; EdTech first judged deployment** | LOCKED scope principle | ADR-0002 supersedes education-only interpretation of ADR-0001 |
 | D-002 | Intent → GoalContract → context → dynamic DAG/swarm → execute/check/repair/deliver | LOCKED principle | ADR-0001 |
 | D-003 | Adaptive, risk-based clarification rather than mandatory questionnaire | LOCKED principle | ADR-0001 |
 | D-004 | Graph/state/policy control over agent choices and tool effects | LOCKED principle | ADR-0001 |
 | D-005 | Role-limited tools, evidence, approval and bounded repair | LOCKED principle | ADR-0001 |
 | D-006 | Governed short-/long-term memory, source- and tenant-scoped | LOCKED principle | ADR-0001 |
 | D-007 | Final project name and expansion of T.A.C.E | OPEN | user/team decision; do not invent expansion |
-| D-008 | Flagship use case = learner-success intervention | PROPOSED | compare with lesson/assessment and accessibility workflows |
+| D-008 | EdTech flagship may use learner support, lesson production or academy operations | PROPOSED | No single education demo yet approved; G01 active |
 | D-009 | FastAPI + Python LangGraph | PROPOSED | prototype graph/checkpoint feasibility before locking |
 | D-010 | React/TypeScript/Vite Mission Console | PROPOSED | verify reuse rights; approve UX flows |
 | D-011 | SQLite demo, PostgreSQL+pgvector later | PROPOSED | measure actual retrieval/data complexity |
@@ -21,6 +21,11 @@
 | D-015 | BobSwarm implementation source reuse | RESTRICTED | no declared license observed; ideas only until permissions confirmed |
 | D-016 | Step-by-step component review/ADRs as project protocol | LOCKED principle | ADR-0001 |
 | D-017 | Demo metric targets and performance claims | OPEN | derive from real tests, never assume |
+| D-018 | No fixed swarm; proportional topology and goal-dependent outputs | LOCKED principle | ADR-0002 |
+| D-019 | Dynamic skills require validation, permissions and sandbox review before use | LOCKED principle | ADR-0002 |
+| D-020 | Any goal can be interpreted, but unsupported or unauthorized execution must be declined or partial | LOCKED principle | ADR-0002 |
+| D-021 | Editable graph visualization / agent event console | PROPOSED | Detailed UI review is G10 |
+| D-022 | API-first goal intake and execution | LOCKED objective, schemas still OPEN | ADR-0002 |
 
 ## Review rule
 

@@ -31,6 +31,11 @@
 | D-025 | KAIRO reuse is explicitly excluded from current competition design | LOCKED user direction | Gate 01 v0.3 |
 | D-026 | Combined Education Recovery mission | PROPOSED, NOT SELECTED | compare vs simpler options and event feasibility |
 
+| D-027 | Formal, simple and spoken problem statement wording | **APPROVED** | ADR-0003; wording frozen 2026-11-10 |
+| D-028 | Fourth problem: interoperability as source-backed theme, associated risks labelled as hypotheses | **APPROVED research framing** | OECD Digital Education Outlook 2023; ADR-0003 |
+| D-029 | Gate 01 architecture / education demonstration acceptance | **IN_RESEARCH** | G01 problem architecture; only problem wording accepted |
+| D-030 | Editable FigJam G01 evidence, impact and architecture diagrams | **DOCUMENTED** | https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi |
+
 ## Review rule
 
 **First session:** Product goal/use case and actor, then Intent/Prompt Engineering. For each section: define purpose → inputs/outputs → algorithms and tools → safety/failure handling → cross-system interactions → tests → ADR → next section.

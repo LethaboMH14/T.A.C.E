@@ -72,19 +72,26 @@ Three editable pages were created:
 
 ## Numbered execution ledger (2026-11-10)
 
-**G02.01 — RESEARCHED / RECOMMENDATION PROPOSED / UNIT SPIKE COMMITTED / USER APPROVAL PENDING.**
+**G02.01 — DESIGN_ACCEPTED (hardened v0.2) / 54/54 deterministic tests verified; production security pending.**
 
 - [G02.01 detailed alternatives, architecture, edge cases and test plan](GATE-02-01-INPUT-NORMALIZATION.md)
 - [ADR-0005 proposed decision](../decisions/ADR-0005-g02-01-normalization-and-turn-precedence.md)
-- [Deterministic normalization code](../../tools/gate02/normalize-turn.mjs) and [22 test assertions](../../tools/gate02/normalize-turn.test.mjs)
-- [GitHub Actions intake test workflow](../../.github/workflows/gate02-intake.yml) — **CI outcome must be verified; do not infer success from a committed workflow**
+- [Deterministic normalization code](../../tools/gate02/normalize-turn.mjs) and [54 test assertions](../../tools/gate02/normalize-turn.test.mjs)
+- [GitHub Actions intake test workflow](../../.github/workflows/gate02-intake.yml) — **CI verified: 54/54 in run 42867607839**
 - [Figma editable G02.01 page](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=6-2)
-- G02.02–G02.15 remain **NOT REVIEWED / NOT IMPLEMENTED**. G02 overall remains **IN_RESEARCH**.
+- G02.02 is **IN_RESEARCH / PROPOSED**, with a limited prototype and verified unit tests; G02.03–G02.15 remain **NOT REVIEWED / NOT IMPLEMENTED**. G02 overall remains **IN_RESEARCH**.
 - **Known limitation:** G02.01 is a deterministic intake spike with caller-supplied test metadata, not real authentication, semantic LLM interpretation, approved skills, secure parser, runtime or verified business impact.
 
 
 ## G02.01 critical review checkpoint — 2026-11-10
 
-**HARDENED PROPOSAL / USER APPROVAL PENDING.** The v0.2 deterministic intake spike passed **54/54** GitHub Actions tests: https://github.com/LethaboMH14/T.A.C.E/actions/runs/42867607839 . Fixes include goal-scoped revision IDs, strict source handles, explicit-null handling, Unicode byte safety, budget preservation and an allowlisted model projection. See the G02.01 dossier and ADR-0005 for detail. Figma G02.01 page is updated.
+**HARDENED DESIGN ACCEPTED by owner on 2026-11-10 (ADR-0005); production approval pending.** The v0.2 deterministic intake spike passed **54/54** GitHub Actions tests: https://github.com/LethaboMH14/T.A.C.E/actions/runs/42867607839 . Fixes include goal-scoped revision IDs, strict source handles, explicit-null handling, Unicode byte safety, budget preservation and an allowlisted model projection. See the G02.01 dossier and ADR-0005 for detail. Figma G02.01 page is updated.
 
 **Do not infer production security:** authenticated gateway, atomic event ledger, source ownership, privacy controls, real LLM interpretation and integration tests are still pending. G02.02–G02.15 are not yet started.
+
+
+## G02.02 execution checkpoint — 2026-11-10
+
+**G02.01 DESIGN_ACCEPTED** by explicit owner decision in ADR-0005; **G02.02 IN_RESEARCH / PROPOSED**, not approved. [G02.02 dossier](GATE-02-02-GOAL-SCHEMA-AND-DECOMPOSITION.md), [ADR-0006](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md), [JSON Schema](../../tools/gate02/goal-proposal.schema.json), [validator](../../tools/gate02/goal-proposal.mjs), [88 tests](../../tools/gate02/goal-proposal.test.mjs), [CI workflow](../../.github/workflows/gate02-proposal.yml), [editable Figma page 05](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2).
+
+**Verified CI:** [GitHub Actions run 42870978038](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42870978038) passed **142/142** combined tests (54 G02.01 + 88 G02.02), 0 failures, 0 skipped, on commit `11cdbe7e34f1c3a412fcffd602edd7f350cbb79f`. No LLM goal extraction, policy enforcement, authenticated ledger, live tools or semantic accuracy is proven. **Owner approval of ADR-0006 required before G02.03.**

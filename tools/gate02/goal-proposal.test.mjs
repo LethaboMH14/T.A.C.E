@@ -8,29 +8,32 @@ const trusted={actor:{subject:'teacher-demo',tenant:'synthetic-school'},goalId:'
 const intake=(sources=[],ctx=trusted)=>normalizeGoalTurn({goal:'Create a study template',sources},ctx).record;
 const sourceRefs=[{kind:'upload',ref:'source-1'},{kind:'connector',ref:'source-2'}];
 const simple=()=>({
-  schemaVersion:'g02-goal-proposal-v0.1',
+  schemaVersion:'g02-goal-proposal-v0.2',
   intent:{summary:'Create a study-plan template',modes:['CREATE']},
   relationToPrior:'NEW_GOAL',
   deliverables:[{id:'template',description:'Editable study-plan template',formatHint:'xlsx'}],
-  subgoals:[{id:'draft',outcome:'Produce the template',dependsOn:[],deliverableIds:['template']}],
+  subgoals:[{id:'draft',outcome:'Produce the template',dependsOn:[],deliverableIds:['template'],sourceSlots:[],capabilityKinds:['WRITE_ARTIFACT'],effectKinds:['LOCAL_ARTIFACT']}],
   sourceSlots:[],
   capabilityNeeds:[{kind:'WRITE_ARTIFACT',reason:'Create a local file'}],
   effectClaims:[{kind:'LOCAL_ARTIFACT',description:'Create a local template only'}],
-  acceptanceCriteria:[{id:'reopen',deliverableId:'template',check:'Reopen saved template',method:'ARTIFACT_REOPEN'}],
+  acceptanceCriteria:[{id:'reopen',deliverableId:'template',check:'Reopen saved template',method:'ARTIFACT_REOPEN',evidenceExpectation:'File exists and can be reopened with expected columns'}],
   uncertainties:[]
 });
 const mixed=()=>{
   const p=simple();
   p.intent={summary:'Analyze synthetic data and produce support drafts',modes:['ANALYZE','CREATE','COORDINATE']};
   p.deliverables.push({id:'report',description:'Gap analysis report',formatHint:'csv'});
-  p.subgoals=[{id:'analysis',outcome:'Analyze source slots',dependsOn:[],deliverableIds:['report']},
-    {id:'draft',outcome:'Draft support plan',dependsOn:['analysis'],deliverableIds:['template']}];
-  p.acceptanceCriteria.push({id:'crosscheck',deliverableId:'report',check:'Check evidence',method:'SOURCE_CROSSCHECK'});
+  p.subgoals=[{id:'analysis',outcome:'Analyze source slots',dependsOn:[],deliverableIds:['report'],sourceSlots:[0,1],capabilityKinds:['READ_SOURCE'],effectKinds:['READ_ONLY']},
+    {id:'draft',outcome:'Draft support plan',dependsOn:['analysis'],deliverableIds:['template'],sourceSlots:[],capabilityKinds:['WRITE_ARTIFACT'],effectKinds:['LOCAL_ARTIFACT']}];
+  p.acceptanceCriteria.push({id:'crosscheck',deliverableId:'report',check:'Check evidence',method:'SOURCE_CROSSCHECK',evidenceExpectation:'Source slot values match the synthetic report totals'});
   p.sourceSlots=[0,1];
   p.capabilityNeeds.push({kind:'READ_SOURCE',reason:'Read authorized source data'});
+  p.effectClaims.push({kind:'READ_ONLY',description:'Read synthetic inputs without mutation'});
   return p;
 };
 const run=(p=simple(),i=intake())=>validateGoalProposal(p,i);
+const setEffects=(p,kinds)=>{p.effectClaims=kinds.map(kind=>({kind,description:'Proposed '+kind+' effect'}));p.subgoals[0].effectKinds=[...kinds];return p;};
+const setCapabilities=(p,kinds)=>{p.capabilityNeeds=kinds.map(kind=>({kind,reason:'Proposed '+kind+' capability'}));p.subgoals[0].capabilityKinds=[...kinds];return p;};
 const mutate=fn=>{const p=simple();fn(p);return run(p);};
 const reject=(r,code)=>{assert.equal(r.status,'REJECTED_PROPOSAL');assert.equal(r.code,code);};
 const secondIntake=(overrides={})=>intake([],{...trusted,turnId:'t2',parentTurnId:'t1',revision:2,...overrides});
@@ -70,7 +73,7 @@ test('P30 too many candidate subgoals rejected',()=>reject(mutate(p=>p.subgoals=
 test('P31 duplicate subgoal IDs rejected',()=>reject(mutate(p=>p.subgoals.push({...p.subgoals[0]})),'INVALID_SUBGOALS'));
 test('P32 unknown dependency rejected',()=>reject(mutate(p=>p.subgoals[0].dependsOn=['missing']),'INVALID_DAG_REFERENCE'));
 test('P33 self dependency rejected',()=>reject(mutate(p=>p.subgoals[0].dependsOn=['draft']),'INVALID_DAG_REFERENCE'));
-test('P34 cycle across two candidate subgoals rejected',()=>{const p=simple();p.subgoals[0].dependsOn=['review'];p.subgoals.push({id:'review',outcome:'Review',dependsOn:['draft'],deliverableIds:[]});reject(run(p),'CYCLIC_CANDIDATE_DAG');});
+test('P34 cycle across two candidate subgoals rejected',()=>{const p=simple();p.subgoals[0].dependsOn=['review'];p.subgoals.push({id:'review',outcome:'Review',dependsOn:['draft'],deliverableIds:[],sourceSlots:[],capabilityKinds:[],effectKinds:['LOCAL_ARTIFACT']});reject(run(p),'CYCLIC_CANDIDATE_DAG');});
 test('P35 unknown deliverable reference rejected',()=>reject(mutate(p=>p.subgoals[0].deliverableIds=['missing']),'INVALID_DAG_REFERENCE'));
 test('P36 deliverable without candidate subgoal rejected',()=>reject(mutate(p=>p.subgoals[0].deliverableIds=[]),'UNMAPPED_DELIVERABLE'));
 test('P37 duplicate subgoal dependency rejected',()=>{const p=mixed();p.subgoals[1].dependsOn=['analysis','analysis'];reject(run(p,intake(sourceRefs)),'INVALID_SUBGOALS');});
@@ -90,21 +93,21 @@ test('P50 valid correction claim on second turn is advisory only',()=>{const r=r
 test('P51 root UNKNOWN relation allowed',()=>{const p=simple();p.relationToPrior='UNKNOWN';assert.equal(run(p).status,'PROPOSAL_VALID');});
 test('P52 blocking uncertainty routes to clarification candidate',()=>{const p=simple();p.uncertainties=[{code:'MISSING_INPUT',question:'Which source?',blocking:true}];assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
 test('P53 nonblocking uncertainty does not automatically block',()=>{const p=simple();p.uncertainties=[{code:'OTHER',question:'Preferred color?',blocking:false}];assert.equal(run(p).status,'PROPOSAL_VALID');});
-test('P54 unknown effect routes to clarification even without uncertainty',()=>{const p=simple();p.effectClaims=[{kind:'UNKNOWN',description:'Effect not yet known'}];assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
-test('P55 unknown capability routes to clarification',()=>{const p=simple();p.capabilityNeeds=[{kind:'UNKNOWN',reason:'Tool not identified'}];assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
+test('P54 unknown effect routes to clarification even without uncertainty',()=>{const p=simple();setEffects(p,['UNKNOWN']);assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
+test('P55 unknown capability routes to clarification',()=>{const p=simple();setCapabilities(p,['UNKNOWN']);assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
 test('P56 unknown intent mode routes to clarification',()=>{const p=simple();p.intent.modes=['UNKNOWN'];assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
-test('P57 external send claim requires later policy review',()=>{const p=simple();p.effectClaims=[{kind:'EXTERNAL_SEND',description:'Send a message'}];assert.equal(run(p).status,'POLICY_REVIEW_REQUIRED');});
-test('P58 shared write claim requires later policy review',()=>{const p=simple();p.effectClaims=[{kind:'SHARED_WRITE',description:'Update shared doc'}];assert.equal(run(p).status,'POLICY_REVIEW_REQUIRED');});
-test('P59 destructive effect claim rejected by prototype',()=>{const p=simple();p.effectClaims=[{kind:'DESTRUCTIVE',description:'Delete data'}];reject(run(p),'DESTRUCTIVE_EFFECT_UNSUPPORTED');});
-test('P60 message send capability with local-only effect rejected',()=>{const p=simple();p.capabilityNeeds=[{kind:'MESSAGE_SEND',reason:'Send email'}];reject(run(p),'EFFECT_CAPABILITY_CONFLICT');});
-test('P61 message send capability with unknown effect requires clarification',()=>{const p=simple();p.capabilityNeeds=[{kind:'MESSAGE_SEND',reason:'Send email'}];p.effectClaims=[{kind:'UNKNOWN',description:'Need review'}];assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
-test('P62 connector write with read-only effect rejected',()=>{const p=simple();p.capabilityNeeds=[{kind:'CONNECTOR_WRITE',reason:'Update app'}];p.effectClaims=[{kind:'READ_ONLY',description:'Read only'}];reject(run(p),'EFFECT_CAPABILITY_CONFLICT');});
-test('P63 connector write with shared effect requires policy review',()=>{const p=simple();p.capabilityNeeds=[{kind:'CONNECTOR_WRITE',reason:'Update app'}];p.effectClaims=[{kind:'SHARED_WRITE',description:'Update shared app'}];assert.equal(run(p).status,'POLICY_REVIEW_REQUIRED');});
-test('P64 a risky effect plus blocking uncertainty clarifies first',()=>{const p=simple();p.effectClaims=[{kind:'EXTERNAL_SEND',description:'Send'}];p.uncertainties=[{code:'MISSING_RECIPIENT',question:'To whom?',blocking:true}];assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
+test('P57 external send claim requires later policy review',()=>{const p=simple();setEffects(p,['EXTERNAL_SEND']);assert.equal(run(p).status,'POLICY_REVIEW_REQUIRED');});
+test('P58 shared write claim requires later policy review',()=>{const p=simple();setEffects(p,['SHARED_WRITE']);assert.equal(run(p).status,'POLICY_REVIEW_REQUIRED');});
+test('P59 destructive effect claim rejected by prototype',()=>{const p=simple();setEffects(p,['DESTRUCTIVE']);reject(run(p),'DESTRUCTIVE_EFFECT_UNSUPPORTED');});
+test('P60 message send capability with local-only effect rejected',()=>{const p=simple();setCapabilities(p,['MESSAGE_SEND']);reject(run(p),'EFFECT_CAPABILITY_CONFLICT');});
+test('P61 message send capability with unknown effect requires clarification',()=>{const p=simple();p.capabilityNeeds=[{kind:'MESSAGE_SEND',reason:'Send email'}];setEffects(p,['UNKNOWN']);assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
+test('P62 connector write with read-only effect rejected',()=>{const p=simple();setCapabilities(p,['CONNECTOR_WRITE']);setEffects(p,['READ_ONLY']);reject(run(p),'EFFECT_CAPABILITY_CONFLICT');});
+test('P63 connector write with shared effect requires policy review',()=>{const p=simple();setCapabilities(p,['CONNECTOR_WRITE']);setEffects(p,['SHARED_WRITE']);assert.equal(run(p).status,'POLICY_REVIEW_REQUIRED');});
+test('P64 a risky effect plus blocking uncertainty clarifies first',()=>{const p=simple();setEffects(p,['EXTERNAL_SEND']);p.uncertainties=[{code:'MISSING_RECIPIENT',question:'To whom?',blocking:true}];assert.equal(run(p).status,'NEEDS_CLARIFICATION');});
 test('P65 frozen validated result cannot be changed by caller mutation',()=>{const p=simple();const r=run(p);p.deliverables[0].description='Mutated after validation';assert.equal(r.proposal.deliverables[0].description,'Editable study-plan template');assert.equal(Object.isFrozen(r.proposal.subgoals[0].dependsOn),true);assert.equal(Object.isFrozen(r.binding),true);});
-test('P66 every status explicitly denies policy authority',()=>{for(const p of [simple(),(()=>{const x=simple();x.effectClaims=[{kind:'EXTERNAL_SEND',description:'Send'}];return x;})(),(()=>{const x=simple();x.intent.modes=['UNKNOWN'];return x;})()])assert.equal(run(p).policyAuthority,'NONE');});
+test('P66 every status explicitly denies policy authority',()=>{for(const p of [simple(),(()=>{const x=simple();setEffects(x,['EXTERNAL_SEND']);return x;})(),(()=>{const x=simple();x.intent.modes=['UNKNOWN'];return x;})()])assert.equal(run(p).policyAuthority,'NONE');});
 test('P67 valid revision always invalidates previous approvals',()=>{const {a,b,p,q}=validatedPair();const r=assessGoalProposalRevision(p,q,a,b);assert.equal(r.status,'REVISION_REQUIRES_INTERPRETATION');assert.equal(r.invalidatePriorApprovals,true);assert.equal(r.recheckDependentPlan,true);});
-test('P68 changed effect claim reported but never authorized',()=>{const {a,b,p}=validatedPair();const q=run({...second(),effectClaims:[{kind:'EXTERNAL_SEND',description:'Send'}]},b);const r=assessGoalProposalRevision(p,q,a,b);assert.equal(r.effectClaimsChanged,true);assert.equal(r.policyAuthority,'NONE');});
+test('P68 changed effect claim reported but never authorized',()=>{const {a,b,p}=validatedPair();const x=second();setEffects(x,['EXTERNAL_SEND']);const q=run(x,b);const r=assessGoalProposalRevision(p,q,a,b);assert.equal(r.effectClaimsChanged,true);assert.equal(r.policyAuthority,'NONE');});
 test('P69 changed deliverable reported',()=>{const {a,b,p}=validatedPair();const x=second();x.deliverables[0].description='Revised template';const q=run(x,b);assert.equal(assessGoalProposalRevision(p,q,a,b).deliverablesChanged,true);});
 test('P70 same proposal wording in new turn still invalidates approvals',()=>{const {a,b,p}=validatedPair();const q=run(second(),b);assert.equal(assessGoalProposalRevision(p,q,a,b).invalidatePriorApprovals,true);});
 test('P71 cross-goal revision rejected',()=>{const {a,p}=validatedPair();const b=secondIntake({goalId:'goal-2'}),q=run(second(),b);reject(assessGoalProposalRevision(p,q,a,b),'INVALID_PROPOSAL_REVISION');});
@@ -117,11 +120,11 @@ test('P77 candidate DAG never becomes an execution graph',()=>{const r=run();ass
 test('P78 no model/provider or installed app is inferred from format hint',()=>{const r=run();assert.equal(r.proposal.deliverables[0].formatHint,'xlsx');assert.equal(Object.hasOwn(r,'connectorAvailable'),false);});
 test('P79 invalid capability type rejected',()=>reject(mutate(p=>p.capabilityNeeds[0].kind='SUPER_ADMIN'),'INVALID_CAPABILITY_NEEDS'));
 test('P80 invalid uncertainty boolean rejected',()=>reject(mutate(p=>p.uncertainties=[{code:'OTHER',question:'Unknown?',blocking:'yes'}]),'INVALID_UNCERTAINTIES'));
-test('P81 schema JSON is parseable, draft 2020-12 and closed at root',()=>{const schema=JSON.parse(readFileSync(new URL('./goal-proposal.schema.json',import.meta.url),'utf8'));assert.equal(schema.$schema,'https://json-schema.org/draft/2020-12/schema');assert.equal(schema.additionalProperties,false);assert.equal(schema.properties.schemaVersion.const,'g02-goal-proposal-v0.1');});
+test('P81 schema JSON is parseable, draft 2020-12 and closed at root',()=>{const schema=JSON.parse(readFileSync(new URL('./goal-proposal.schema.json',import.meta.url),'utf8'));assert.equal(schema.$schema,'https://json-schema.org/draft/2020-12/schema');assert.equal(schema.additionalProperties,false);assert.equal(schema.properties.schemaVersion.const,'g02-goal-proposal-v0.2');});
 test('P82 schema required keys and prototype match',()=>{const schema=JSON.parse(readFileSync(new URL('./goal-proposal.schema.json',import.meta.url),'utf8'));assert.deepEqual([...schema.required].sort(),Object.keys(simple()).sort());assert.equal(schema.properties.subgoals.maxItems,12);assert.equal(schema.properties.deliverables.maxItems,8);assert.equal(schema.properties.sourceSlots.maxItems,24);});
 test('P83 schema enums mirror validator effect/capability examples',()=>{const schema=JSON.parse(readFileSync(new URL('./goal-proposal.schema.json',import.meta.url),'utf8'));assert.deepEqual(schema.properties.effectClaims.items.properties.kind.enum,['READ_ONLY','LOCAL_ARTIFACT','SHARED_WRITE','EXTERNAL_SEND','DESTRUCTIVE','UNKNOWN']);assert.equal(schema.properties.capabilityNeeds.items.additionalProperties,false);});
 test('P84 non-JSON function-valued nested field rejected',()=>reject(mutate(p=>p.deliverables[0].formatHint=()=>{}),'INVALID_DELIVERABLES'));
 test('P85 huge intent summary rejected',()=>reject(mutate(p=>p.intent.summary='x'.repeat(401)),'INVALID_INTENT'));
 test('P86 invalid extra nested effect authority rejected',()=>reject(mutate(p=>p.effectClaims[0].approved=true),'INVALID_EFFECT_CLAIMS'));
 test('P87 effect claim array cannot be empty',()=>reject(mutate(p=>p.effectClaims=[]),'INVALID_EFFECT_CLAIMS'));
-test('P88 source slot 0 bound to actual source is structurally valid only',()=>{const p=simple();p.sourceSlots=[0];const r=run(p,intake([{kind:'upload',ref:'handle-1'}]));assert.equal(r.status,'PROPOSAL_VALID');assert.equal(r.policyAuthority,'NONE');});
+test('P88 source slot 0 bound to actual source is structurally valid only',()=>{const p=simple();p.sourceSlots=[0];p.subgoals[0].sourceSlots=[0];const r=run(p,intake([{kind:'upload',ref:'handle-1'}]));assert.equal(r.status,'PROPOSAL_VALID');assert.equal(r.policyAuthority,'NONE');});

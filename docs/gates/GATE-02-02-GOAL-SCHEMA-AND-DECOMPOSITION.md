@@ -1,7 +1,7 @@
 # G02.02 — Versioned GoalContract Proposal, outcome decomposition and correction semantics
 
 **Date:** 2026-11-10
-**State:** HARDENED v0.2 / DESIGN PROPOSED / DETERMINISTIC PROTOTYPE VERIFIED / USER SIGNOFF PENDING
+**State:** HARDENED v0.2 / DESIGN_ACCEPTED BY OWNER / DETERMINISTIC PROTOTYPE VERIFIED / PRODUCTION PENDING
 **Predecessor:** [G02.01 design ACCEPTED](GATE-02-01-INPUT-NORMALIZATION.md), [ADR-0005](../decisions/ADR-0005-g02-01-normalization-and-turn-precedence.md).
 **Decision:** [ADR-0006](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md) — PROPOSED.
 **Contract:** [goal-proposal.schema.json](../../tools/gate02/goal-proposal.schema.json).
@@ -154,4 +154,9 @@ Required tests: simple goal, mixed-domain DAG, duplicate/unknown/cyclic dependen
 
 **Figma:** [Editable page 05](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2) updated to v0.2, with per-subgoal mapping and 197-test CI evidence.
 
-**Recommended owner decision:** review **hardened v0.2 design** as a **candidate design baseline only**. Do not approve G02.03, production readiness, real tool execution or semantic correctness on this evidence.
+**Review outcome:** Owner approved **hardened v0.2 design only** after this critical review, recorded in ADR-0006. G02.03 may begin research; no production readiness, real tool execution or semantic correctness is approved.
+
+
+## 11. Owner signoff — 2026-11-10
+
+The owner responded **"i approve next"** to the request to approve G02.02 hardened v0.2 and proceed. **Design baseline ACCEPTED**, including the critical review amendments and 197-test evidence. This does not certify semantic interpretation, security, integration or operational impact. [ADR-0006 acceptance record](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md) is authoritative. [G02.03 prompt architecture](GATE-02-03-PROMPT-ARCHITECTURE-RESEARCH.md) is now IN_RESEARCH, with its own PROPOSED ADR-0007; G02.04 remains blocked.

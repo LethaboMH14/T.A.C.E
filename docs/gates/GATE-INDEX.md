@@ -1,39 +1,35 @@
-# T.A.C.E — Numbered gate registry
+# T.A.C.E numbered gate registry — v0.2
 
-**Last reviewed:** 2026-11-10. **Protocol:** only one gate is under active deep review at a time.
+**Date:** 2026-11-10. **Product scope:** universal goal-to-execution engine; **judged deployment:** education domain pack.
 
-| Gate | Formal title | Status | Dependency | Gate output |
-| --- | --- | --- | --- | --- |
-| G01 | Education Goal & Product Outcome | **IN_RESEARCH** | none | approved job, user, inputs, outputs and educational success criteria |
-| G02 | Prompt Engineering & Intent Contract | BLOCKED | G01 approved | validated goal contract and ambiguity policy |
-| G03 | Context Engineering & Evidence Retrieval | BLOCKED | G02 approved | trusted source context compiler |
-| G04 | Capability Planning & Agent Registry | BLOCKED | G03 approved | verified typed task DAG and roster |
-| G05 | Graph Runtime, State & Recovery | BLOCKED | G04 approved | transition and checkpoint model |
-| G06 | Swarm, Role Protocols & Handoffs | BLOCKED | G05 approved | role contracts, dependencies and parallelism |
-| G07 | Tool/Action Engineering & Permissions | BLOCKED | G06 approved | bounded adapters, receipts, approvals |
-| G08 | Memory Lifecycle & Knowledge Governance | BLOCKED | G07 approved | scoped working/episodic/semantic/procedural memory |
-| G09 | Independent Verification & Self-Correction | BLOCKED | G08 approved | validators, review and bounded repair |
-| G10 | Mission Console & User Experience | BLOCKED | G09 approved | traceable workflow and artifact UI |
-| G11 | Evaluation, Security, Privacy & Operations | BLOCKED | G10 approved | reproducible safety and quality evaluation |
-| G12 | Integrated Educational Outcome & Delivery | BLOCKED | G11 approved | verified end-to-end demo and evidence |
+| Gate | Name | Current state | Exit artifact |
+| --- | --- | --- | --- |
+| G01 | **Universal Goal Boundary + EdTech Proof Case** | **IN_RESEARCH** | accepted goal classes, output semantics, authority, objective proof, selected EdTech case |
+| G02 | Prompt Engineering and Adaptive Clarification | BLOCKED | structured goal interpretation and clarity contract |
+| G03 | Context Engineering and Retrieval | BLOCKED | trusted context compiler / evidence scopes |
+| G04 | Skill, Tool and Agent Capability Planning | BLOCKED | feasible dynamic roster / task DAG |
+| G05 | Graph Orchestration, State and Recovery | BLOCKED | validated dependencies, retries, stop/ask policy |
+| G06 | Swarm Communications and Handoffs | BLOCKED | typed agent messages and parallelism |
+| G07 | Bounded Tools, API Actions and Permissions | BLOCKED | action receipts, approvals, verified side effects |
+| G08 | Short- and Long-Term Memory | BLOCKED | provenance- and access-scoped memory lifecycle |
+| G09 | Independent Review and Self-Correction | BLOCKED | validation/revision evidence |
+| G10 | Editable Mission Console and Visualization | BLOCKED | reliable event-backed graph editor and artifact panel |
+| G11 | Evaluation, Privacy and Operational Safety | BLOCKED | benchmark and negative-test evidence |
+| G12 | End-to-End Integration and Judged Delivery | BLOCKED | deployed verified education outcome |
 
-**Gate states:** NOT_STARTED → RESEARCH → DRAFTED → REVIEWED → APPROVED → IMPLEMENTED → VERIFIED. A gate can be BLOCKED; later evidence can return it to REVIEW without overwriting prior decisions.
+## Item numbering
 
-## Numbering convention
+- Gate: **G01**; items: **G01.01–G01.15**.
+- Decision: **G01-D01**; source: **G01-S01**; test: **G01-T01**; output: **G01-O01**.
+- Every item has a formal scope, owner, inputs/outputs, alternatives, dependencies, tests and approval gate in the detailed dossier.
+- **Status sequence:** OPEN → IN_RESEARCH → REVIEWED → APPROVED → IMPLEMENTED → VERIFIED. Blocked later gates remain conceptual placeholders. Decisions changing earlier design create a superseding ADR.
 
-- **G01** = gate.
-- **G01.01** = first research/design item within the gate; **G01.12** = approval and handoff.
-- **G01-D01** = gate-specific design decision, to be recorded in an ADR.
-- **G01-T01** = test/acceptance case.
-- **G01-S01** = evidence/source record.
-- **G01-O01** = output artifact.
-- Link every implementation file, test, design element and acceptance note to its gate and item ID.
+## Links
 
-## Gate documents
+- [G01 revised detailed research](GATE-01-EDUCATION-GOAL.md)
+- [G01 judge alignment](GATE-01-judge-alignment.md)
+- [Original v0.1 education research preserved](../archive/GATE-01-EDUCATION-GOAL-v0.1.md)
+- [Scope decision ADR-0002](../decisions/ADR-0002-universal-engine-education-demo.md)
+- [Editable architecture map](../../diagrams/TACE-Architecture.drawio)
 
-- [G01 research dossier](GATE-01-EDUCATION-GOAL.md)
-- [Editable diagram source](../../diagrams/TACE-Architecture.drawio) — two pages: 00 overview and 01 education goal
-- [Overview Mermaid diagram](../../diagrams/TACE-system-gates.mmd)
-- [Detailed G01 Mermaid diagram](../../diagrams/GATE-01-education-goal.mmd)
-
-**Progress policy:** never start G02 design until G01 has been explicitly approved and ADR-0002 is committed. High-level placeholder names on the overview are navigation, not specifications.
+**G01 remains IN_RESEARCH. Do not begin G02 detailed design until the goal boundary and an EdTech flagship are formally reviewed and approved.**

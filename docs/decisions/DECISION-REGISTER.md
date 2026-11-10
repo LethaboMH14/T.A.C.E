@@ -42,6 +42,8 @@
 | D-034 | G01 universal outcome boundary and Education Recovery Mission reference fixture | **DESIGN_ACCEPTED** | ADR-0004 and G01 final spec |
 | D-035 | G01 fail-closed boundary spike, local 16/16 tests | **LIMITED TESTED PROTOTYPE** | tools/gate01; no auth or effects |
 | D-036 | Gate 02 prompt/intent/clarification research may begin | **IN_RESEARCH** | G02 charter and issue #3 |
+| D-037 | G02.01 hardened dual-text intake, server goal lineage and restricted interpreter view | **DESIGN_ACCEPTED / RUNTIME_PENDING** | Owner approval ADR-0005; 54/54 deterministic tests verified |
+| D-038 | G02.02 strict versioned goal proposal, candidate DAG, source slots and uncertainty/effect claims | **PROPOSED / USER_REVIEW_PENDING** | ADR-0006; 142/142 combined deterministic tests; G07 security pending |
 
 ## Review rule
 

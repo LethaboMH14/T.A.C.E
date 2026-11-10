@@ -2,9 +2,11 @@
 
 **Status:** Proposal for design review. **Version:** 0.1. **Date:** 2026-11-10.
 
+> **v0.2 scope refinement — ADR-0002:** T.A.C.E is a domain-agnostic goal-to-execution engine. Education examples below are proposed Colleague Zero deployments, not a general engine restriction. Gate 01 now defines any-goal boundaries, completion and capability semantics; Gate 02 will define adaptive prompt interpretation only after G01 approval. See [Gate 01](gates/GATE-01-EDUCATION-GOAL.md).
+
 ## Product intent
 
-T.A.C.E will be an education-focused autonomous digital colleague. Its visible value is **finished, verified educational work**. The user provides an outcome, not a sequence of steps. The colleague must interpret it, locate relevant materials, choose agents, produce an action plan, use tools, check work, repair mistakes, and deliver artifacts with evidence. It must not claim it completed an action it merely recommended or drafted.
+T.A.C.E will be a domain-agnostic autonomous goal-to-execution engine, demonstrated first as an education-focused digital colleague. Its visible value is **finished, verified educational work**. The user provides an outcome, not a sequence of steps. The colleague must interpret it, locate relevant materials, choose agents, produce an action plan, use tools, check work, repair mistakes, and deliver artifacts with evidence. It must not claim it completed an action it merely recommended or drafted.
 
 ### Sample north-star request
 

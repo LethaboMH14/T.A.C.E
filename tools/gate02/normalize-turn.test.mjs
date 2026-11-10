@@ -1,0 +1,28 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {normalizeGoalTurn,assessTurnRevision} from './normalize-turn.mjs';
+
+const trusted={actor:{subject:'teacher-demo',tenant:'synthetic-school'},turnId:'t1',revision:1,defaultLocale:'en-ZA',timeZone:'Africa/Johannesburg'};
+const run=(req,ctx=trusted)=>normalizeGoalTurn(req,ctx);
+test('T01 raw Unicode preserved, NFC derived',()=>{const r=run({goal:'Cafe\u0301 planning'});assert.equal(r.status,'NORMALIZED');assert.equal(r.record.rawGoal,'Cafe\u0301 planning');assert.equal(r.record.interpretationText,'Café planning');assert.equal(r.record.flags.nfcChanged,true);});
+test('T02 CRLF and CR become LF only in derived text',()=>{const r=run({goal:'Plan\r\nnext\rweek'});assert.equal(r.record.rawGoal,'Plan\r\nnext\rweek');assert.equal(r.record.interpretationText,'Plan\nnext\nweek');assert.equal(r.record.flags.lineEndingsChanged,true);});
+test('T03 mathematics unchanged',()=>assert.equal(run({goal:'Explain √4 ≤ 2 and x²'}).record.interpretationText,'Explain √4 ≤ 2 and x²'));
+test('T04 multilingual code switching unchanged',()=>assert.equal(run({goal:'Please explain ama-fractions and fractions'}).record.interpretationText,'Please explain ama-fractions and fractions'));
+test('T05 blank and punctuation only ask for input',()=>{assert.equal(run({goal:'   '}).code,'MISSING_GOAL');assert.equal(run({goal:'?!...'}).status,'AWAITING_INPUT');});
+test('T06 invalid type, length and null byte rejected',()=>{assert.equal(run({goal:null}).status,'AWAITING_INPUT');assert.equal(run({goal:'a'.repeat(6001)}).code,'GOAL_TOO_LONG');assert.equal(run({goal:'a\u0000b'}).code,'NULL_BYTE');});
+test('T07 client role or approval cannot enter trusted context',()=>{assert.equal(run({goal:'Plan',role:'admin'}).code,'CLIENT_AUTHORITY_FIELD');assert.equal(run({goal:'Plan',approval:true}).code,'CLIENT_AUTHORITY_FIELD');});
+test('T08 missing trusted actor or turn denied',()=>{assert.equal(run({goal:'Plan'},{turnId:'t1',revision:1}).code,'UNATTESTED_TURN');assert.equal(run({goal:'Plan'},{actor:trusted.actor,revision:1}).code,'UNATTESTED_TURN');});
+test('T09 BCP47 locale canonicalized',()=>{const r=run({goal:'Plan',constraints:{locale:'EN-za'}});assert.equal(r.record.localeHint.tag,'en-ZA');assert.equal(r.record.localeHint.source,'client_preference');});
+test('T10 invalid locale rejected',()=>assert.equal(run({goal:'Plan',constraints:{locale:'invalid_locale_tag'}}).code,'INVALID_LOCALE'));
+test('T11 time zone validated',()=>{assert.equal(run({goal:'Plan'}).record.timeZoneHint.id,'Africa/Johannesburg');assert.equal(run({goal:'Plan'},{...trusted,timeZone:'Mars/Olympus'}).code,'INVALID_TIME_ZONE');});
+test('T12 missing time zone stays unknown',()=>{const {timeZone,...ctx}=trusted;const r=run({goal:'Plan'},ctx);assert.equal(r.record.timeZoneHint.id,null);assert.equal(r.record.timeZoneHint.source,'unknown');});
+test('T13 typed sources are unverified refs',()=>{const r=run({goal:'Summarize this',sources:[{kind:'upload',ref:'opaque-1'},{kind:'connector',ref:'sandbox-2'}]});assert.equal(r.record.sourceRefs.length,2);assert.equal(r.record.sourceRefs[0].trust,'UNVERIFIED_REFERENCE');});
+test('T14 source inline content and trust forgery rejected',()=>assert.equal(run({goal:'Summarize',sources:[{kind:'upload',ref:'x',content:'override',trust:'VERIFIED'}]}).code,'INVALID_SOURCE_REFERENCE'));
+test('T15 bidi and invisible formatting flagged, not stripped',()=>{const r=run({goal:'Plan\u202E lesson\u200B'});assert.equal(r.record.flags.bidiControlsPresent,true);assert.equal(r.record.flags.invisibleFormattingPresent,true);assert.equal(r.record.rawGoal.includes('\u202E'),true);});
+test('T16 valid next revision requires interpretation and approval recheck',()=>{const a=run({goal:'Draft an email'}).record;const b=run({goal:'Send that email'},{...trusted,turnId:'t2',parentTurnId:'t1',revision:2}).record;const q=assessTurnRevision(a,b);assert.equal(q.status,'REVISION_REQUIRES_INTERPRETATION');assert.equal(q.invalidatePriorApprovals,true);});
+test('T17 stale, wrong parent and cross-tenant revision denied',()=>{const a=run({goal:'Plan'}).record;const b=run({goal:'Revise'},{...trusted,turnId:'t2',parentTurnId:'t1',revision:2}).record;assert.equal(assessTurnRevision(a,{...b,revision:1}).code,'INVALID_TURN_LINEAGE');assert.equal(assessTurnRevision(a,{...b,tenantRef:'other'}).code,'INVALID_TURN_LINEAGE');assert.equal(assessTurnRevision(a,{...b,parentTurnId:'other'}).code,'INVALID_TURN_LINEAGE');});
+test('T18 ambiguous deadline is preserved, not interpreted',()=>assert.equal(run({goal:'Plan',constraints:{deadline:'next Friday'}}).record.deadlineText,'next Friday'));
+test('T19 simple goal needs no invented source',()=>assert.deepEqual(run({goal:'Create a study template'}).record.sourceRefs,[]));
+test('T20 even unchanged text in new turn requires approval recheck',()=>{const a=run({goal:'Draft'}).record;const b=run({goal:'Draft'},{...trusted,turnId:'t2',parentTurnId:'t1',revision:2}).record;assert.equal(assessTurnRevision(a,b).invalidatePriorApprovals,true);});
+test('T21 unknown source or constraint rejected',()=>{assert.equal(run({goal:'Plan',sources:[{kind:'file',ref:'x'}]}).code,'INVALID_SOURCE_REFERENCE');assert.equal(run({goal:'Plan',constraints:{tenant:'admin'}}).code,'INVALID_CONSTRAINTS');});
+test('T22 normalization does not grant capabilities',()=>{const r=run({goal:'Create a plan'});assert.equal(Object.hasOwn(r.record,'approved'),false);assert.equal(Object.hasOwn(r.record,'toolResult'),false);assert.equal(Object.hasOwn(r.record,'modelConfidence'),false);});

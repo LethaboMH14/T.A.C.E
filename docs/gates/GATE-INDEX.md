@@ -47,4 +47,4 @@
 
 ## G01 researched problem definition
 
-[Primary umbrella education problem statement and source audit](GATE-01-PROBLEM-STATEMENT.md) describes the information-to-action gap across educators, programmes and learners without hardcoding any single task. Sources and proof metrics are explicit; no time savings, human interviews or educational improvement have yet been established. **Status: research draft, not sign-off.**
+[Primary umbrella education problem statement and source audit](GATE-01-PROBLEM-STATEMENT.md) describes the information-to-action gap across educators, programmes and learners without hardcoding any single task. Sources and proof metrics are explicit; no time savings, human interviews or educational improvement have yet been established. **Status: formal/simple problem wording APPROVED (ADR-0003); the overall G01 gate is still IN_RESEARCH.**

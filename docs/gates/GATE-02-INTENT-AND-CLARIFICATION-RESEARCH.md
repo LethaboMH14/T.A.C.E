@@ -69,3 +69,15 @@ Three editable pages were created:
 **Status:** editable *design concepts only*, not a functioning interface or approved Gate 02 architecture. Model selection, library adoption, memory vendors, schema, and real tool access are pending the active deep research and G02 review. Security controls remain assigned to G07 and testing to G11. Preserve the original [Gate 01 FigJam board](https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi) as the earlier architecture reference.
 
 **Design synchronization rule (proposed):** Each accepted architectural change should update its source-of-truth Markdown/ADR and the relevant editable Figma page. The diagrams must display the current status (proposed/accepted/implemented/tested) and should not be treated as proof of implementation.
+
+## Numbered execution ledger (2026-11-10)
+
+**G02.01 — RESEARCHED / RECOMMENDATION PROPOSED / UNIT SPIKE COMMITTED / USER APPROVAL PENDING.**
+
+- [G02.01 detailed alternatives, architecture, edge cases and test plan](GATE-02-01-INPUT-NORMALIZATION.md)
+- [ADR-0005 proposed decision](../decisions/ADR-0005-g02-01-normalization-and-turn-precedence.md)
+- [Deterministic normalization code](../../tools/gate02/normalize-turn.mjs) and [22 test assertions](../../tools/gate02/normalize-turn.test.mjs)
+- [GitHub Actions intake test workflow](../../.github/workflows/gate02-intake.yml) — **CI outcome must be verified; do not infer success from a committed workflow**
+- [Figma editable G02.01 page](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=6-2)
+- G02.02–G02.15 remain **NOT REVIEWED / NOT IMPLEMENTED**. G02 overall remains **IN_RESEARCH**.
+- **Known limitation:** G02.01 is a deterministic intake spike with caller-supplied test metadata, not real authentication, semantic LLM interpretation, approved skills, secure parser, runtime or verified business impact.

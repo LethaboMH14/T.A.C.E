@@ -1,7 +1,7 @@
 # GATE 01 — Universal Goal Boundary and Education Proof Case
 
-**Version:** v0.2, 2026-11-10  
-**Status:** IN RESEARCH — not approved  
+**Version:** G01 v1.0, 2026-11-10  
+**Status:** **DESIGN_COMPLETE under ADR-0004** — runtime implementation and empirical evidence NOT approved  
 **Scope decision:** [ADR-0002](../decisions/ADR-0002-universal-engine-education-demo.md)  
 **Previous education-first research:** [Archived v0.1](../archive/GATE-01-EDUCATION-GOAL-v0.1.md)
 
@@ -160,3 +160,8 @@ See [the full evidence-backed problem statement, public pitch variants, mappings
 **Formal and simple problem wording is approved** by the user and preserved exactly in [ADR-0003](../decisions/ADR-0003-education-problem-statement-approval.md). The [source-backed problem dossier](GATE-01-PROBLEM-STATEMENT.md) now explicitly connects teacher workload, learning needs, language access and interoperability to plausible **risk-labelled** downstream consequences, separately from T.A.C.E's untested solution hypothesis. The [Gate 01 problem-to-goal architecture](GATE-01-PROBLEM-ARCHITECTURE.md) maps evidence and actors to any-goal intake, file/connector permission boundaries, an illustrative outcome envelope and successor gate responsibilities. [Editable FigJam](https://www.figma.com/board/WObVafIxNSBwRssWhTk5wi) and [editable diagrams.net source](../../diagrams/TACE-Architecture.drawio) are the visual source maps.
 
 **IMPORTANT:** This approval concerns **problem framing**, not the full Gate 01 completion. User has not yet selected a final flagship, data fixtures, authenticated connections or specific acceptance tests. G01 remains IN_RESEARCH; G02 BLOCKED.
+
+
+## Final G01 requirements and approved design handoff
+
+This previous evolving draft is superseded as the current Gate 01 **design baseline** by [GATE-01-FINAL-SPECIFICATION.md](GATE-01-FINAL-SPECIFICATION.md), signed off in [ADR-0004](../decisions/ADR-0004-g01-requirements-signoff-and-g02-handoff.md). The initial education recovery case is now a synthetic **reference scenario**; it does not restrict any-goal admission or bind the engine to grade/subject. The [security threat model](GATE-01-SECURITY-THREAT-MODEL.md), [impact evaluation plan](GATE-01-IMPACT-EVALUATION-PLAN.md), [48 edge cases](GATE-01-EDGE-CASE-MATRIX.md) and [local admission tests](../checks/G01-BOUNDARY-TEST-20261110.md) specify what downstream work must build and test. **Gate 02 IN_RESEARCH**. No production security or educational benefit has been demonstrated.

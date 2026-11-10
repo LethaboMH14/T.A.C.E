@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LethaboMH14/T.A.C.E/blob/main/tools/gate02/goal-proposal.schema.json",
+  "title": "T.A.C.E G02.02 GoalContractProposal v0.1 (UNTRUSTED MODEL PROPOSAL)",
+  "description": "Provider-neutral bounded proposal; never an approval, verified result or executable plan. Server binding is deliberately excluded.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "g02-goal-proposal-v0.1"
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "modes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "ANALYZE",
+              "TRANSFORM",
+              "COORDINATE",
+              "COMMUNICATE",
+              "UNKNOWN"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 4
+        }
+      },
+      "required": [
+        "summary",
+        "modes"
+      ]
+    },
+    "relationToPrior": {
+      "type": "string",
+      "enum": [
+        "NEW_GOAL",
+        "REFINEMENT",
+        "CORRECTION",
+        "UNKNOWN"
+      ]
+    },
+    "deliverables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,31}$",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          },
+          "formatHint": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "formatHint"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 8
+    },
+    "subgoals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,31}$",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "outcome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_-]{0,31}$",
+              "minLength": 1,
+              "maxLength": 32
+            },
+            "minItems": 0,
+            "maxItems": 11
+          },
+          "deliverableIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_-]{0,31}$",
+              "minLength": 1,
+              "maxLength": 32
+            },
+            "minItems": 0,
+            "maxItems": 8
+          }
+        },
+        "required": [
+          "id",
+          "outcome",
+          "dependsOn",
+          "deliverableIds"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 12
+    },
+    "sourceSlots": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 23
+      },
+      "minItems": 0,
+      "maxItems": 24
+    },
+    "capabilityNeeds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "READ_SOURCE",
+              "WRITE_ARTIFACT",
+              "SEARCH_PUBLIC",
+              "CONNECTOR_READ",
+              "CONNECTOR_WRITE",
+              "MESSAGE_DRAFT",
+              "MESSAGE_SEND",
+              "SCHEDULING",
+              "UNKNOWN"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        },
+        "required": [
+          "kind",
+          "reason"
+        ]
+      },
+      "minItems": 0,
+      "maxItems": 12
+    },
+    "effectClaims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "READ_ONLY",
+              "LOCAL_ARTIFACT",
+              "SHARED_WRITE",
+              "EXTERNAL_SEND",
+              "DESTRUCTIVE",
+              "UNKNOWN"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        },
+        "required": [
+          "kind",
+          "description"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 8
+    },
+    "acceptanceCriteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,31}$",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "deliverableId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,31}$",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "check": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "ARTIFACT_REOPEN",
+              "SCHEMA_VALIDATION",
+              "SOURCE_CROSSCHECK",
+              "SCHEDULE_CONFLICT_CHECK",
+              "HUMAN_REVIEW",
+              "OTHER"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "deliverableId",
+          "check",
+          "method"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 16
+    },
+    "uncertainties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "MISSING_INPUT",
+              "AMBIGUOUS_REFERENCE",
+              "UNRESOLVED_TIME",
+              "MISSING_RECIPIENT",
+              "UNSUPPORTED_FORMAT",
+              "UNKNOWN_EFFECT",
+              "OTHER"
+            ]
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          },
+          "blocking": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "question",
+          "blocking"
+        ]
+      },
+      "minItems": 0,
+      "maxItems": 12
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "intent",
+    "relationToPrior",
+    "deliverables",
+    "subgoals",
+    "sourceSlots",
+    "capabilityNeeds",
+    "effectClaims",
+    "acceptanceCriteria",
+    "uncertainties"
+  ]
+}

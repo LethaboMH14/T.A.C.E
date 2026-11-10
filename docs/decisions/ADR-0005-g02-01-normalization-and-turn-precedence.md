@@ -1,7 +1,7 @@
 # ADR-0005 — G02.01 raw preservation, NFC interpretation and revisioned user turns
 
 **Date:** 2026-11-10
-**Status:** PROPOSED — USER REVIEW PENDING, NOT ACCEPTED
+**Status:** **ACCEPTED — G02.01 DESIGN BASELINE ONLY; NOT PRODUCTION SECURITY OR RUNTIME APPROVAL**
 **Scope:** G02.01 input normalization and turn lineage only.
 **Dossier:** [G02.01](../gates/GATE-02-01-INPUT-NORMALIZATION.md).
 
@@ -34,12 +34,12 @@ Positive: auditable raw evidence, canonical comparison, stable provenance, low v
 
 Limited prototype under [tools/gate02](../../tools/gate02/), deterministic unit tests and CI. This does not test LLM interpretation, actual auth, file safety or integration. See the G02.01 dossier and pending G07/G11 work.
 
-**Approval required before marking ACCEPTED and beginning G02.02.**
+**Approval received on 2026-11-10 for the hardened G02.01 v0.2 design baseline; G02.02 may begin.**
 
 
 ## Critical review amendment — v0.2, 2026-11-10
 
-**Status: HARDENED PROPOSAL — OWNER APPROVAL PENDING.**
+**Historical review status before owner approval: HARDENED PROPOSAL.**
 
 The original design omitted stable goal-scoped revision identity, had permissive source handles, accepted some explicit nulls as absent, lost client budget hints and lacked a restricted interpreter projection. These were defects in a research prototype, not in a deployed production service.
 
@@ -47,4 +47,11 @@ The original design omitted stable goal-scoped revision identity, had permissive
 
 **Verified test evidence:** https://github.com/LethaboMH14/T.A.C.E/actions/runs/42867607839 — GitHub Actions success, 54/54 deterministic tests at commit 4c41e29ba4862b23a8e2443b42052b4208626ca4.
 
-**Unresolved P0:** real server authentication, atomic event-ledger replay and concurrency protection, source ownership, authorization, privacy-safe storage and audit. **Not yet approved.**
+**Unresolved P0:** real server authentication, atomic event-ledger replay and concurrency protection, source ownership, authorization, privacy-safe storage and audit. **At time of the critical review, approval was still pending; see accepted design decision below.**
+
+
+## Owner decision — ACCEPTED DESIGN, 2026-11-10
+
+The project owner explicitly approved the **hardened G02.01 design** and authorized beginning G02.02 in numbered order. **Decision accepted:** versioned internal intake v0.2, exact decoded raw goal preservation, NFC+LF interpretation, goal-scoped trusted lineage, bounded opaque source handles, locale/time/budget hints, and a restricted allowlisted model projection. **Verification:** 54/54 deterministic tests passed in [GitHub Actions run 42867607839](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42867607839). Figma page 04 records the same architecture.
+
+**Acceptance scope is design-only.** No claim of production authentication, atomic replay prevention, secure source resolution, personal-data protection, POPIA compliance, prompt-injection immunity, LLM accuracy, approval enforcement, external actions, or universal execution. G03/G07/G08/G11 implementation and security gates remain open. G02.02 is authorized for **research/prototype**, not automatically approved.

@@ -1,7 +1,7 @@
 # G02.02 — Versioned GoalContract Proposal, outcome decomposition and correction semantics
 
 **Date:** 2026-11-10
-**State:** IN_RESEARCH / DESIGN PROPOSED / DETERMINISTIC PROTOTYPE IMPLEMENTED AND TESTED / USER SIGNOFF PENDING
+**State:** HARDENED v0.2 / DESIGN PROPOSED / DETERMINISTIC PROTOTYPE VERIFIED / USER SIGNOFF PENDING
 **Predecessor:** [G02.01 design ACCEPTED](GATE-02-01-INPUT-NORMALIZATION.md), [ADR-0005](../decisions/ADR-0005-g02-01-normalization-and-turn-precedence.md).
 **Decision:** [ADR-0006](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md) — PROPOSED.
 **Contract:** [goal-proposal.schema.json](../../tools/gate02/goal-proposal.schema.json).
@@ -34,11 +34,11 @@ G02.01 supplies a normalized intake and an **allowlisted interpreter view**. G02
 ## 3. Proposed data contract
 
 The **model-side** GoalContractProposal contains *only*:
-- `schemaVersion`: exactly `g02-goal-proposal-v0.1`.
+- `schemaVersion`: exactly `g02-goal-proposal-v0.2`.
 - `intent`: concise summary plus 1–4 modes (CREATE, ANALYZE, TRANSFORM, COORDINATE, COMMUNICATE, UNKNOWN); UNKNOWN may not mix with known modes.
 - `relationToPrior`: NEW_GOAL, REFINEMENT, CORRECTION or UNKNOWN — **model's claim, not verified fact**. Root turns require NEW_GOAL or UNKNOWN; a new goal on an existing goalId must be re-routed by a trusted gateway.
 - `deliverables`: 1–8 named outcome descriptions with format hints; format hint **does not imply supported format or connected app**.
-- `subgoals`: 1–12 candidate outcome nodes with IDs, outcome descriptions, `dependsOn` and `deliverableIds`. References must exist, be unique and form a DAG; every deliverable must be covered. These are **not executable tasks or agent assignments**.
+- `subgoals`: 1–12 candidate outcome nodes with IDs, outcome descriptions, `dependsOn`, `deliverableIds`, `sourceSlots`, `capabilityKinds` and `effectKinds`. References must exist, be unique and form a DAG; every deliverable must be covered. These are **not executable tasks or agent assignments**.
 - `sourceSlots`: 0–24 unique indices pointing to G02.01 source descriptors, not source content or handles. A slot is not an authorization grant.
 - `capabilityNeeds`: 0–12 proposed kinds and reasons, never a declaration of actual installed tools.
 - `effectClaims`: 1–8 proposed effect kinds and reasons (READ_ONLY, LOCAL_ARTIFACT, SHARED_WRITE, EXTERNAL_SEND, DESTRUCTIVE, UNKNOWN). **Never an authorization classification**. Destructive claims are rejected by this spike; unknown effects require clarification; consequential effects require later policy review.
@@ -125,3 +125,33 @@ Required tests: simple goal, mixed-domain DAG, duplicate/unknown/cyclic dependen
 **Open issues:** The validator is hand-written and the JSON Schema is not independently evaluated by a full schema engine; a model may omit or misclassify real effects; the G02.01 intake fixture is caller supplied and not authenticated; revision comparison is not atomic; source slots do not prove ownership; no real prompt/LLM or multilingual accuracy evaluation. All are later gates' acceptance requirements.
 
 **Decision:** ADR-0006 remains **PROPOSED** pending owner review. G02.03 must not begin without that approval.
+
+## 10. Critical review — hardened G02.02 v0.2 (2026-11-10)
+
+**Owner requested a critical review, not acceptance.** The original 88 G02.02 tests passed, but several cross-field and semantic risks were not covered. This review supersedes the v0.1 recommendation while preserving its historical evidence. [ADR-0006](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md) remains **PROPOSED**, and G02.03 remains **BLOCKED**.
+
+### Defects, corrections, evidence and limitations
+
+| ID | Severity | Original weakness | Hardened v0.2 change | Evidence / residual risk |
+| --- | --- | --- | --- | --- |
+| R01 | P0 | Model could attach a consequential effect to one subgoal and a risky capability to another, bypassing a global consistency check | Each subgoal now explicitly lists `effectKinds`, `capabilityKinds` and `sourceSlots`; cross-check every node and global mapping; fail on send/write capability inconsistencies | P97–P110. **Still model claims only; G07 must independently classify actual tool effects** |
+| R02 | P0 | Revision comparator checked selected binding fields but not the whole result snapshot; forged status/order/policy flags could survive | Recompute and deep-compare both canonical validated results, including code, status, candidate order and binding | P116–P123. No server ledger, cryptographic signing or replay protection |
+| R03 | P1 | Same turn metadata could be presented with altered raw goal, source handles or budget | Require exact G02.01 v0.2 intake record shape and raw/NFC/flag consistency; bind an internal SHA-256 fingerprint over canonical intake fields | P133–P143. Fingerprint is **not a MAC**; an attacker controlling input can recompute it; G07 must authenticate/persist events |
+| R04 | P1 | JSON Schema and JS validator disagreed on Unicode string length (code points vs UTF-16 units), uniqueness and hidden formatting | Count code points, reject unpaired surrogates and bidi control chars, annotate safe patterns, enforce unique simple arrays | P89–P94, P127–P128. Full schema engine comparison still pending |
+| R05 | P1 | Candidate DAG could contain unrelated orphan nodes with no path to a deliverable | Require every node to contribute to a deliverable directly or through descendants | P95–P96. No actual graph feasibility or runtime scheduling proven |
+| R06 | P1 | Acceptance criteria contained only generic check text and a method enum | Require `evidenceExpectation` text for each criterion | P111–P113. Still **model-proposed evidence**, not observed proof or an independently executable test |
+| R07 | P1 | Global source slots, capability kinds and effect claims could be declared without association to an outcome | Require every global claim to map to at least one subgoal and every subgoal claim to appear globally | P97–P107. Cannot detect omitted real-world actions without semantic evaluation |
+| R08 | P1 | Proposal-size cap applied to fields separately but not the whole accepted proposal | Bound serialized, validated proposal to 32,768 UTF-8 bytes | P126. Raw request body and duplicate JSON keys must be limited/handled at HTTP parser boundary |
+| R09 | P1 | Validation status could be mistaken for real success | Explicit `semanticStatus: UNVERIFIED`, `verificationStatus: NOT_RUN`, `policyAuthority: NONE` | P114–P115. Caller must still treat these statuses as non-authoritative |
+
+**Compatibility:** `g02-goal-proposal-v0.1` is intentionally rejected by the v0.2 validator. Migration requires explicit versioned conversion and renewed validation; no silent coercion. A source slot is a *reference*, not source permission. A candidate DAG is an *interpretation*, not an executable graph. All subgoal mappings are model claims and may be incomplete or misleading.
+
+**Security caveat:** SHA-256 fingerprints are internal consistency checks only. Neither the normalized intake fixture nor its fingerprint is authenticated, tenant-authorized or stored atomically in this prototype. Actual access control, human approvals, audit, data minimization and replay protection remain G03/G07/G08/G11 responsibilities.
+
+**Semantic limitations:** These tests do not establish whether the user's goal was interpreted correctly, whether all requested effects were identified, whether proposed verification criteria are sufficient, whether multilingual text was understood, or whether a real connector exists. Those require held-out human-reviewed cases and independently derived tool/action policy.
+
+**Verified CI:** [GitHub Actions run 42882371606](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42882371606) succeeded at commit `315357c2a9583bee84a480489e98ce2dfaf773e5`: **197 tests passed, 0 failed, 0 skipped**, comprising **143 G02.02** and **54 G02.01** tests. A prior intermediate run [42882122592](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42882122592) failed 1/186 because test P61 had not mapped the new capability into its subgoal; the test fixture was corrected and later runs passed. This failure was not concealed.
+
+**Figma:** [Editable page 05](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2) updated to v0.2, with per-subgoal mapping and 197-test CI evidence.
+
+**Recommended owner decision:** review **hardened v0.2 design** as a **candidate design baseline only**. Do not approve G02.03, production readiness, real tool execution or semantic correctness on this evidence.

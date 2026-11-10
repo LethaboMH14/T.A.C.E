@@ -58,3 +58,5 @@
 - New test evidence:
 - Decision: ACCEPTED / REJECTED / DEFERRED:
 - Link to superseding ADR or PR:
+
+**D-038 review amendment (2026-11-10):** G02.02 v0.1 is superseded by hardened **v0.2** (per-subgoal effect/source/capability mappings, expected evidence, intake fingerprint and full snapshot comparison). **PROPOSED / OWNER SIGNOFF PENDING**; [197/197 deterministic tests verified](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42882371606). G02.03 remains blocked. No production approval.

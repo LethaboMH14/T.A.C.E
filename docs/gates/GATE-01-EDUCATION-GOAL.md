@@ -144,3 +144,12 @@ This gate is **NOT an educational task router with fixed prompt strings**. T.A.C
 The user explicitly chose **not** to integrate KAIRO into this direction. Existing KAIRO research remains historical and is not an accepted product dependency.
 
 **Important distinction:** education is the first competition *domain*, not a restriction on the universal engine. No one candidate—Cohort Rescue, Continuity, Learning Recovery or a combined mission—is the approved flagship. G01 remains IN_RESEARCH; G02 remains BLOCKED.
+
+
+## G01 Problem Statement — task-to-outcome gap (2026-11-10)
+
+**Recommended umbrella problem statement:** Educators and training providers are expected to assess learning, identify difficulties, adapt materials, coordinate support and manage communication under time/resource constraints. When the work crosses multiple documents, systems and people, turning evidence into timely, reliable action becomes expensive in effort and difficult to coordinate. Educators experience pressure and learners risk delayed or inadequately tailored support, including language access barriers.
+
+**Evidence versus hypothesis:** OECD TALIS 2024 South Africa directly measures reported marking and admin workload; OECD's 2026 General Education Certificate review cites Grade 9 Mathematics benchmark gaps; DBE MTbBE documents language-access needs; OECD's Digital Education Outlook documents fragmented digital tools and inefficient manual data interchange. That T.A.C.E improves outcomes is **a testable hypothesis, not an established result**.
+
+See [the full evidence-backed problem statement, public pitch variants, mappings to all seven goal families, input/file/connector boundaries, and proof metrics](GATE-01-PROBLEM-STATEMENT.md). **Any requested file format may be presented for feasibility inspection; only formats actually supported by validated tools can be ingested/exported, and connected accounts require explicit authorization.** G01 remains IN_RESEARCH.

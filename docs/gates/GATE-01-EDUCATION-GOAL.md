@@ -131,3 +131,16 @@ Detailed intent parsing, clarification generation, confidence calibration and st
 - LangGraph interrupts: https://github.com/langchain-ai/docs/blob/main/src/oss/langgraph/interrupts.mdx
 - React Flow: https://reactflow.dev/
 - MCP tool security: https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2026-07-28/server/tools.mdx
+
+
+## G01.16–G01.22 — Goal-adaptive education families and integration scope (v0.3 clarification)
+
+This gate is **NOT an educational task router with fixed prompt strings**. T.A.C.E must interpret goals across workload reduction, learning-gap intervention, multilingual access, academy cohort rescue, learning continuity, evidence auditing and access/careers operations, including unexpected combinations and previously unseen phrasings. Each should produce different evidence needs, graph topology, specialists, outputs, tool effects and end conditions. Missing files and unavailable app connections must lead to minimal clarification, trusted public sources or honest partial results—not invented facts.
+
+- [Detailed seven task-family catalogue, multiple rephrasings, sample topologies and a high-impact combined mission](GATE-01-UNIVERSAL-TASK-CATALOGUE.md)
+- [Excel, Word, Gmail, Outlook, Google Workspace, Classroom, Moodle, calendar and custom-API capability contracts](GATE-01-CONNECTOR-CAPABILITIES.md)
+- [Editable visual gate and integration maps](../../diagrams/TACE-Architecture.drawio)
+
+The user explicitly chose **not** to integrate KAIRO into this direction. Existing KAIRO research remains historical and is not an accepted product dependency.
+
+**Important distinction:** education is the first competition *domain*, not a restriction on the universal engine. No one candidate—Cohort Rescue, Continuity, Learning Recovery or a combined mission—is the approved flagship. G01 remains IN_RESEARCH; G02 remains BLOCKED.

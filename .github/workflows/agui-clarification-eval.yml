@@ -1,0 +1,28 @@
+name: T.A.C.E AG-UI clarification integration evaluation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/integrations/agui/**'
+      - '.github/workflows/agui-clarification-eval.yml'
+  pull_request:
+    paths:
+      - 'tools/integrations/agui/**'
+      - '.github/workflows/agui-clarification-eval.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  adapter-spike:
+    name: AG-UI event and clarification boundary tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 pinned
+      - name: Show Node runtime
+        run: node --version
+      - name: Run isolated AG-UI adapter tests (no SaaS credentials)
+        run: node --test tools/integrations/agui/tace-clarification-events.test.mjs

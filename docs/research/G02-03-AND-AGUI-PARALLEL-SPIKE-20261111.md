@@ -37,3 +37,7 @@ A: critical review against ADR-0007, expand adversarial cases and run a model-se
 B: official AG-UI SDK/schema conformance, UI prototype with accessible cards and revision-safe answer endpoint, independent permissions/effect checks, deployment/licensing trade-off analysis, and later separate integration ADR.
 
 **Honesty rule:** 231 core tests and 30 integration tests are distinct passing suites. Do not add them to imply 261 independent system-level end-to-end tests; none has connected a real CopilotKit backend or executed a live task.
+
+## Editable Figma synchronization
+
+Updated [G02.03 prompt trust architecture page 06](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=18-2) to reflect **34 new prompt-assembly tests passing**, while preserving **ADR-0007 PROPOSED** status. Created an editable [parallel integration design page 07](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=29-2), mapping the T.A.C.E trust boundary, AG-UI event adapter, optional CopilotKit UI, OpenDots/OpenBot candidates, approval and receipt boundaries, and verified but limited CI evidence. Both pages are editable Figma-native shapes and text, not screenshots or deployed product features.

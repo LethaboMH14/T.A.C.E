@@ -61,3 +61,6 @@
 - Link to superseding ADR or PR:
 
 **D-038 review amendment (2026-11-10):** G02.02 v0.1 is superseded by hardened **v0.2** (per-subgoal effect/source/capability mappings, expected evidence, intake fingerprint and full snapshot comparison). **DESIGN_ACCEPTED BY OWNER 2026-11-10**; [197/197 deterministic tests verified](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42882371606). G02.03 IN_RESEARCH under proposed ADR-0007; G02.04 blocked. No production approval.
+
+
+**D-039 implementation checkpoint (2026-11-11):** ADR-0007 remains PROPOSED but [G02.03 prompt assembly](../tools/gate02/prompt-assembly.mjs) has **34 isolated tests passing** as part of [231/231 combined tests](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42930397995). **D-040 (parallel evaluation)** AG-UI/CopilotKit/OpenDots/OpenBot evaluation approved; isolated [adapter](../tools/integrations/agui/tace-clarification-events.mjs) and [30/30 tests](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42930855437) verified. No SDK integration or production adoption. G02.04 remains blocked until owner design approval of G02.03.

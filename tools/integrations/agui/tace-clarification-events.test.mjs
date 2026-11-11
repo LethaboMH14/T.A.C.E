@@ -37,5 +37,5 @@ test('U25 user answer cannot assert approved flag',()=>reject(previewClarificati
 test('U26 all event envelopes frozen for stable rendering',()=>{const e=r();assert.equal(Object.isFrozen(e.events),true);assert.equal(Object.isFrozen(e.events[1].value),true);assert.equal(Object.isFrozen(e.events[2].outcome.interrupts),true);});
 test('U27 event creation is deterministic for the same input',()=>assert.deepEqual(r(),r()));
 test('U28 a different goal is allowed only through matching server context',()=>{const c={...ctx(),goalId:'new-goal'};const e=r(c);assert.equal(e.events[1].value.goalId,'new-goal');});
-test('U29 malformed getter in question fails closed',()=>{const q=question();Object.defineProperty(q,'prompt',{get(){throw Error('boom');},enumerable:true});reject(r(ctx(),q),'INVALID_UI_INPUT');});
+test('U29 malformed getter in question fails closed',()=>{const q=question();Object.defineProperty(q,'prompt',{get(){throw Error('boom');},enumerable:true});reject(r(ctx(),q),'INVALID_QUESTION');});
 test('U30 an answer does not send AG-UI tool call or create G02.01 revision',()=>{const a=previewClarificationAnswer(ctx(),question(),answer());assert.equal(a.serverEffect,'NOT_EXECUTED');assert.equal(Object.hasOwn(a,'newTurnId'),false);});

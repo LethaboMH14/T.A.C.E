@@ -1,7 +1,7 @@
 # G02.03 — Prompt architecture and instruction/data trust boundaries
 
 **Date:** 2026-11-10  
-**State:** IN_RESEARCH — FIRST-PASS DESIGN PROPOSAL; NOT APPROVED OR IMPLEMENTED  
+**State:** IN_RESEARCH — PROTOTYPE IMPLEMENTED AND CI VERIFIED; DESIGN APPROVAL PENDING  
 **Predecessor:** [ADR-0006 — G02.02 hardened v0.2 DESIGN_ACCEPTED](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md)  
 **Decision under review:** [ADR-0007 — PROPOSED](../decisions/ADR-0007-g02-03-prompt-trust-architecture.md)  
 **Scope:** G02.03 only. Provider-neutral prompt packaging and trust boundaries; no LLM/provider selection, actual model execution, tool permissions, memory adoption or semantic accuracy claims.
@@ -131,7 +131,7 @@ These are **proposed cases, not passing tests**. G02.03 needs isolated assembler
 - **G04/G08:** reviewed skill and memory policy; no auto-loaded instructions from `AGENTS.md`, `RULES.md`, `SKILL.md`, `MEMORY.md`.
 - **G07:** real identity, tenant scopes, effect classification, exact approval binding, event store and actual tool permissions.
 
-**Current outcome:** research proposal recorded; **no G02.03 prompt assembler, provider call, unit test or security guarantee is implemented or verified yet**. Request owner review after the design and evidence are completed.
+**Current outcome (updated 2026-11-11):** a deterministic G02.03 prompt assembler is committed, with 34 verified G02.03-specific tests; no provider call, source ingestion, semantic model evaluation, security certification or design acceptance. See checkpoint below. Request owner review after the design and evidence are completed.
 
 ## 8. Editable Figma research architecture
 
@@ -146,3 +146,22 @@ Modes proposed for later owner decision: **Adaptive** default (ask only material
 External candidate [CopilotKit/OpenDots](https://github.com/CopilotKit/OpenDots): MIT-licensed alpha single-owner agent workspace with specialist Dots, Spaces/editor, chat, human approvals, per-Dot computers, MCP/Composio, schedules, voice, Slack and memory. **Not a complete T.A.C.E engine**: no automatic multi-Dot delegation, complete event-triggered lifecycle, or included team editing; CopilotKit Intelligence requires hosted service, local evaluation or separately licensed deployment. Its readOnlyHint trust and initially enabled tool behavior do not meet T.A.C.E's proposed deny-by-default G07 policy without further hardening. The maintained [OpenBot](https://github.com/CopilotKit/OpenBot) plus OpenDots skin and AG-UI is a candidate alternative. No fork or integration implemented/approved.
 
 See [full source-based adoption and guided clarification analysis](../research/OPENDOTS-ADOPTION-AND-CLARIFICATION-UX-20261110.md). G02.04 remains BLOCKED until G02.03 design approval; capture of the requirement does not advance it.
+
+
+## 9. G02.03 implementation checkpoint and critical-review notes — 2026-11-11
+
+**Code:** [tools/gate02/prompt-assembly.mjs](../../tools/gate02/prompt-assembly.mjs) and [34 tests](../../tools/gate02/prompt-assembly.test.mjs). **GitHub Actions:** [run 42930397995](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42930397995), **231/231 tests passed**, zero failed/skipped: 54 G02.01 + 143 G02.02 + 34 G02.03. This is deterministic, local JavaScript verification only.
+
+**Implemented:** server-owned fixed system/developer roles, G02.01 allowlisted interpreter view, JSON-packaged user intent, pinned output schema version (`g02-goal-proposal-v0.2`), template/schema SHA-256 digests, a 16,500 UTF-8 byte output envelope cap, typed failure codes and explicit non-authority markers. Future context excerpts are **rejected** (not silently accepted) until G03/G07 authorization. No external provider/model call is made. The assembler avoids copying internal actor/tenant IDs and real source handles into message metadata; the user's interpretation text remains task content and may contain personal data.
+
+**Critical review / remaining gaps:**
+
+1. **High:** Separating actual message roles does **not** make the model semantically immune to instructions embedded in user text; adversarial live-model tests G02.12/G11 remain mandatory.
+2. **High:** No real server authentication, atomic turn binding, secret redaction, data minimization policy or source approval; test fixtures can impersonate trusted inputs. G07/G08/G11 must enforce these boundaries.
+3. **High:** The schema digest is computed from the local schema file and may be compared against a caller-provided expected value. A production deployment must pin a reviewed digest independently in its release manifest and verify it; computed digest alone is not a signature or supply-chain assurance.
+4. **Medium:** The implementation enforces UTF-8 byte limits, not provider-specific token, latency, cost or cancellation budgets; these require provider adapters and operational enforcement.
+5. **Medium:** G03 contextual excerpts and G08 skills/memory remain blocked, rather than being tested against actual authorized evidence; ingestion/source-injection tests are future work.
+6. **Medium:** The role-assembly implementation is provider-neutral only as an internal envelope. No model adapter, structured response parser, output quality evaluation, or comparison against simple deterministic baselines was run.
+7. **Medium:** Security review should add property-based/prototype-pollution and actual transport JSON fuzzing; 34 unit assertions are not a comprehensive penetration test.
+
+**Design status:** ADR-0007 remains **PROPOSED / awaiting critical owner review**; G02.04 still blocked. Parallel CopilotKit/OpenDots evaluation is tracked separately in [Issue #7](https://github.com/LethaboMH14/T.A.C.E/issues/7) and [two-lane checkpoint](../research/G02-03-AND-AGUI-PARALLEL-SPIKE-20261111.md). Neither lane controls the other's permissions.

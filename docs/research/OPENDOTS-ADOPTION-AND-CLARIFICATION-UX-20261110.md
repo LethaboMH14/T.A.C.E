@@ -1,7 +1,7 @@
 # T.A.C.E research note — CopilotKit/OpenDots and clarification UX
 
 **Date:** 2026-11-10  
-**Status:** RESEARCH ONLY — candidate technology, no adoption or integration approval  
+**Status:** EVALUATION_APPROVED — isolated AG-UI adapter prototype tested; vendor dependency adoption NOT APPROVED  
 **Sources inspected:** [OpenDots README](https://github.com/CopilotKit/OpenDots/blob/main/README.md), [MIT LICENSE](https://github.com/CopilotKit/OpenDots/blob/main/LICENSE), [Connections](https://github.com/CopilotKit/OpenDots/blob/main/docs/CONNECTIONS.md), [Computers](https://github.com/CopilotKit/OpenDots/blob/main/docs/COMPUTERS.md), [Setup](https://github.com/CopilotKit/OpenDots/blob/main/docs/SETUP.md), [OpenBot README](https://github.com/CopilotKit/OpenBot/blob/main/README.md). Live third-party integration not independently tested by T.A.C.E.
 
 ## A. Clarification: where and when
@@ -106,4 +106,11 @@ AG-UI is a UI event protocol, **not** an execution-security boundary. The T.A.C.
 
 **Evaluation acceptance targets:** AG-UI stream mapping for `INTAKE` → `CLARIFICATION_REQUIRED` → `ANSWERED` → `PROPOSAL_VALID/NEEDS_CLARIFICATION` → `POLICY_REVIEW_REQUIRED` → `VERIFIED` (only after real verification); accessible guided three-question prototype; tested stale-answer and revision fences; independent effect classification despite inaccurate read-only hints; pinned dependency/commit and separate CopilotKit Intelligence licensing/cost review; no real execution or PII in initial fixture tests.
 
-**Status:** EVALUATION_APPROVED; IMPLEMENTATION_PENDING. G02.03 remains in research, G02.04 is not yet approved, G10 UI integration remains a downstream option.
+**Status (superseded by 2026-11-11 checkpoint):** evaluation approved; isolated integration spike now implemented and tested. Full CopilotKit/OpenDots/OpenBot integration pending. G02.03 remains in research, G02.04 is not yet approved, G10 UI integration remains a downstream option.
+
+
+## E. Parallel evaluation implementation checkpoint — 2026-11-11
+
+The owner requested this evaluation proceed **in parallel** with G02.03. [Issue #7](https://github.com/LethaboMH14/T.A.C.E/issues/7) records the evaluation lane. Implemented an isolated adapter for AG-UI 1.0 `RUN_STARTED`, namespaced `CUSTOM` clarification event, and `RUN_FINISHED` interrupt with JSON Schema answer choices; answer-preview validation rejects stale/wrong-goal/forged option submissions. [Code and limitations](../../tools/integrations/agui/README.md).
+
+**Verified [GitHub Actions 42930855437](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42930855437): 30/30 passing**, 0 failures, 0 skipped. Initial isolated run 42930753252 failed one *incorrect test expectation*; corrected and reran successfully. **No actual AG-UI SDK conformance run, React/CopilotKit UI, hosted Intelligence, OpenDots/OpenBot instance, model, computer or connected service is in place**. Pending security/licensing/UX evaluation before adoption. Maintain independent T.A.C.E exact permission and receipt enforcement; `readOnlyHint` is not policy.

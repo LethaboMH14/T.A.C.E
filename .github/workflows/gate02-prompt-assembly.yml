@@ -1,0 +1,28 @@
+name: T.A.C.E G02.03 prompt trust assembly
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/gate02/**'
+      - '.github/workflows/gate02-prompt-assembly.yml'
+  pull_request:
+    paths:
+      - 'tools/gate02/**'
+      - '.github/workflows/gate02-prompt-assembly.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prompt-boundary:
+    name: G02.01-G02.03 structural and role-boundary checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 pinned
+      - name: Show Node runtime
+        run: node --version
+      - name: Run intake, goal contract and prompt assembly tests
+        run: node --test tools/gate02/normalize-turn.test.mjs tools/gate02/goal-proposal.test.mjs tools/gate02/prompt-assembly.test.mjs

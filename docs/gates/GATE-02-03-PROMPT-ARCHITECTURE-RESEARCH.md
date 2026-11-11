@@ -165,3 +165,5 @@ See [full source-based adoption and guided clarification analysis](../research/O
 7. **Medium:** Security review should add property-based/prototype-pollution and actual transport JSON fuzzing; 34 unit assertions are not a comprehensive penetration test.
 
 **Design status:** ADR-0007 remains **PROPOSED / awaiting critical owner review**; G02.04 still blocked. Parallel CopilotKit/OpenDots evaluation is tracked separately in [Issue #7](https://github.com/LethaboMH14/T.A.C.E/issues/7) and [two-lane checkpoint](../research/G02-03-AND-AGUI-PARALLEL-SPIKE-20261111.md). Neither lane controls the other's permissions.
+
+**Figma synchronization, 2026-11-11:** [G02.03 architecture page 06](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=18-2) now labels 34 verified G02.03 tests; [parallel AG-UI/OpenDots evaluation page 07](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=29-2) documents the independent UI integration lane. Neither is production evidence or ADR-0007 signoff.

@@ -98,6 +98,15 @@ export function assemblePrompt(intake,opts={}) {
        !Number.isSafeInteger(intake.revision)||intake.revision<1 ||
        (intake.revision===1?intake.parentTurnId!==null:!id(intake.parentTurnId)))
       return fail('INVALID_INTAKE');
+    // Restrict even internal fixtures: do not trust a caller who fabricates a
+    // different interpretation text or upgrades a source trust label.
+    if(typeof intake.rawGoal!=='string' ||
+       Buffer.byteLength(intake.rawGoal,'utf8')>6000 ||
+       intake.interpretationText!==intake.rawGoal.normalize('NFC').replace(/\r\n?/g,'\n') ||
+       !Array.isArray(intake.sourceRefs)||intake.sourceRefs.length>24 ||
+       intake.sourceRefs.some(s=>!keys(s,['kind','ref','trust']) ||
+         !['upload','public','connector'].includes(s.kind) ||
+         !id(s.ref) || s.trust!=='UNVERIFIED_REFERENCE')) return fail('INVALID_INTAKE');
     const projected=projectForInterpreter(intake);
     if(!safeData(projected)||!noSecrets(projected))return fail('INVALID_INTERPRETER_PROJECTION');
 

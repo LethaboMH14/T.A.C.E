@@ -73,3 +73,10 @@
 ### G02.02 critical review — 2026-11-10
 
 **G02.02 design was subsequently ACCEPTED by the owner; ADR-0006 records the signoff.** Hardened `g02-goal-proposal-v0.2` adds per-subgoal effect/capability/source mapping, orphan-DAG rejection, expected evidence, Unicode/schema alignment, canonical intake fingerprint and full snapshot revision checks. [ADR-0006](../decisions/ADR-0006-g02-02-goal-proposal-and-candidate-dag.md), [dossier](GATE-02-02-GOAL-SCHEMA-AND-DECOMPOSITION.md), [editable Figma page 05](https://www.figma.com/design/28egBAkhQHExkqUinyimtM?node-id=11-2). [Verified CI](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42882371606): **197 pass, 0 fail, 0 skipped** (143 G02.02 + 54 G02.01). G02.03 is now IN_RESEARCH with proposed ADR-0007; G02.04 remains BLOCKED. No production claims.
+
+
+### Parallel implementation checkpoint — 2026-11-11
+
+**G02.03 IN_RESEARCH / PROTOTYPE CI VERIFIED / ADR-0007 PROPOSED:** [prompt assembler](../../tools/gate02/prompt-assembly.mjs), [34 tests](../../tools/gate02/prompt-assembly.test.mjs), [run 42930397995](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42930397995): **231/231 combined deterministic tests**. G02.04 is still blocked pending G02.03 owner design signoff.
+
+**CopilotKit/AG-UI/OpenDots/OpenBot evaluation lane STARTED IN PARALLEL:** [Issue #7](https://github.com/LethaboMH14/T.A.C.E/issues/7), [isolated adapter](../../tools/integrations/agui/tace-clarification-events.mjs), [30 tests](../../tools/integrations/agui/tace-clarification-events.test.mjs), [run 42930855437](https://github.com/LethaboMH14/T.A.C.E/actions/runs/42930855437): **30/30 passing**. No live CopilotKit/OpenDots/AG-UI SDK, external tool execution, approval or production adoption. [Parallel research checkpoint](../research/G02-03-AND-AGUI-PARALLEL-SPIKE-20261111.md).

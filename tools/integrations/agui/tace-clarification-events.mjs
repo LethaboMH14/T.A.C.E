@@ -58,7 +58,16 @@ export function makeClarificationEvents(context,question){
       Object.freeze({type:'RUN_STARTED',threadId:context.threadId,runId:context.runId,protocolVersion:'1.0'}),
       Object.freeze({type:'CUSTOM',name:'tace.clarification.requested.v1',value}),
       Object.freeze({type:'RUN_FINISHED',threadId:context.threadId,runId:context.runId,
-        outcome:Object.freeze({type:'interrupt',interrupts:Object.freeze([])})})
+        outcome:Object.freeze({type:'interrupt',interrupts:Object.freeze([
+          Object.freeze({id:question.id,reason:'needs_clarification',message:question.prompt,
+            responseSchema:Object.freeze({type:'object',additionalProperties:false,
+              properties:Object.freeze({
+                optionId:Object.freeze({type:'string',enum:Object.freeze(question.options.map(o=>o.id))}),
+                otherText:Object.freeze({type:['string','null']})
+              }),
+              required:Object.freeze(['optionId','otherText'])
+            })})
+        ])})})
     ]);
     return Object.freeze({status:'UI_EVENTS_READY',events,policyAuthority:'NONE',serverEffect:'NOT_EXECUTED'});
   }catch{return fail('INVALID_UI_INPUT');}

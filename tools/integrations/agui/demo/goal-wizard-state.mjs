@@ -40,7 +40,7 @@ export function wizardReady(state){
     SOURCE_OPTIONS.some(x=>x.id===state?.source) &&
     ACTION_OPTIONS.some(x=>x.id===state?.action) &&
     (state.source!=='other'||typeof state.otherSource==='string'&&
-      state.otherSource.trim().length>0&&state.otherSource.length<=600);
+      state.otherSource.trim().length>0&&state.otherSource.length<=140);
 }
 const d=(id,description,formatHint)=>({id,description,formatHint});
 const s=(id,outcome,dependsOn,deliverableIds,capabilityKinds,effectKinds)=>({
@@ -91,7 +91,7 @@ export function buildUnverifiedGoalProposal(state){
   const uncertainties=[{
     code:'MISSING_INPUT',
     question:state.source==='none'?'Please supply data before factual analysis':
-      state.source==='other'?'Please verify access to the other source before analysis':
+      state.source==='other'?'Please verify access to this source: '+state.otherSource.trim():
       'Please upload or authorize the selected training data before analysis',
     blocking:true
   }];

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>T.A.C.E — Guided Alignment (Synthetic Demo)</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Mission navigation">
+      <div class="logo"><span class="logo-mark">T</span><span>T.A.C.E <small>RESEARCH STUDIO</small></span></div>
+      <div class="workspace-label">CURRENT MISSION</div>
+      <div class="mission-name"><span class="mission-icon" aria-hidden="true">◈</span><span>Training Improvement<br><small>Synthetic demonstration</small></span></div>
+      <nav aria-label="Workflow steps">
+        <div class="nav-row completed">01 <span>Goal intake</span> <span aria-hidden="true">✓</span></div>
+        <div class="nav-row active">02 <span>Goal alignment</span> <span aria-hidden="true">●</span></div>
+        <div class="nav-row">03 <span>Verified plan</span> <span aria-hidden="true">○</span></div>
+        <div class="nav-row">04 <span>Execution</span> <span aria-hidden="true">○</span></div>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="label-green">● LOCAL DEMO</div>
+        No model calls, credentials, uploaded files, tool permissions or external actions.
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="breadcrumbs">MISSIONS <span>/</span> TRAINING IMPROVEMENT <span>/</span> <strong>ALIGNMENT</strong></div>
+        <div class="top-status">G02.04 concept · AG-UI prototype</div>
+      </header>
+
+      <div class="content">
+        <div class="eyebrow">GOAL INTELLIGENCE / HUMAN ALIGNMENT</div>
+        <h1>Before we act,<br><em>let's align on the outcome.</em></h1>
+        <p class="lead">A short guided conversation removes the assumptions most likely to produce the wrong work. T.A.C.E preserves your choices as an unverified goal proposal, not a permission grant.</p>
+        <section class="alignment-card" aria-labelledby="question-title">
+          <div class="progress-row">
+            <span id="question-label">QUESTION 2 OF 3</span>
+            <span id="progress-caption">Aligning evidence</span>
+          </div>
+          <div class="progress-track" role="progressbar" aria-label="Clarification progress" aria-valuemin="0" aria-valuemax="3" aria-valuenow="2" id="progress-track"><span id="progress-fill"></span></div>
+          <div id="question-screen">
+            <div class="asked-reason" id="question-reason">Why this matters</div>
+            <h2 id="question-title" tabindex="-1">Where are the training results?</h2>
+            <fieldset id="choice-group" aria-describedby="question-help">
+              <legend class="sr-only">Choose one answer</legend>
+              <p id="question-help" class="hint">Choose the best available option. You can edit your answers before continuing.</p>
+              <div id="choices" class="choices"></div>
+            </fieldset>
+            <div id="other-container" class="other-container hidden">
+              <label for="other-text">Describe your source (140 characters maximum)</label>
+              <input id="other-text" type="text" maxlength="140" placeholder="For example: paper assessment sheets" autocomplete="off">
+            </div>
+          </div>
+          <div id="review-screen" class="hidden" aria-live="polite">
+            <div class="asked-reason">ALIGNMENT SUMMARY</div>
+            <h2>Your goal, structured.</h2>
+            <p class="hint">These are candidate outputs and checks. Factual analysis is blocked until the underlying assessment evidence is actually supplied and authorized.</p>
+            <dl id="answers-list" class="answers-list"></dl>
+            <div class="review-alert"><strong>Needs verified inputs</strong><span>Responses are a preview only. No source access, schedule change, external message or permission has been granted.</span></div>
+          </div>
+          <div id="inline-error" class="inline-error hidden" role="alert"></div>
+          <div class="button-row">
+            <button class="btn secondary" id="back-btn" type="button">← Back</button>
+            <button class="btn primary" id="next-btn" type="button">Continue →</button>
+          </div>
+        </section>
+
+        <section class="contract-card" aria-labelledby="contract-title">
+          <div class="contract-heading">
+            <div><div class="eyebrow small">LIVE LOCAL PREVIEW</div><h2 id="contract-title">GoalContract proposal</h2></div>
+            <span class="neutral-pill">NOT VERIFIED / NOT EXECUTED</span>
+          </div>
+          <p class="hint">Proposed G02.02 v0.2 structure. The browser preview does not run the server-side validator or call a model.</p>
+          <pre id="contract-preview" tabindex="0">Answer the remaining questions to see the candidate contract.</pre>
+          <div class="contract-bottom"><span>Source slots are intentionally empty until separately authorized.</span><button class="text-button" id="copy-btn" type="button" disabled>Copy JSON</button></div>
+        </section>
+
+        <section class="event-card" aria-label="Event trace">
+          <div class="event-head"><strong>AG-UI event trace</strong><span class="neutral-pill">SIMULATED</span></div>
+          <p id="event-preview">Question events will appear here. These are display events, not tool calls.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

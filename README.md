@@ -1,7 +1,27 @@
 # T.A.C.E — Universal Goal-to-Execution Engine
 
 **Status:** Gate 01 design requirements complete; Gate 02 in research; no working universal multi-agent engine
-**Last reviewed:** 2026-11-10
+**Last reviewed:** 2026-11-13 (handover status; verify live branch/CI before acting)
+
+## Claude Code / engineering handover — START HERE
+
+The complete, navigable project architecture, existing research, decisions, technical execution contracts, security boundaries, UI stack, and prioritized implementation backlog are now documented **inside this repository**. **No new runtime capability is claimed by adding these documents.**
+
+- **[CLAUDE.md](CLAUDE.md)** — required starting point for Claude: what is approved, what runs, current PR #8, engineering rules and the build mission.
+- **[AGENTS.md](AGENTS.md)** — repository-wide, tool-neutral contributor conventions and security/approval limits.
+- **[START-HERE](docs/handover/START-HERE.md)** — dated factual status and entry points to verified source and proposed work.
+- **[Complete system blueprint](docs/architecture/COMPLETE-SYSTEM-BLUEPRINT.md)** — G01–G12, full goal→plan→agents→tools→checks→repair→delivery lifecycle.
+- **[Contracts, state machine and API](docs/architecture/CONTRACTS-STATE-MACHINE-AND-APIS.md)** — versioned schemas, endpoints, typed events, exact approval and receipts (future runtime design).
+- **[Security, tools, skills and memory](docs/architecture/SECURITY-MEMORY-AND-TOOL-BOUNDARIES.md)** — all 20 G01 risk controls, source and tool policies, POPIA and governance.
+- **[Mission Console UI/UX](docs/architecture/MISSION-CONSOLE-UX-DESIGN-SYSTEM.md)** — screens, interactions, open-source stack, Figma and AG-UI/OpenDots evaluation.
+- **[Execution backlog and 25 E2E tests](docs/architecture/EXECUTION-BACKLOG-AND-ACCEPTANCE-TESTS.md)** — first real synthetic education mission, actual self-repair, CI/evidence and build order.
+- **[Research and reference map](docs/research/REFERENCE-MAP.md)** — all relevant primary project documents, accepted ADRs, source code, Figma and candidate technologies.
+- **[Claude implementation brief](docs/handover/CLAUDE-IMPLEMENTATION-BRIEF.md)** — actionable task sequence for a new Claude coding session.
+- **[Mermaid execution flow](diagrams/TACE-EXECUTION-END-TO-END.mmd)** and **[run state machine](diagrams/TACE-RUN-LIFECYCLE.mmd)** — editable architecture diagrams.
+
+**Honest implementation status:** G01, G02.01 and G02.02 are accepted **design** baselines with deterministic code/tests. G02.03 ADR-0007 remains proposed; the next hardening and offline Guided Alignment demo are on open draft [PR #8](https://github.com/LethaboMH14/T.A.C.E/pull/8), **not merged at the last review**. G02.04 and wider execution/security/verification modules remain not deployed. CopilotKit/AG-UI/OpenDots/OpenBot are evaluation-only. The priority is a true synthetic education goal → real artifacts → independent error detection → targeted repair → recheck demonstration, not new architecture for its own sake.
+
+
 **Repository purpose:** Durable source of truth for the Colleague Zero project: product definition, agent architecture, design decisions, research, interfaces, tests and development.
 
 > T.A.C.E is the repository name. Its expanded acronym and the public-facing product name are **not yet approved**. SONAR is a working lineage label from BobSwarm, not a confirmed rename.

@@ -104,7 +104,7 @@ test('goal reader: invalid first (extra field) then valid gives 2 drafts, 1 chal
   assert.equal(challenges.length, 1);
   assert.equal(challenges[0].from, 'Validator');
   assert.equal(challenges[0].to, 'Goal Reader');
-  assert.equal(challenges[0].reason, 'Rejected: INVALID_PROPOSAL_SHAPE');
+  assert.match(challenges[0].reason, /^Rejected: INVALID_PROPOSAL_SHAPE/);
   // Retry message states only the code.
   const retry = model.calls[1].messages.at(-1);
   assert.equal(retry.role, 'user');
@@ -294,10 +294,10 @@ test('reviewer voice: route mismatch gives DECISION from Engine and keeps the co
   const msgs = messenger.list();
   const decision = msgs.find((m) => m.type === 'DECISION');
   assert.equal(decision.from, 'Engine');
-  assert.equal(decision.to, 'Reviewer');
+  assert.equal(decision.to, 'Reviewer voice');
   assert.match(decision.reason, /Kept the repair route/);
   const result = msgs.find((m) => m.type === 'RESULT');
-  assert.equal(result.from, 'Reviewer');
+  assert.equal(result.from, 'Reviewer voice');
   assert.equal(result.to, 'Repair');
   // Only failed checks go to the model.
   const sent = JSON.parse(model.calls[0].messages[1].content);

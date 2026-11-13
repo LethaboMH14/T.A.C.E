@@ -101,6 +101,11 @@ const server = http.createServer(async (req, res) => {
       if (parts[1] === 'runs' && parts.length === 2) {
         if (req.method === 'GET') return send(res, 200, listRuns());
         if (req.method === 'POST') {
+          // Runs can call a paid model API: only same-origin JSON requests, one run at a time.
+          const origin = req.headers.origin;
+          if (origin && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return send(res, 403, { error: 'cross-origin request refused' });
+          if (!String(req.headers['content-type'] || '').startsWith('application/json')) return send(res, 415, { error: 'send JSON' });
+          if (active.size > 0) return send(res, 409, { error: 'a run is already in progress; wait for it to finish' });
           let raw = ''; for await (const c of req) { raw += c; if (raw.length > 4096) return send(res, 413, { error: 'too large' }); }
           try { return send(res, 202, startRun(JSON.parse(raw || '{}'))); } catch (e) { return send(res, 400, { error: e.message }); }
         }
@@ -125,10 +130,15 @@ const server = http.createServer(async (req, res) => {
       return send(res, 404, { error: 'unknown endpoint' });
     }
 
-    // static
-    const rel = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
+    // static: the React Mission Studio (apps/studio/dist) at "/", the zero-dependency page at "/classic"
+    const studioDist = path.join(repo, 'apps', 'studio', 'dist');
+    const useStudio = fs.existsSync(path.join(studioDist, 'index.html')) && !url.pathname.startsWith('/classic');
+    const root = useStudio ? studioDist : here;
+    let rel = url.pathname.replace(/^\/classic\/?/, '/');
+    rel = rel === '/' ? 'index.html' : rel.slice(1);
     if (!/^[a-z0-9][a-z0-9._/-]*$/i.test(rel) || rel.includes('..') || rel === 'server.mjs') return send(res, 404, 'not found', 'text/plain');
-    const abs = safeJoin(here, rel);
+    let abs = safeJoin(root, rel);
+    if (useStudio && (!fs.existsSync(abs) || fs.statSync(abs).isDirectory())) abs = path.join(studioDist, 'index.html'); // SPA fallback
     if (!fs.existsSync(abs) || fs.statSync(abs).isDirectory()) return send(res, 404, 'not found', 'text/plain');
     return send(res, 200, fs.readFileSync(abs), MIME[path.extname(abs)] || 'application/octet-stream');
   } catch (e) {

@@ -54,7 +54,7 @@ export async function explainReview({ model, checks, route, messenger }) {
   const codeRouteOf = (checkId) => (repairIds.has(checkId) ? 'repair' : 'person');
 
   const out = await model.chat({
-    agent: 'Reviewer',
+    agent: 'Reviewer voice',
     messages: [
       {
         role: 'system',
@@ -93,7 +93,7 @@ export async function explainReview({ model, checks, route, messenger }) {
     const agreed = v.proposedRoute === codeRoute;
     if (!agreed) {
       messenger.send({
-        type: 'DECISION', from: 'Engine', to: 'Reviewer',
+        type: 'DECISION', from: 'Engine', to: 'Reviewer voice',
         about: { checkId: check.id },
         reason: cut(`Kept the ${codeRoute} route for ${check.id}: the repair plan says ${codeRoute}, ` +
           `the reviewer proposed ${v.proposedRoute}.`),
@@ -102,7 +102,7 @@ export async function explainReview({ model, checks, route, messenger }) {
     }
     const verdictText = String(v.verdict ?? '').trim() || 'No verdict text returned.';
     messenger.send({
-      type: 'RESULT', from: 'Reviewer',
+      type: 'RESULT', from: 'Reviewer voice',
       to: codeRoute === 'repair' ? 'Repair' : 'Coordinator',
       about: { checkId: check.id },
       reason: cut(verdictText),

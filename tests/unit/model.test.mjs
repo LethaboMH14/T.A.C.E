@@ -59,7 +59,7 @@ test('request shape: headers, body fields, no tools, no response_format', async 
     assert.equal(r.body.model, 'test-model');
     assert.deepEqual(r.body.messages, msgs);
     assert.equal(r.body.temperature, 0.2);
-    assert.equal(r.body.max_tokens, 1500);
+    assert.equal(r.body.max_tokens, 6000);
     assert.equal('tool_choice' in r.body, false);
     assert.equal('tools' in r.body, false);
     assert.equal('response_format' in r.body, false);

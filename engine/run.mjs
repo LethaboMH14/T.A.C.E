@@ -96,9 +96,16 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
     if (agentsOn) {
       const { readGoal } = await import('../agents/goal-reader.mjs');
       try {
-        const r = await readGoal({ model: M.model, intake: M.intake, catalog: domain.catalog || [], messenger: M.messenger, emit });
+        const r = await readGoal({ model: M.model, intake: M.intake, catalog: domain.catalog || [], messenger: M.messenger, emit, domainContext: domain.goalContext || null, example: domain.goalExample || null });
+        if (r.status === 'NEEDS_CLARIFICATION') {
+          for (const [i, q] of r.questions.entries()) emit(EVENT.HUMAN_QUESTION, { id: `Q-${i + 1}`, question: q.question, code: q.code, options: q.options ?? [], whyAsked: 'The Goal Reader marked this as blocking: the plan would change with the answer.' }, { taskId: null, role: 'Goal Reader' });
+          M.blockedReason = `Needs an answer before planning: ${r.questions.map((q) => q.question).join(' / ')}`;
+          return { next: 'finish', status: RUN_STATUS.BLOCKED, trail: ['goal:needs-answer'] };
+        }
         if (r.status !== 'ACCEPTED') {
-          M.blockedReason = 'The Goal Reader could not produce a goal contract the validator accepts. A person must rephrase the goal.';
+          M.blockedReason = String(r.code).startsWith('MODEL_')
+            ? `The model service kept failing (${r.code}), so no goal contract was produced. Try again, or run with the model off.`
+            : `The Goal Reader could not produce a goal contract the validator accepts (${r.code}). A person must rephrase the goal.`;
           return { next: 'finish', status: RUN_STATUS.BLOCKED, trail: ['goal:escalated'] };
         }
         proposal = r.proposal; source = 'model';
@@ -318,10 +325,19 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
 
   try {
     await graph.invoke({}, { configurable: { thread_id: runId }, recursionLimit: 40 });
+  } catch (err) {
+    // A crash inside any node must still end the run honestly: a failure event, a reason, a manifest.
+    const msg = `Engine error: ${err.code || ''} ${err.message}`.trim();
+    try { emit(EVENT.TASK_FAILED, { code: err.code || 'ENGINE_ERROR', message: msg, attempt: 1 }, { taskId: 'engine', role: 'Engine' }); } catch { /* ledger itself failed */ }
+    M.blockedReason = msg;
+    if (!M.result) {
+      try { await finishNode({ status: M.tasks.length ? RUN_STATUS.PARTIAL : RUN_STATUS.BLOCKED }); }
+      catch { try { emit(EVENT.RUN_FINISHED, { status: RUN_STATUS.PARTIAL, checksPassed: 0, checksTotal: M.checks.length, repairs: 0, reason: msg }); } catch { /* nothing more we can do */ } }
+    }
   } finally {
     ledger.close();
   }
-  return M.result;
+  return M.result ?? { runId, runDir, status: RUN_STATUS.PARTIAL, checksPassed: 0, checksTotal: 0, repairs: [], unsupported: [], manifest: null };
 }
 
 /** The mission graph's shape, for docs and the UI (no execution). */
@@ -359,6 +375,8 @@ function buildManifest({ runId, scenario, status, store, admitted, checks, repai
     plantedFault: scenario.inject ?? null,
     unsupported,
     reason,
-    honesty: agents ? `Agents use ${agents.provider}:${agents.model}; every model output is checked by code. Synthetic data only. Nothing was sent.` : 'Workers are deterministic code. Synthetic data only. Nothing was sent.',
+    honesty: agents
+      ? `Agents use ${agents.provider}:${agents.model}. Model decisions (goal contract, team, repair route, draft wording) are checked by code before use; explanatory text (join reasons, verdicts) is shown as the model wrote it. The numbers, schedule and checks are code. Synthetic data only. Nothing was sent.`
+      : 'Workers are deterministic code. Synthetic data only. Nothing was sent.',
   };
 }

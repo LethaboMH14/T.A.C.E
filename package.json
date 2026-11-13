@@ -18,7 +18,9 @@
     "demo:inject_wrong_aggregate": "node cli/tace.mjs run --scenario inject_wrong_aggregate",
     "demo:mentor_unavailable": "node cli/tace.mjs run --scenario mentor_unavailable",
     "demo:missing_source": "node cli/tace.mjs run --scenario missing_source",
-    "studio": "node web/server.mjs"
+    "studio": "node web/server.mjs",
+    "model:check": "node cli/tace.mjs model-check",
+    "mcp": "node mcp/server.mjs"
   },
   "license": "MIT",
   "dependencies": {

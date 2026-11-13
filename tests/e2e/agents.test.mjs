@@ -33,7 +33,7 @@ function scriptedModel({ wrongTimeFirst }) {
         });
         return { json: { drafts }, text: '', toolCalls: [], usage, ms: 1 };
       }
-      if (agent === 'Reviewer') return { json: { verdicts: [] }, text: '', toolCalls: [], usage, ms: 1 };
+      if (agent === 'Reviewer voice') return { json: { verdicts: [] }, text: '', toolCalls: [], usage, ms: 1 };
       throw Object.assign(new Error(`unexpected agent ${agent}`), { code: 'TEST_UNEXPECTED' });
     },
   };

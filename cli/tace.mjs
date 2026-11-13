@@ -81,6 +81,23 @@ async function main() {
     }
     return 0;
   }
+  if (cmd === 'model-check') {
+    loadLocalEnv();
+    const { modelFromEnv } = await import('../engine/model.mjs');
+    const m = modelFromEnv(process.env);
+    if (!m.available) { console.log('No model key found. Put MODEL_API_KEY=... in repo/.env (see .env.example).'); return 3; }
+    console.log(`Checking ${m.provider} · ${m.model} at ${m.baseUrl} (the key is not shown) ...`);
+    try {
+      const r = await m.chat({ agent: 'model-check', messages: [{ role: 'user', content: 'Reply with exactly: ready' }], maxTokens: 800, temperature: 0 });
+      console.log(`OK · ${r.ms} ms · ${r.usage?.total ?? '?'} tokens · reply: ${JSON.stringify(String(r.text).slice(0, 40))} · message fields: ${Object.keys(r.message || {}).join(',')}`);
+      const s = await m.chat({ agent: 'model-check', messages: [{ role: 'user', content: 'Give {"ok": true}' }], jsonSchema: { name: 'ok', schema: { type: 'object', properties: { ok: { type: 'boolean' } }, required: ['ok'] } }, maxTokens: 800, temperature: 0 });
+      console.log(`Structured output OK · ${JSON.stringify(s.json)}`);
+      return 0;
+    } catch (err) {
+      console.log(`FAILED · ${err.code || 'ERROR'} · ${err.message}`);
+      return 2;
+    }
+  }
   if (cmd !== 'run' || !a.scenario) {
     console.log('usage: node cli/tace.mjs run --scenario <id> [--model off] [--pace ms] [--runs dir] [--run-id id] [--json]\n       node cli/tace.mjs list\n  agents use the model in repo/.env (MODEL_API_KEY) when present; --model off forces code only');
     return cmd === 'help' ? 0 : 1;
@@ -104,8 +121,9 @@ async function main() {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-  main().then((code) => process.exit(code), (err) => {
-    if (err.code === 'RUN_EXISTS') { console.error(err.message); process.exit(4); }
-    console.error(err.stack || err); process.exit(1);
+  // exitCode (not exit()) lets open network handles close cleanly on Windows
+  main().then((code) => { process.exitCode = code; }, (err) => {
+    if (err.code === 'RUN_EXISTS') { console.error(err.message); process.exitCode = 4; return; }
+    console.error(err.stack || err); process.exitCode = 1;
   });
 }

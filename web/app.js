@@ -108,6 +108,7 @@ function apply(e) {
   switch (e.type) {
     case 'RUN_STARTED':
       S.title = d.title; S.goal = d.goalText; S.pace = d.pacedMs || 0;
+      $('#footNote').textContent = `Synthetic data only. ${d.agents?.mode === 'model' ? `Agents use ${d.agents.provider} · ${d.agents.model}; every model output is checked by code.` : 'Code only: no model took part in this run.'} Nothing is sent: messages stay as drafts until a person approves them.`;
       $('#missionTitle').textContent = d.title;
       $('#goalText').textContent = d.goalText;
       { const p = plantedText(d.plantedFault, d); const el = $('#planted'); el.hidden = !p.length; if (p.length) el.innerHTML = `${icon('alert')}<span>${d.plantedFault ? 'Planted on purpose for this demo' : 'Changed for this scenario'}: ${esc(p.join('; '))}. It is declared in the scenario file and in the ledger.</span>`; }

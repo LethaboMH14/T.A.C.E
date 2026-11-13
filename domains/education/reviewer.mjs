@@ -784,6 +784,21 @@ function draftProblems(d, row, mentorName) {
     out.push({ ...base, issue: 'mentor_missing', expected: mentorName, found: null,
       say: `Draft ${id} does not name the mentor ${mentorName}.` });
   }
+
+  // Model-written text is untrusted: the subject gets the same time/weekday rules, and neither
+  // field may carry contact details or links (prompt-only rules are not enough).
+  const subject = typeof d.subject === 'string' ? d.subject : '';
+  for (const t of [...subject.matchAll(CLOCK_RE)].map((m) => Number(m[1]) * 60 + Number(m[2]))) {
+    if (t !== startMin && t !== endMin) out.push({ ...base, issue: 'subject_time_wrong', expected: startHm, found: hhmm(t), say: `Draft ${id} subject says ${hhmm(t)} but the session starts at ${startHm}.` });
+  }
+  for (const m of subject.matchAll(WEEKDAY_WORD_RE)) {
+    if (m[1].slice(0, 3) !== row.day) out.push({ ...base, issue: 'subject_weekday_wrong', expected: row.day, found: m[1], say: `Draft ${id} subject says ${m[1]} but the session is on ${row.day}.` });
+  }
+  for (const [field, text] of [['subject', subject], ['body', body]]) {
+    const hit = text.match(/https?:\/\/\S+|www\.\S+|[\w.+-]+@[\w-]+\.[\w.]+|\+?\d[\d\s-]{8,}\d/);
+    if (hit) out.push({ ...base, issue: 'contact_or_link', expected: 'no links, emails or phone numbers', found: hit[0].slice(0, 40), say: `Draft ${id} ${field} contains "${hit[0].slice(0, 40)}"; drafts may not carry links, emails or phone numbers.` });
+  }
+  if (body.length > 1200) out.push({ ...base, issue: 'too_long', expected: '≤ 1200 characters', found: body.length, say: `Draft ${id} is ${body.length} characters; keep drafts short.` });
   return out;
 }
 

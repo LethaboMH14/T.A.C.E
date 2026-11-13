@@ -52,11 +52,22 @@ function stripFences(text) {
   return m ? m[1] : trimmed;
 }
 
+/**
+ * Meta's constrained decoder returns HTTP 500 for schemas that contain regex `pattern`
+ * (measured live on 13 Nov 2026: full G02 schema -> 500; same schema without `pattern` -> 200).
+ * We drop only the keywords the decoder cannot handle. The caller still validates the reply
+ * against the FULL schema in code (e.g. validateGoalProposal), so no rule is lost.
+ */
+export function providerSchema(schema) {
+  return JSON.parse(JSON.stringify(schema, (k, v) => (k === 'pattern' || k === '$comment' || k === '$schema' || k === '$id' ? undefined : v)));
+}
+
 export function modelFromEnv(env = process.env, opts = {}) {
   return createModel({
     apiKey: env.MODEL_API_KEY || env.LLAMA_API_KEY || undefined,
     baseUrl: env.MODEL_BASE_URL || undefined,
     model: env.MODEL_NAME || undefined,
+    reasoningEffort: env.MODEL_REASONING_EFFORT || undefined,
     ...opts,
   });
 }
@@ -65,10 +76,12 @@ export function createModel({
   apiKey,
   baseUrl = 'https://api.meta.ai/v1',
   model = 'muse-spark-1.3',
-  timeoutMs = 45000,
+  timeoutMs = 90000,
   maxRetries = 2,
   fetchImpl = fetch,
   onCall = () => {},
+  // Measured live on 13 Nov: the goal schema took 17 s (default), 15 s ('low'), 10 s ('minimal').
+  reasoningEffort = 'low',
 } = {}) {
   const base = String(baseUrl).replace(/\/+$/, '');
   const available = !!apiKey;
@@ -167,13 +180,15 @@ export function createModel({
     tools,
     jsonSchema,
     temperature = 0.2,
-    maxTokens = 1500,
+    maxTokens = 6000, // reasoning models spend tokens thinking before they answer; 1500 truncated replies in live tests (13 Nov)
+    reasoningEffort: effort = reasoningEffort,
   } = {}) {
     if (!available) {
       throw modelError('MODEL_UNAVAILABLE', 'No model API key is configured (set MODEL_API_KEY)');
     }
 
     const payload = { model, messages, temperature, max_tokens: maxTokens };
+    if (effort) payload.reasoning_effort = effort;
     if (tools && tools.length > 0) {
       payload.tools = tools;
       payload.tool_choice = 'auto';
@@ -181,7 +196,7 @@ export function createModel({
     if (jsonSchema) {
       payload.response_format = {
         type: 'json_schema',
-        json_schema: { name: jsonSchema.name, schema: jsonSchema.schema },
+        json_schema: { name: jsonSchema.name, schema: providerSchema(jsonSchema.schema) },
       };
     }
 

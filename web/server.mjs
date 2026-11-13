@@ -37,14 +37,20 @@ function send(res, status, body, type = 'application/json; charset=utf-8') {
 
 function listRuns() {
   if (!fs.existsSync(runsDir)) return [];
-  return fs.readdirSync(runsDir, { withFileTypes: true }).filter((d) => d.isDirectory() && RUN_ID.test(d.name)).map((d) => {
+  // Folders starting with "_" (e.g. runs/_lms snapshots) are not runs.
+  return fs.readdirSync(runsDir, { withFileTypes: true }).filter((d) => d.isDirectory() && RUN_ID.test(d.name) && !d.name.startsWith('_')).map((d) => {
     const ev = path.join(runsDir, d.name, 'events.jsonl');
-    let first = null; let last = null;
+    let first = null; let finished = null; let delivered = null;
     if (fs.existsSync(ev)) {
-      const lines = fs.readFileSync(ev, 'utf8').trim().split('\n').filter(Boolean);
-      if (lines.length) { first = JSON.parse(lines[0]); last = JSON.parse(lines[lines.length - 1]); }
+      const events = fs.readFileSync(ev, 'utf8').trim().split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+      first = events[0] ?? null;
+      // Events may follow RUN_FINISHED (e.g. MESSAGES_DELIVERED), so look for the finish event itself.
+      finished = events.findLast((e) => e.type === 'RUN_FINISHED') ?? null;
+      delivered = events.findLast((e) => e.type === 'MESSAGES_DELIVERED') ?? null;
     }
-    return { runId: d.name, scenarioId: first?.data?.scenarioId ?? null, title: first?.data?.title ?? null, startedAt: first?.ts ?? null, status: last?.type === 'RUN_FINISHED' ? last.data.status : (active.has(d.name) ? 'RUNNING' : 'INCOMPLETE') };
+    return { runId: d.name, scenarioId: first?.data?.scenarioId ?? null, title: first?.data?.title ?? null, startedAt: first?.ts ?? null,
+      status: finished ? finished.data.status : (active.has(d.name) ? 'RUNNING' : 'INCOMPLETE'),
+      delivered: delivered ? delivered.data.count : null };
   }).sort((a, b) => String(b.startedAt).localeCompare(String(a.startedAt)));
 }
 

@@ -22,7 +22,9 @@ export function planRepairs(failed) {
     jobs.get(key).checkIds.push(id);
   };
   for (const c of [...failed].sort((a, b) => (a.id < b.id ? -1 : 1))) {
-    if (SCHEDULE_CHECKS.has(c.id)) add('schedule', { kind: 'mentor_schedule', strategy: 'reschedule_affected_sessions', fixable: true, rerun: ['mentor_schedule'] }, c.id);
+    // UNKNOWN means the reviewer could not read or trust a file. Repair must not guess around that.
+    if (c.status !== 'FAIL') add('unknown:' + c.id, { kind: c.kind, strategy: 'none', fixable: false, rerun: [], reason: `${c.id} could not be checked (${c.message}). A person must look at it.` }, c.id);
+    else if (SCHEDULE_CHECKS.has(c.id)) add('schedule', { kind: 'mentor_schedule', strategy: 'reschedule_affected_sessions', fixable: true, rerun: ['mentor_schedule'] }, c.id);
     else if (SUMMARY_CHECKS.has(c.id)) add('summary', { kind: 'performance_summary', strategy: 'recompute_affected_numbers', fixable: true, rerun: ['performance_summary'] }, c.id);
     else if (DRAFT_CHECKS.has(c.id)) add('drafts', { kind: 'message_drafts', strategy: 'regenerate_from_latest_schedule', fixable: true, rerun: [] , rerunSelf: 'draft_messages' }, c.id);
     else if (c.id === 'C01_gaps_match') add('gaps', { kind: 'gap_analysis', strategy: 'rerun_producer', fixable: true, rerun: [], rerunSelf: 'compute_gaps' }, c.id);
@@ -48,7 +50,8 @@ function mentorSlots(mentorId, sources, scenario) {
   const slots = [];
   for (const w of sources.availability.rows) {
     if (w.mentor_id !== mentorId || off.has(w.day)) continue;
-    for (let s = toMin(w.start); s + SESSION_MINUTES <= toMin(w.end); s += 60) {
+    // whole-hour starts only, same rule as the scheduler (rules.mjs)
+    for (let s = Math.ceil(toMin(w.start) / 60) * 60; s + SESSION_MINUTES <= toMin(w.end); s += 60) {
       slots.push({ day: w.day, date: dateFor(w.day), start: toHhmm(s), end: toHhmm(s + SESSION_MINUTES) });
     }
   }
@@ -105,7 +108,7 @@ function skillStats(skillId, sources) {
   const skill = sources.skills.rows.find(s => s.skill_id === skillId);
   const threshold = Number(skill.threshold);
   const cells = sources.assessments.rows.filter(a => a.skill_id === skillId);
-  const present = cells.filter(a => a.score !== '').map(a => Number(a.score));
+  const present = cells.filter(a => String(a.score).trim() !== '').map(a => Number(String(a.score).trim()));
   const mean = present.length ? Math.round((present.reduce((x, y) => x + y, 0) / present.length) * 10) / 10 : null;
   return { mean, present: present.length, missing: cells.length - present.length, below_threshold: present.filter(s => s < threshold).length };
 }
@@ -149,16 +152,20 @@ export async function applyRepair(ctx, job, failedChecks) {
   if (job.kind === 'performance_summary') {
     const ref = store.latestByName('performance-summary.json');
     const { json, changes } = repairSummary(JSON.parse(store.read(ref)), failedChecks, sources);
+    const onlyText = failedChecks.every((c) => c.id === 'C03_summary_text_matches');
+    if (!changes.length && !onlyText) {
+      return { unfixable: true, reason: 'The flagged summary numbers already match a fresh recompute here, so repair cannot tell what is wrong. A person must look at it.' };
+    }
     if (!changes.length) {
-      // numbers already right: the text drifted, so only re-render the markdown
+      // numbers already right: only the text drifted, so re-render the markdown from the JSON
       const mdRef = store.latestByName('performance-summary.md');
       const md = store.write({ kind: mdRef.kind, name: mdRef.name, content: renderSummaryMd(json), producer: 'repair', inputs: mdRef.inputs });
-      return { from: `${mdRef.name}@v${mdRef.version}`, to: `${md.name}@v${md.version}`, toRef: md, changes: [{ field: 'markdown', from: 'out of date', to: 'rendered from verified JSON' }] };
+      return { from: `${mdRef.name}@v${mdRef.version}`, to: `${md.name}@v${md.version}`, toRef: md, changes: [{ field: 'markdown', from: 'out of date', to: 're-rendered from the JSON numbers' }] };
     }
     const to = store.write({ kind: ref.kind, name: ref.name, content: JSON.stringify(json, null, 2) + '\n', producer: 'repair', inputs: ref.inputs });
     const mdRef = store.latestByName('performance-summary.md');
-    store.write({ kind: mdRef.kind, name: mdRef.name, content: renderSummaryMd(json), producer: 'repair', inputs: mdRef.inputs });
-    return { from: `${ref.name}@v${ref.version}`, to: `${to.name}@v${to.version}`, toRef: to, changes };
+    const md = store.write({ kind: mdRef.kind, name: mdRef.name, content: renderSummaryMd(json), producer: 'repair', inputs: mdRef.inputs });
+    return { from: `${ref.name}@v${ref.version}`, to: `${to.name}@v${to.version}`, toRef: to, alsoWritten: [md], changes };
   }
   return { unfixable: true, reason: `No repair strategy for ${job.kind}` };
 }

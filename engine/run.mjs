@@ -29,6 +29,10 @@ const tag = (ref) => `${ref.name}@v${ref.version}`;
  * @param {(e:object)=>void} [o.onEvent]
  */
 export async function runMission({ scenario, domain, sourcesDir, runDir, runId, trustedContext, paceMs = 0, onEvent, clock }) {
+  // One run = one empty folder. Re-using a folder would mix two runs' events and versions.
+  if (fs.existsSync(runDir) && fs.readdirSync(runDir).length > 0) {
+    throw Object.assign(new Error(`run folder already used: ${runDir} (pick a new --run-id)`), { code: 'RUN_EXISTS' });
+  }
   fs.mkdirSync(runDir, { recursive: true });
   const ledger = openLedger(runDir, runId, clock ? { clock } : {});
   if (onEvent) ledger.on(onEvent);
@@ -44,12 +48,13 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
     const manifest = buildManifest({ runId, scenario, status, store, admitted, checks, repairs, unsupported, domain, extra });
     const mref = store.write({ kind: 'final_manifest', name: 'final-manifest.json', content: JSON.stringify(manifest, null, 2) + '\n', producer: 'runner' });
     emit(EVENT.ARTIFACT_WRITTEN, mref);
-    emit(EVENT.RUN_FINISHED, { status, checksPassed: passed, checksTotal: checks.length, repairs: repairs.filter((r) => r.to).length, reason: extra.reason ?? null });
+    emit(EVENT.RUN_FINISHED, { status, checksPassed: passed, checksTotal: checks.length, repairs: repairs.filter((r) => r.to || r.rerun).length, reason: extra.reason ?? null });
     ledger.close();
     return { runId, runDir, status, checksPassed: passed, checksTotal: checks.length, repairs, unsupported, manifest };
   };
 
-  emit(EVENT.RUN_STARTED, { scenarioId: scenario.id, title: scenario.title, goalText: scenario.goalText, pacedMs: paceMs, contract: CONTRACT_VERSION });
+  // A planted demo fault is declared in the ledger itself, so nobody has to trust the title.
+  emit(EVENT.RUN_STARTED, { scenarioId: scenario.id, title: scenario.title, goalText: scenario.goalText, pacedMs: paceMs, contract: CONTRACT_VERSION, plantedFault: scenario.inject ?? null, changedConstraints: scenario.unavailable ?? null, excludedSources: scenario.excludeSources ?? null });
   await sleep(paceMs);
 
   // 1. Goal: the accepted G02 intake + proposal validators. Valid = structurally valid, NOT authorised.
@@ -109,6 +114,7 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
 
   // 5. Independent review -> targeted repair -> re-run downstream -> fresh review.
   let status = first.status === 'COMPLETED' ? null : RUN_STATUS.PARTIAL;
+  const reasons = first.failed.map((f) => `Step ${f.id} failed: ${f.message}`);
   for (let round = 1; ; round++) {
     await sleep(paceMs);
     emit(EVENT.REVIEW_STARTED, { round }, { taskId: 'review', role: 'Reviewer' });
@@ -117,16 +123,17 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
     for (const c of checks) emit(EVENT.CHECK_RESULT, c, { taskId: 'review', role: 'Reviewer' });
     emit(EVENT.ARTIFACT_WRITTEN, cref, { taskId: 'review', role: 'Reviewer' });
     const failed = checks.filter((c) => c.status !== CHECK_STATUS.PASS);
+    if (checks.length === 0) { status = RUN_STATUS.PARTIAL; reasons.push('Nothing could be checked: no reviewable file was produced'); break; }
     if (failed.length === 0) {
-      emit(EVENT.VERIFICATION_PASSED, { round, passed: checks.length, total: checks.length }, { taskId: 'review', role: 'Reviewer' });
+      emit(EVENT.VERIFICATION_PASSED, { round, passed: checks.length, total: checks.length, note: status ? 'Every file that exists passed, but some steps did not finish' : null }, { taskId: 'review', role: 'Reviewer' });
       break;
     }
     emit(EVENT.VERIFICATION_FAILED, { round, failed: failed.map((c) => c.id), messages: failed.map((c) => c.message) }, { taskId: 'review', role: 'Reviewer' });
-    if (round > REPAIR_BUDGET) { status = RUN_STATUS.PARTIAL; break; }
+    if (round > REPAIR_BUDGET) { status = RUN_STATUS.PARTIAL; reasons.push(`Repair budget (${REPAIR_BUDGET} rounds) used up; still failing: ${failed.map((c) => c.id).join(', ')}`); break; }
 
     const jobs = domain.planRepairs(failed);
     const fixable = jobs.filter((j) => j.fixable);
-    for (const j of jobs.filter((j) => !j.fixable)) repairs.push({ round, kind: j.kind, checkIds: j.checkIds, unfixable: true, reason: j.reason });
+    for (const j of jobs.filter((j) => !j.fixable)) { repairs.push({ round, kind: j.kind, checkIds: j.checkIds, unfixable: true, reason: j.reason }); reasons.push(j.reason); }
     if (fixable.length === 0) { status = RUN_STATUS.PARTIAL; break; }
 
     const rerun = new Set();
@@ -142,14 +149,22 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
         progressed = true;
         continue;
       }
-      const res = await domain.applyRepair({ store, sources: adm.sources, scenario }, job, failed.filter((c) => job.checkIds.includes(c.id)));
+      let res;
+      try {
+        res = await domain.applyRepair({ store, sources: adm.sources, scenario }, job, failed.filter((c) => job.checkIds.includes(c.id)));
+      } catch (err) {
+        res = { unfixable: true, reason: `Repair could not run: ${err.code || ''} ${err.message}`.trim() };
+      }
       if (res.unfixable) {
         repairs.push({ round, kind: job.kind, checkIds: job.checkIds, unfixable: true, reason: res.reason });
+        reasons.push(res.reason);
+        emit(EVENT.TASK_FAILED, { code: 'REPAIR_NOT_POSSIBLE', message: res.reason, attempt: 1 }, { taskId: 'repair', role: 'Repair' });
         continue;
       }
       progressed = true;
       repairs.push({ round, kind: job.kind, checkIds: job.checkIds, strategy: job.strategy, from: res.from, to: res.to, changes: res.changes });
       emit(EVENT.ARTIFACT_WRITTEN, res.toRef, { taskId: 'repair', role: 'Repair' });
+      for (const extra of res.alsoWritten || []) emit(EVENT.ARTIFACT_WRITTEN, extra, { taskId: 'repair', role: 'Repair' });
       emit(EVENT.ARTIFACT_REPAIRED, { round, from: res.from, to: res.to, changes: res.changes, checkIds: job.checkIds }, { taskId: 'repair', role: 'Repair' });
       for (const producer of job.rerun) for (const d of descendants(tasks, producer)) rerun.add(d);
     }
@@ -165,8 +180,10 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
   const hist = store.write({ kind: 'repair_history', name: 'repair-history.json', content: JSON.stringify({ repairs }, null, 2) + '\n', producer: 'repair' });
   emit(EVENT.ARTIFACT_WRITTEN, hist, { taskId: 'repair', role: 'Repair' });
 
-  if (!status) status = unsupported.length ? RUN_STATUS.PARTIAL : RUN_STATUS.VERIFIED;
-  return finish(status, { repairsApplied: repairsDone.length });
+  const realUnsupported = unsupported.filter((k) => !k.startsWith('source:'));
+  if (realUnsupported.length) reasons.push(`Cannot produce: ${realUnsupported.join(', ')}`);
+  if (!status) status = realUnsupported.length ? RUN_STATUS.PARTIAL : RUN_STATUS.VERIFIED;
+  return finish(status, { repairsApplied: repairsDone.length, reason: status === RUN_STATUS.VERIFIED ? null : [...new Set(reasons)].join(' · ') || null });
 }
 
 // A kind may have a data file and a readable rendering (e.g. .json + .md). The hand-off is the data file.
@@ -192,7 +209,8 @@ function buildManifest({ runId, scenario, status, store, admitted, checks, repai
     artifacts: [...latest.values()].filter((r) => r.name !== 'final-manifest.json').sort((a, b) => (a.name < b.name ? -1 : 1)).map((r) => ({ name: r.name, ...strip(r) })),
     supersededVersions: all.filter((r) => latest.get(r.name) !== r).map((r) => ({ name: r.name, ...strip(r) })),
     checks: { passed: checks.filter((c) => c.status === CHECK_STATUS.PASS).length, total: checks.length, failed: checks.filter((c) => c.status !== CHECK_STATUS.PASS).map((c) => c.id) },
-    repairs: repairs.map((r) => ({ round: r.round, kind: r.kind, checkIds: r.checkIds, from: r.from ?? null, to: r.to ?? null, rerun: r.rerun ?? null, unfixable: !!r.unfixable })),
+    repairs: repairs.map((r) => ({ round: r.round, kind: r.kind, checkIds: r.checkIds, from: r.from ?? null, to: r.to ?? null, rerun: r.rerun ?? null, unfixable: !!r.unfixable, reason: r.reason ?? null })),
+    plantedFault: scenario.inject ?? null,
     unsupported,
     reason: extra.reason ?? null,
     honesty: 'Workers are deterministic code. Synthetic data only. Nothing was sent.',

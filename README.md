@@ -1,7 +1,37 @@
 # T.A.C.E — Universal Goal-to-Execution Engine
 
-**Status:** Gate 01 design requirements complete; Gate 02 in research; no working universal multi-agent engine
-**Last reviewed:** 2026-11-13 (handover status; verify live branch/CI before acting)
+**Status:** One synthetic education mission now runs end to end: goal → plan → real files → independent review → targeted repair → re-check. The workers are deterministic code (no language model in the runtime yet). The universal engine, auth, real connectors and sending are not built.
+**Last reviewed:** 2026-11-13 (verify live branch/CI before acting)
+
+## Run the demo (Node ≥ 22.13, no install step, no internet, no keys)
+
+```sh
+npm test                                  # 383 tests: engine, education pack, end-to-end, existing G01/G02 gates
+node cli/tace.mjs list                    # the six scenarios
+npm run demo:inject_overlap               # the Scheduler double-books Mentor B; the Reviewer catches it; Repair moves 1 session
+npm run studio                            # Mission Studio at http://localhost:4173 (start runs, watch them live)
+```
+
+| Scenario | What happens (measured on 2026-11-13) | Exit |
+|---|---|---|
+| `baseline` | 5 steps, 36 learners, 57 gaps, 14 at risk, 14 sessions booked, 17 unsent drafts; 13/13 checks | VERIFIED |
+| `report_only` | Smaller goal → planner picks 2 steps only; 5/5 checks | VERIFIED |
+| `inject_overlap` | Planted fault: Mentor B booked twice Tue 09:00. Reviewer C04 fails → Repair writes `mentor-schedule.v2.csv` (1 session moved, v1 kept) → drafts re-run from v2 → 13/13 | VERIFIED after 1 repair |
+| `inject_wrong_aggregate` | Planted fault: S3 mean counts missing scores as zero (60.9). Reviewer recomputes 64.5 → Repair writes v2; its sha256 equals the correct baseline file | VERIFIED after 1 repair |
+| `mentor_unavailable` | Mentor B away Thursday → schedule re-planned, still 14 booked | VERIFIED |
+| `missing_source` | No assessment file → nothing guessed, nothing produced | BLOCKED |
+
+Each run writes `runs/<runId>/`: versioned `artifacts/` (old versions kept), `events.jsonl` + `ledger.sqlite` (append-only), `evidence-checks.json`, `repair-history.json` and `final-manifest.json` (sha256 of every input and output).
+
+**How it is built:** `engine/` is domain-neutral (contracts, source admission, planner, graph runner, artifact store with read-back, SQLite ledger, run loop). `domains/education/` is the first domain pack (analyst, support planner, scheduler, writer, **independent reviewer that imports no worker code**, targeted repair). Goal proposals pass the accepted G02 validators before planning. Decision record: [ADR-0008](docs/decisions/ADR-0008-runtime-slice.md). Reviews: [wave 1](docs/reviews/WAVE1-REVIEW-20261113.md), [wave 2](docs/reviews/WAVE2-REVIEW-20261113.md).
+
+**Honest limits:**
+- Workers are code, not LLM agents.
+- Synthetic data only.
+- Faults in the two self-correction scenarios are planted on purpose. They are declared in the scenario file and in the ledger (`plantedFault`).
+- Mission Studio paces runs to about 0.65 s per step so people can follow them. The work itself takes milliseconds.
+- No auth or tenant layer. Nothing can be sent.
+- Impact on coordinators is not measured.
 
 ## Claude Code / engineering handover — START HERE
 

@@ -93,5 +93,8 @@ async function main() {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-  main().then((code) => process.exit(code), (err) => { console.error(err.stack || err); process.exit(1); });
+  main().then((code) => process.exit(code), (err) => {
+    if (err.code === 'RUN_EXISTS') { console.error(err.message); process.exit(4); }
+    console.error(err.stack || err); process.exit(1);
+  });
 }

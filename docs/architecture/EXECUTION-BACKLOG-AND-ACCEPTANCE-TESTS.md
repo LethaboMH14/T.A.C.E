@@ -36,7 +36,7 @@ Claude should avoid overlapping PR changes to the same source or relying on unme
 
 ### P0.0 — verify baseline and pick the minimal runtime
 
-**Inputs:** [main code](../../tools/gate02/), [draft PR #8](https://github.com/LethaboMH14/T.A.C.E/pull/8), existing CI and accepted ADRs.
+**Inputs:** [main code](../../tools/gate02/README.md), [draft PR #8](https://github.com/LethaboMH14/T.A.C.E/pull/8), existing CI and accepted ADRs.
 
 Tasks:
 - `git status`, `git log`, open PR/issue check, dependency/license scan and review actual commands.

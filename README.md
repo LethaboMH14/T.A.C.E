@@ -1,37 +1,68 @@
 # T.A.C.E — Universal Goal-to-Execution Engine
 
-**Status:** One synthetic education mission now runs end to end: goal → plan → real files → independent review → targeted repair → re-check. The workers are deterministic code (no language model in the runtime yet). The universal engine, auth, real connectors and sending are not built.
+**Status (13 Nov 2026):** One synthetic education mission runs end to end with **real model agents**:
+goal → model-drafted goal contract (checked by the accepted G02 validator) → plan → model-staffed team (checked by the planner) → workers write real files → **independent Reviewer** (code, imports no worker code) catches a fault → **targeted Repair** writes v2 → downstream re-run → fresh review → manifest.
+
+It is orchestrated as a **LangGraph JS** state graph and streamed live to a **React Mission Studio**. Auth, tenants, real connectors and sending are not built.
 **Last reviewed:** 2026-11-13 (verify live branch/CI before acting)
 
-## Run the demo (Node ≥ 22.13, no install step, no internet, no keys)
+## Run it
 
 ```sh
-npm test                                  # 383 tests: engine, education pack, end-to-end, existing G01/G02 gates
-node cli/tace.mjs list                    # the six scenarios
-npm run demo:inject_overlap               # the Scheduler double-books Mentor B; the Reviewer catches it; Repair moves 1 session
-npm run studio                            # Mission Studio at http://localhost:4173 (start runs, watch them live)
+npm ci                                    # LangGraph JS, MCP SDK, zod (Node ≥ 22.13)
+npm test                                  # 473 tests: engine, agents, router, MCP, E2E, G01/G02 gates
+node cli/tace.mjs list                    # scenarios
+npm run demo:inject_overlap               # code-only run (no key needed)
+cp .env.example .env                      # then add MODEL_API_KEY and/or GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY …
+npm run providers                         # checks every configured model provider (keys never printed)
+MODEL_PROFILE=free npm run demo:inject_overlap   # same mission with model agents on free models
+npm run studio                            # Mission Studio at http://localhost:4173 (React; classic page at /classic)
+npm run mcp                               # T.A.C.E as an MCP server (see mcp/README.md)
 ```
 
-| Scenario | What happens (measured on 2026-11-13) | Exit |
+### Measured on 13 Nov 2026 (synthetic cohort: 36 learners, 3 mentors)
+
+| Run | What happened | Result |
 |---|---|---|
-| `baseline` | 5 steps, 36 learners, 57 gaps, 14 at risk, 14 sessions booked, 17 unsent drafts; 13/13 checks | VERIFIED |
-| `report_only` | Smaller goal → planner picks 2 steps only; 5/5 checks | VERIFIED |
-| `inject_overlap` | Planted fault: Mentor B booked twice Tue 09:00. Reviewer C04 fails → Repair writes `mentor-schedule.v2.csv` (1 session moved, v1 kept) → drafts re-run from v2 → 13/13 | VERIFIED after 1 repair |
-| `inject_wrong_aggregate` | Planted fault: S3 mean counts missing scores as zero (60.9). Reviewer recomputes 64.5 → Repair writes v2; its sha256 equals the correct baseline file | VERIFIED after 1 repair |
-| `mentor_unavailable` | Mentor B away Thursday → schedule re-planned, still 14 booked | VERIFIED |
-| `missing_source` | No assessment file → nothing guessed, nothing produced | BLOCKED |
+| `inject_overlap`, Meta `muse-spark-1.3` agents | The Goal Reader's contract passed G02 first time. The Supervisor's team matched the planner. Code found 57 gaps and 14 learners at risk and booked 14 sessions; the model wrote 17 drafts. **Reviewer: Mentor B booked twice Tue 09:00** → Repair moved 1 session (v1 kept) → the model re-wrote drafts from v2 → 14/14 checks | **VERIFIED in 52 s**, 5 model calls, 11,789 tokens |
+| `inject_overlap`, `MODEL_PROFILE=free` | Same story on Groq `gpt-oss-20b`. Live fallbacks: Groq rate limit (429) → Gemini; Gemini 503 → OpenRouter free | **VERIFIED in 56 s, $0** |
+| `inject_wrong_aggregate` (code only) | Planted: S3 mean counts missing scores as zero (60.9). Reviewer recomputes 64.5 → Repair writes v2, byte-identical to the correct file | VERIFIED after 1 repair |
+| `report_only` | Smaller goal → planner picks 2 steps instead of 5 | VERIFIED |
+| `mentor_unavailable` | Mentor B away Thursday → re-planned, 14 booked | VERIFIED |
+| `missing_source` | No assessment file → nothing guessed, nothing produced | BLOCKED (honest) |
+| Agent E2E (scripted model double) | The model writes 11:30 for a 09:00 session → check **C14** catches it → the writer is re-run with the checker's feedback → passes | VERIFIED |
 
-Each run writes `runs/<runId>/`: versioned `artifacts/` (old versions kept), `events.jsonl` + `ledger.sqlite` (append-only), `evidence-checks.json`, `repair-history.json` and `final-manifest.json` (sha256 of every input and output).
+### How it is built
+- **Engine (`engine/`, domain-neutral):**
+  - source admission with sha256 and row numbers,
+  - planner (only the steps the deliverables need),
+  - LangGraph mission graph,
+  - artifact store with read-back verification,
+  - SQLite ledger mirrored to `events.jsonl`,
+  - model adapter and provider router (`engine/providers.mjs`: demo / free / cheap profiles, visible fallbacks, per-run token and USD budget),
+  - typed agent messages (zod).
+- **Agents (`agents/`):**
+  - Goal Reader: model → G02 contract; the validator decides; it asks a person when the goal is genuinely unclear.
+  - Supervisor: model staffs the team; the planner decides.
+  - Reviewer voice: plain verdicts; the code route decides.
+- **Education pack (`domains/education/`):**
+  - analyst, support planner, scheduler and writer (code),
+  - model Message Writer (facts copied by code, wording by the model),
+  - **independent Reviewer, 14 checks C01–C14**,
+  - targeted Repair.
+- **UI (`apps/studio`):** React + React Flow + Radix/shadcn-style components + Motion. It renders only ledger events and files: graph, Failure Autopsy, Evidence X-Ray, Agent room, model use, versioned files.
+- **MCP (`mcp/server.mjs`):** list scenarios, run a mission, read files, re-review a run.
+- **Decisions and reviews:**
+  - [ADR-0008](docs/decisions/ADR-0008-runtime-slice.md), [agent spec](engine/AGENTS-SPEC.md), [model providers](docs/MODEL-PROVIDERS.md)
+  - reviews: [wave 1](docs/reviews/WAVE1-REVIEW-20261113.md), [wave 2](docs/reviews/WAVE2-REVIEW-20261113.md)
 
-**How it is built:** `engine/` is domain-neutral (contracts, source admission, planner, graph runner, artifact store with read-back, SQLite ledger, run loop). `domains/education/` is the first domain pack (analyst, support planner, scheduler, writer, **independent reviewer that imports no worker code**, targeted repair). Goal proposals pass the accepted G02 validators before planning. Decision record: [ADR-0008](docs/decisions/ADR-0008-runtime-slice.md). Reviews: [wave 1](docs/reviews/WAVE1-REVIEW-20261113.md), [wave 2](docs/reviews/WAVE2-REVIEW-20261113.md).
-
-**Honest limits:**
-- Workers are code, not LLM agents.
-- Synthetic data only.
-- Faults in the two self-correction scenarios are planted on purpose. They are declared in the scenario file and in the ledger (`plantedFault`).
-- Mission Studio paces runs to about 0.65 s per step so people can follow them. The work itself takes milliseconds.
-- No auth or tenant layer. Nothing can be sent.
-- Impact on coordinators is not measured.
+### Honest limits
+- Synthetic data only. Nothing can be sent: drafts are marked UNSENT and wait for a person.
+- Faults in the self-correction scenarios are **planted on purpose**. They are declared in the scenario file, the ledger (`plantedFault`) and on screen. The catching and fixing are not scripted.
+- The numbers, schedule and checks are code. Models draft the goal contract, propose the team, write message wording and explain verdicts. Each of those is checked by code before use.
+- Model quality varies by provider. Meta's structured output rejects regex `pattern` in schemas, so the adapter strips it and code re-validates against the full schema.
+- Mission Studio paces runs to about 0.65 s per step so people can follow them.
+- No auth or tenant layer. Impact on coordinators is not measured.
 
 ## Claude Code / engineering handover — START HERE
 

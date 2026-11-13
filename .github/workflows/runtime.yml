@@ -38,3 +38,19 @@ jobs:
           set +e
           node cli/tace.mjs run --scenario missing_source --run-id ci-missing
           test $? -eq 3
+
+  studio:
+    name: Mission Studio (React) tests + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/studio
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # checkout v4, pinned
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # setup-node v4.4.0, pinned
+        with:
+          node-version: '24'
+      - run: npm ci --no-audit --no-fund
+      - run: npx vitest run --reporter=dot
+      - run: npm run build

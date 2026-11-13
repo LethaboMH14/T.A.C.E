@@ -21,6 +21,8 @@ jobs:
           node-version: '24'
       - name: Node runtime
         run: node --version
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
       - name: All tests (unit, E2E, existing G01/G02 gates)
         run: npm test
       - name: Self-correction run must end VERIFIED after a real repair

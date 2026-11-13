@@ -65,8 +65,12 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
 
   // ---------- agents: only when a model is configured; otherwise the run says "code only"
   if (model === 'auto') {
-    const { modelFromEnv } = await import('./model.mjs');
-    M.model = modelFromEnv(env, { onCall: (c) => emit(EVENT.MODEL_CALL, c, { taskId: null, role: c.agent }) });
+    // Provider router: profile order from MODEL_PROFILE (demo | free | cheap | meta), visible fallbacks, per-run budget.
+    const { routerFromEnv } = await import('./providers.mjs');
+    M.model = routerFromEnv(env, {
+      onCall: (c) => emit(EVENT.MODEL_CALL, c, { taskId: null, role: c.agent }),
+      onFallback: (f) => emit(EVENT.MODEL_FALLBACK, f, { taskId: null, role: f.agent }),
+    });
   } else if (model && typeof model === 'object') {
     M.model = model;
   }

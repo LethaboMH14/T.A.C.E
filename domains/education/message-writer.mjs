@@ -156,11 +156,13 @@ export async function draftMessagesWithModel(ctx) {
     messages.push({ role: 'user', content: feedbackMessage(feedback, previousDraftsBySession(ctx.store)) });
   }
 
-  const { json } = await ctx.model.chat({
+  const reply = await ctx.model.chat({
     agent: 'Message Writer',
     messages,
     jsonSchema: { name: 'drafts', schema: DRAFTS_SCHEMA },
   });
+  const json = reply.json;
+  const writtenBy = `${reply.provider ?? ctx.model.provider}:${reply.model ?? ctx.model.model}`; // the provider that actually answered (router may fall back)
 
   const byId = new Map();
   for (const d of Array.isArray(json?.drafts) ? json.drafts : []) {
@@ -247,7 +249,7 @@ export async function draftMessagesWithModel(ctx) {
       drafts: drafts.length,
       learnerDrafts,
       mentorDrafts: drafts.length - learnerDrafts,
-      writtenBy: `${ctx.model.provider}:${ctx.model.model}`,
+      writtenBy,
     },
   };
 }

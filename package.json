@@ -20,6 +20,7 @@
     "demo:missing_source": "node cli/tace.mjs run --scenario missing_source",
     "studio": "node web/server.mjs",
     "model:check": "node cli/tace.mjs model-check",
+    "providers": "node cli/tace.mjs providers",
     "mcp": "node mcp/server.mjs"
   },
   "license": "MIT",

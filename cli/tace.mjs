@@ -44,7 +44,8 @@ const line = (e) => {
   const d = e.data || {};
   switch (e.type) {
     case 'RUN_STARTED': return `▶ ${d.title}\n  goal: ${d.goalText}\n  agents: ${d.agents?.mode === 'model' ? `${d.agents.provider} · ${d.agents.model}` : `code only (${d.agents?.note ?? 'no model'})`}`;
-    case 'MODEL_CALL': return `  ${who}model ${d.ok ? 'ok' : 'FAILED ' + (d.error ?? '')} · ${d.ms} ms · ${d.usage?.total ?? 0} tokens`;
+    case 'MODEL_CALL': return `  ${who}${d.provider}:${d.model} ${d.ok ? 'ok' : 'FAILED ' + (d.error ?? '')} · ${d.ms} ms · ${d.usage?.total ?? 0} tokens`;
+    case 'MODEL_FALLBACK': return `  ${who}fallback ${d.from} → ${d.to} (${d.reason})`;
     case 'AGENT_JOINED': return `  ${who}joined: ${d.reason}`;
     case 'AGENT_MESSAGE': return `  ${(d.from + ' → ' + d.to).padEnd(30)} ${d.type}: ${d.reason}`;
     case 'GOAL_DRAFTED': return `  Goal Reader     draft ${d.attempt}: ${d.ok ? 'accepted by validator' : 'rejected (' + d.code + ')'}`;
@@ -79,6 +80,14 @@ async function main() {
       const s = JSON.parse(fs.readFileSync(path.join(EDU_DOMAIN.scenariosDir, f), 'utf8'));
       console.log(`${s.id.padEnd(24)} ${s.title}`);
     }
+    return 0;
+  }
+  if (cmd === 'providers') {
+    loadLocalEnv();
+    const { checkProviders } = await import('../engine/providers.mjs');
+    const rows = await checkProviders(process.env);
+    for (const r of rows) console.log(`${String(r.provider).padEnd(12)} ${String(r.model).padEnd(34)} text: ${String(r.text).padEnd(14)} schema: ${String(r.schema).padEnd(14)} ${r.ms ?? '-'} ms`);
+    console.log(`profile: ${process.env.MODEL_PROFILE || 'demo'} (set MODEL_PROFILE=free for tests)`);
     return 0;
   }
   if (cmd === 'model-check') {

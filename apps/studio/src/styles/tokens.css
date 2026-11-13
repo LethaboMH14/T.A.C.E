@@ -1,0 +1,36 @@
+/* Copied from web/styles.css :root. Light theme only. Do not add a dark theme. */
+:root {
+  --bg: #F6F7FB;
+  --surface: #FFFFFF;
+  --sunken: #F1F2F7;
+  --line: #E3E5EE;
+  --line-strong: #CFD3E0;
+  --ink: #141625;
+  --ink-2: #444A63;
+  --ink-3: #575D77;
+  --accent: #6447DB;
+  --accent-ink: #4E33C4;
+  --accent-weak: #F0ECFF;
+  --blue: #7D9EFA;
+  --pink: #DB61E6;
+  --violet: #8F66ED;
+  --ok: #15805A;
+  --ok-weak: #E6F5EE;
+  --ok-line: #A9DCC4;
+  --bad: #C9372C;
+  --bad-weak: #FDEDEB;
+  --bad-line: #F2B7B0;
+  --run: #A25F00;
+  --run-weak: #FFF3DD;
+  --run-line: #F1CF94;
+  --redo: #6447DB;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgba(20, 22, 37, .06);
+  --shadow-lift: 0 2px 3px rgba(20, 22, 37, .08);
+  --font: "Instrument Sans", ui-sans-serif, "Segoe UI Variable", system-ui, sans-serif;
+  --display: "Bricolage Grotesque", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  color-scheme: light;
+}

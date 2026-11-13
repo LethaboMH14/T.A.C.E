@@ -35,6 +35,7 @@ export const EVENT = Object.freeze({
   RUN_FINISHED: 'RUN_FINISHED',           // data: {status, checksPassed, checksTotal, repairs}
   // ---- agent layer (see engine/AGENTS-SPEC.md) ----
   MODEL_CALL: 'MODEL_CALL',               // data: {agent, provider, model, ok, ms, usage:{prompt,completion,total}, error?}  (never the key, never full prompts)
+  MODEL_FALLBACK: 'MODEL_FALLBACK',       // data: {agent, from:'prov:model', to:'prov:model', reason}  (router switched provider)
   AGENT_MESSAGE: 'AGENT_MESSAGE',         // data: AgentMessage (typed, validated with zod)
   AGENT_JOINED: 'AGENT_JOINED',           // data: {agent, capabilityId, reason, by}
   GOAL_DRAFTED: 'GOAL_DRAFTED',           // data: {attempt, ok, code, deliverables}

@@ -1,0 +1,117 @@
+/* Ported from web/styles.css (.graph, .edges, .node, .roster). Light theme tokens come from styles/tokens.css. */
+
+.tace-graph {
+  position: relative;
+  border-radius: var(--radius-sm);
+  background:
+    radial-gradient(circle at 1px 1px, #DDE0EA 1px, transparent 1.2px) 0 0 / 18px 18px,
+    var(--surface);
+  overflow: hidden;
+}
+.tace-graph .react-flow__attribution { background: transparent; }
+
+/* edges */
+.tace-graph .react-flow__edge-path { fill: none; stroke: #C7CBDA; stroke-width: 1.6; transition: stroke .3s; }
+.tace-graph .tace-edge-done .react-flow__edge-path { stroke: #9FD1B9; }
+.tace-graph .tace-edge-stop .react-flow__edge-path { stroke: var(--bad); stroke-width: 2; }
+.tace-graph .tace-edge-loop .react-flow__edge-path { stroke: #C9BEF3; stroke-dasharray: 5 5; }
+.tace-graph .tace-edge-flow .react-flow__edge-path { stroke: var(--accent); stroke-width: 2.2; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .tace-graph .tace-edge-flow .react-flow__edge-path {
+    stroke-dasharray: 7 7;
+    animation: tace-dash .8s linear infinite;
+  }
+  .tace-graph .tace-edge-loop-live .react-flow__edge-path {
+    stroke: var(--accent);
+    stroke-dasharray: 5 5;
+    animation: tace-dash 1s linear infinite;
+  }
+}
+@keyframes tace-dash { to { stroke-dashoffset: -28; } }
+
+/* nodes */
+.tace-node {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px 1fr 18px;
+  gap: 10px;
+  align-items: center;
+  box-sizing: border-box;
+  height: 58px;
+  width: 216px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  transition: border-color .3s, box-shadow .4s var(--ease), background .3s, opacity .3s;
+}
+.tace-node .tace-glyph {
+  width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+  background: var(--sunken); color: var(--ink-2); transition: background .3s, color .3s;
+}
+.tace-node .tace-glyph svg { width: 19px; height: 19px; }
+.tace-node .tace-t { min-width: 0; }
+.tace-node .tace-role, .tace-node .tace-sub { display: block; }
+.tace-node .tace-role { font-weight: 600; font-size: 14px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tace-node .tace-sub { color: var(--ink-3); font-size: 12px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tace-node .tace-ring {
+  width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--line-strong);
+  display: grid; place-items: center; box-sizing: border-box;
+}
+.tace-node .tace-ring svg { width: 12px; height: 12px; stroke-width: 2.6; }
+
+.tace-node[data-state="pending"] { opacity: .78; }
+.tace-node[data-state="running"] { border-color: var(--run-line); box-shadow: 0 0 0 4px var(--run-weak), var(--shadow); }
+.tace-node[data-state="running"] .tace-glyph { background: var(--run-weak); color: var(--run); }
+.tace-node[data-state="running"] .tace-ring { border-color: var(--run); border-top-color: transparent; }
+.tace-node[data-state="done"] .tace-glyph { background: var(--ok-weak); color: var(--ok); }
+.tace-node[data-state="done"] .tace-ring { background: var(--ok); border-color: var(--ok); color: #fff; }
+.tace-node[data-state="failed"] { border-color: var(--bad); background: #FFFBFA; box-shadow: 0 0 0 4px var(--bad-weak), var(--shadow); }
+.tace-node[data-state="failed"] .tace-glyph { background: var(--bad-weak); color: var(--bad); }
+.tace-node[data-state="failed"] .tace-ring { background: var(--bad); border-color: var(--bad); color: #fff; }
+.tace-node[data-state="repairing"] { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-weak), var(--shadow); }
+.tace-node[data-state="repairing"] .tace-glyph { background: var(--accent-weak); color: var(--accent); }
+.tace-node[data-state="repairing"] .tace-ring { border-color: var(--accent); border-top-color: transparent; }
+.tace-node[data-state="skipped"] { border-style: dashed; opacity: .7; }
+.tace-node[data-state="blocked"] { border-color: var(--bad); border-style: dashed; color: var(--bad); opacity: 1; }
+.tace-node[data-state="blocked"] .tace-glyph { background: var(--bad-weak); color: var(--bad); }
+.tace-node[data-state="blocked"] .tace-ring { background: var(--bad); border-color: var(--bad); color: #fff; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .tace-node .tace-ring[data-spin="true"] { animation: tace-spin .9s linear infinite; }
+}
+@keyframes tace-spin { to { transform: rotate(360deg); } }
+
+.tace-node .tace-badge {
+  position: absolute; top: -9px; right: 10px; padding: 1px 7px; border-radius: 999px;
+  font: 500 11px/1.5 var(--mono); background: var(--surface); border: 1px solid var(--line-strong); color: var(--ink-2);
+  white-space: nowrap;
+}
+.tace-node .tace-badge.bad { border-color: var(--bad-line); background: var(--bad-weak); color: var(--bad); }
+.tace-node .tace-badge.ok { border-color: var(--ok-line); background: var(--ok-weak); color: var(--ok); }
+.tace-node .tace-badge.redo { border-color: #CFC4F6; background: var(--accent-weak); color: var(--accent-ink); }
+.tace-node .tace-badge.plain { color: var(--ink-2); }
+
+/* roster */
+.tace-roster { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; list-style: none; padding: 0; }
+.tace-chip {
+  display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px 5px 8px; border-radius: 999px;
+  background: var(--sunken); font-size: 13px; color: var(--ink-2); cursor: default;
+}
+.tace-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tace-chip .tace-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line-strong); }
+.tace-chip[data-state="running"] .tace-dot { background: var(--run); }
+.tace-chip[data-state="done"] .tace-dot { background: var(--ok); }
+.tace-chip[data-state="failed"] .tace-dot { background: var(--bad); }
+.tace-chip[data-state="repairing"] .tace-dot { background: var(--accent); }
+.tace-chip[data-state="blocked"] .tace-dot { background: var(--bad); }
+.tace-chip .tace-kind { color: var(--ink-3); font-size: 12px; }
+
+.tace-empty {
+  display: grid; place-content: center; justify-items: center; gap: 8px; min-height: 240px;
+  color: var(--ink-3); text-align: center; border-radius: var(--radius-sm); background: var(--surface);
+}
+.tace-empty p { margin: 0; max-width: 28ch; }

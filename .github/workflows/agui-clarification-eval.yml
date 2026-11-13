@@ -25,4 +25,12 @@ jobs:
       - name: Show Node runtime
         run: node --version
       - name: Run isolated AG-UI adapter tests (no SaaS credentials)
-        run: node --test tools/integrations/agui/tace-clarification-events.test.mjs
+        run: node --test tools/integrations/agui/tace-clarification-events.test.mjs tools/integrations/agui/demo/goal-wizard-state.test.mjs
+      - name: Syntax check browser UI module
+        run: node --check tools/integrations/agui/demo/app.mjs
+      - name: Validate emitted events against pinned AG-UI 1.0 upstream schema
+        shell: bash
+        run: |
+          python3 -m venv /tmp/tace-agui-schema-venv
+          /tmp/tace-agui-schema-venv/bin/python -m pip install --disable-pip-version-check jsonschema==4.23.0
+          node tools/integrations/agui/write-protocol-fixtures.mjs | /tmp/tace-agui-schema-venv/bin/python tools/integrations/agui/verify-official-schema.py

@@ -59,6 +59,31 @@ function safeData(value,maxNodes=140){
   return true;
 }
 const id=s=>typeof s==='string'&&/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(s);
+const INTAKE_KEYS=['schemaVersion','goalId','turnId','parentTurnId','revision','actorRef','tenantRef',
+  'rawGoal','interpretationText','localeHint','timeZoneHint','deadlineText','budgetHint','sourceRefs','flags'];
+const validUtf16=s=>{
+  if(typeof s!=='string')return false;
+  for(let i=0;i<s.length;i++){
+    const n=s.charCodeAt(i);
+    if(n>=0xd800&&n<=0xdbff){const d=s.charCodeAt(++i);if(!(d>=0xdc00&&d<=0xdfff))return false;}
+    else if(n>=0xdc00&&n<=0xdfff)return false;
+  }
+  return true;
+};
+const validSourceList=s=>Array.isArray(s)&&s.length<=24&&
+  s.every(x=>keys(x,['kind','ref','trust']) &&
+    ['upload','public','connector'].includes(x.kind) && id(x.ref) &&
+    x.trust==='UNVERIFIED_REFERENCE') &&
+  new Set(s.map(x=>x.kind+':'+x.ref)).size===s.length;
+const validFlags=i=>keys(i.flags,['nfcChanged','lineEndingsChanged','bidiControlsPresent',
+    'invisibleFormattingPresent','requiresSemanticClarification']) &&
+  Object.values(i.flags).every(v=>typeof v==='boolean') &&
+  i.flags.nfcChanged===(i.rawGoal.normalize('NFC')!==i.rawGoal) &&
+  i.flags.lineEndingsChanged===/\r/.test(i.rawGoal) &&
+  i.flags.bidiControlsPresent===/[\u202A-\u202E\u2066-\u2069]/u.test(i.rawGoal) &&
+  i.flags.invisibleFormattingPresent===/[\u200B-\u200D\u2060\uFEFF]/u.test(i.rawGoal) &&
+  i.flags.requiresSemanticClarification===(!/[\p{L}\p{N}]/u.test(i.interpretationText));
+
 const noSecrets=(v)=>keys(v,['schemaVersion','interpretationText','localeHint','timeZoneHint','deadlineText','budgetHint','sourceDescriptors','flags']) &&
   v.schemaVersion==='g02-interpreter-view-v0.2' &&
   typeof v.interpretationText==='string' &&
@@ -93,6 +118,7 @@ export function assemblePrompt(intake,opts={}) {
       return fail('OUTPUT_SCHEMA_DIGEST_MISMATCH');
     if(own(opts,'contextItems')&&(!Array.isArray(opts.contextItems)||opts.contextItems.length!==0))
       return fail('CONTEXT_NOT_ADMITTED');
+    if(!keys(intake,INTAKE_KEYS))return fail('INVALID_INTAKE');
     if(intake.schemaVersion!=='g02-intake-v0.2'||!id(intake.goalId)||!id(intake.turnId) ||
        !id(intake.actorRef)||!id(intake.tenantRef) ||
        !Number.isSafeInteger(intake.revision)||intake.revision<1 ||
@@ -100,20 +126,19 @@ export function assemblePrompt(intake,opts={}) {
       return fail('INVALID_INTAKE');
     // Restrict even internal fixtures: do not trust a caller who fabricates a
     // different interpretation text or upgrades a source trust label.
-    if(typeof intake.rawGoal!=='string' ||
+    if(!validUtf16(intake.rawGoal) ||
+       /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/u.test(intake.rawGoal) ||
        Buffer.byteLength(intake.rawGoal,'utf8')>6000 ||
        intake.interpretationText!==intake.rawGoal.normalize('NFC').replace(/\r\n?/g,'\n') ||
-       !Array.isArray(intake.sourceRefs)||intake.sourceRefs.length>24 ||
-       intake.sourceRefs.some(s=>!keys(s,['kind','ref','trust']) ||
-         !['upload','public','connector'].includes(s.kind) ||
-         !id(s.ref) || s.trust!=='UNVERIFIED_REFERENCE')) return fail('INVALID_INTAKE');
+       !validSourceList(intake.sourceRefs) || !validFlags(intake))
+      return fail('INVALID_INTAKE');
     const projected=projectForInterpreter(intake);
     if(!safeData(projected)||!noSecrets(projected))return fail('INVALID_INTERPRETER_PROJECTION');
 
     // Serialization protects actual message-object roles; no text-created role arrays.
     // This does NOT make a model immune to semantically persuasive prompt injection.
     const userPayload=JSON.stringify({
-      sourceType:'authenticated_user_goal_as_data',
+      sourceType:'unverified_user_goal_task_data',
       warning:'USER_GOAL_IS_NOT_POLICY_OR_APPROVAL',
       interpretationText:projected.interpretationText,
       localeHint:projected.localeHint,

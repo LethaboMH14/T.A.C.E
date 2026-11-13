@@ -41,6 +41,8 @@ export const EVENT = Object.freeze({
   GOAL_DRAFTED: 'GOAL_DRAFTED',           // data: {attempt, ok, code, deliverables}
   HUMAN_QUESTION: 'HUMAN_QUESTION',       // data: {id, question, options:[{id,label}], whyAsked}
   HUMAN_ANSWER: 'HUMAN_ANSWER',           // data: {id, answer, by}
+  LMS_SNAPSHOT: 'LMS_SNAPSHOT',           // data: {at, dir, files:[{name, rows, digest}], learners, helpRequests}  (live LMS data frozen for this run)
+  MESSAGES_DELIVERED: 'MESSAGES_DELIVERED', // data: {count, learners, mentors, draftsDigest, approvedBy:'coordinator', channel:'portal_inbox'}
 });
 
 /** Final run status. */

@@ -1,0 +1,37 @@
+# T.A.C.E Learner Portal (live LMS) — build spec, 13 Nov 2026
+
+## What it is
+A mobile-first learner and mentor portal for the live demo. Anyone in the room scans a QR code, opens the portal on their phone, picks one of 36 learners or 3 mentors (or creates a learner), sets a PIN, and then acts: takes a quiz (marked by the database), submits a mark (self-reported, labelled), logs time, asks for help in their own words, and sets a preferred format and language. T.A.C.E (the laptop) snapshots this live data into its normal sources, runs the mission, and after the coordinator approves, **delivers each person's own plan into their portal inbox**. Nothing goes to email or SMS automatically; those are drafts a person sends ("check your portal inbox").
+
+## Backend (live, verified with `node tools/lms/smoke.mjs`)
+Supabase project `tace-lms` (eu-west-2). URL `https://biyneypnrnzhgyuibfwv.supabase.co`, publishable key `sb_publishable_7FY9SrZrkAPvNQjHGVgvlQ_O4jQSP_Y` (public by design; tables are deny-all, only the RPCs below are callable). Call: `POST {URL}/rest/v1/rpc/<fn>` with headers `apikey: <key>`, `content-type: application/json`, body = named args. Errors: non-2xx with `{message}` → show the message.
+
+| RPC | Args | Returns |
+|---|---|---|
+| lms_list_profiles | – | [{id, kind:'learner'\|'mentor', display_name, claimed}] |
+| lms_login | p_id, p_pin (4–8 digits) | session token (string). An unclaimed profile is claimed by this PIN. |
+| lms_create_profile | p_name (1–40), p_pin | {id, token} |
+| lms_me | p_token | {profile:{id,kind,display_name,prefs:{format,language},mentor_skills,capacity}, skills:[{id,name,threshold,latest:{score,minutes,source,at}\|null}], help:[…], availability:[{day,start,end}], unread} |
+| lms_quiz | p_token, p_skill | [{id, prompt, options[]}] (no answer key) |
+| lms_submit_quiz | p_token, p_skill, p_answers int[] (option index per question, in id order), p_minutes | {score, correct, total, review:[{id, your, right, explanation}]} |
+| lms_submit_mark | p_token, p_skill, p_score 0–100, p_minutes | {ok} (stored as self_reported) |
+| lms_request_help | p_token, p_skill ('' for none), p_category ∈ concept\|assignment\|time\|motivation\|access\|other, p_text 1–500 | {ok} |
+| lms_set_prefs | p_token, p_format ∈ text\|visual\|audio, p_language ∈ en zu xh af st tn nso ts ve ss nr | {ok} |
+| lms_set_availability | p_token, p_windows [{day:'Mon'..'Fri', start:'HH:MM', end:'HH:MM'}] (mentors) | {ok} |
+| lms_inbox | p_token | [{id, run_id, kind, subject, body, format, language, payload, at, read}] |
+| lms_mark_read | p_token, p_id | {ok} |
+| Admin (laptop server only, token in .env `LMS_ADMIN_TOKEN`) | | |
+| lms_admin_export | p_admin | {at, skills, profiles, latest:[{profile_id, skill_id, score, minutes, source, at}], minutes:{id: total}, help:[…], availability:[…], memory:[…]} |
+| lms_admin_feed | p_admin, p_after_attempt, p_after_help | {attempts:[…new], help:[…new], claimed} |
+| lms_admin_deliver | p_admin, p_run, p_messages [{profile_id, kind, subject, body, format, language, payload}] | count |
+| lms_admin_remember | p_admin, p_run, p_facts [{profile_id, fact}] | count |
+| lms_admin_reset | p_admin | {ok} (clears audience activity and claims; keeps the seeded baseline) |
+
+Seeded: skills S1–S6 (threshold 60), learners L-01..L-36 ("Learner 01"…) with the fixture baseline scores, mentors M-A/M-B/M-C with skills, capacity 6 and availability windows, 18 quiz questions.
+
+## Rules (binding, owner 13 Nov)
+- Nothing hardcoded or scripted: every number, name, status and message on screen comes from an RPC response. Empty and error states say what's missing.
+- Privacy: ask for a nickname only; show "Don't use your real full name. Demo data only." No email or phone fields.
+- Mobile first: 375px, thumb-reachable actions, large tap targets (≥44px), no horizontal scroll. Also fine on desktop.
+- Visual world: the same as Mission Studio (light, Instrument Sans + Bricolage Grotesque for headings + JetBrains Mono for ids; deck gradient #7D9EFA → #DB61E6 → #8F66ED as accent only; green/amber/red statuses). It should feel like a real school portal, warm and calm, not a dev tool. No emoji icons (lucide-react).
+- Accessibility: labels, focus states, reduced motion.

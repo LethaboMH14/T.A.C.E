@@ -118,7 +118,7 @@ function startRun(body) {
     const timer = setTimeout(() => done(null), ASK_TIMEOUT_MS);
     pendingAnswers.set(runId, { id, done });
   });
-  const p = runMission({ scenario, domain: EDU_DOMAIN, sourcesDir: EDU_DOMAIN.sourcesDir, runDir, runId, trustedContext: TRUSTED_FIXTURE_CONTEXT, paceMs: pace, model: body.model === 'off' ? 'off' : 'auto', env, askHuman, askTimeoutMs: ASK_TIMEOUT_MS })
+  const p = runMission({ scenario, domain: EDU_DOMAIN, sourcesDir: body.sourcesDir || EDU_DOMAIN.sourcesDir, runDir, runId, trustedContext: TRUSTED_FIXTURE_CONTEXT, paceMs: pace, model: body.model === 'off' ? 'off' : 'auto', env, askHuman, askTimeoutMs: ASK_TIMEOUT_MS })
     .catch((err) => { console.error(`[run ${runId}]`, err); })
     .finally(() => active.delete(runId));
   active.set(runId, p);

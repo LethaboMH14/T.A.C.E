@@ -61,7 +61,7 @@ describe('reduce on the inject_overlap ledger', () => {
     expect(m.title).toBe('Self-correction: the scheduler double-books a mentor');
     expect(m.planted).toEqual(['the Scheduler is set to double-book Mentor B once']);
     expect(m.plantedHeading).toBe('Planted on purpose for this demo');
-    expect(m.agents).toEqual({ mode: 'code', provider: undefined, model: undefined, note: 'Model turned off for this run' });
+    expect(m.agents).toEqual({ mode: 'code', profile: null, chain: [], provider: undefined, model: undefined, note: 'Model turned off for this run' });
     expect(m.deliverables).toHaveLength(5);
     expect(m.goalSource).toBe('fixture');
   });

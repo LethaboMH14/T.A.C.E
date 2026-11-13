@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
 import { ReactFlow, type Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './graph/graph.css';
@@ -13,7 +13,19 @@ const proOptions = { hideAttribution: false };
 const fitViewOptions = { padding: 0.12 };
 const PULSE_MS = 1400;
 
-export function MissionGraph({ mission }: { mission: Mission }) {
+/**
+ * onSelectNode(id) fires on click, and on Enter or Space while a node has keyboard focus.
+ * selectedId draws the selection ring on that node. The graph never decides selection itself.
+ */
+export function MissionGraph({
+  mission,
+  onSelectNode,
+  selectedId = null,
+}: {
+  mission: Mission;
+  onSelectNode?: (id: string) => void;
+  selectedId?: string | null;
+}) {
   const input = useMemo(
     () => layoutInputFrom(mission),
     // Only the slices the layout reads; node states are applied below without relayout.
@@ -39,6 +51,7 @@ export function MissionGraph({ mission }: { mission: Mission }) {
       layout.nodes.map((n) => {
         const info = mission.node[n.id];
         const fallback = n.id === 'blocked' ? 'blocked' : 'pending';
+        const selected = n.id === selectedId;
         return {
           id: n.id,
           type: 'mission',
@@ -46,13 +59,24 @@ export function MissionGraph({ mission }: { mission: Mission }) {
           width: n.w,
           height: n.h,
           draggable: false,
-          selectable: false,
+          selectable: true,
+          selected,
           connectable: false,
+          style: selected ? { borderRadius: 14, boxShadow: '0 0 0 3px var(--accent-weak), 0 0 0 5px var(--accent)' } : undefined,
           data: { role: n.role, sub: n.sub, state: info?.state ?? fallback, badge: info?.badge },
         };
       }),
-    [layout, mission.node],
+    [layout, mission.node, selectedId],
   );
+
+  // Keyboard: nodes are focusable (xyflow tabIndex). Enter or Space on a focused node selects it.
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const id = (e.target as HTMLElement).closest<HTMLElement>('.react-flow__node')?.dataset.id;
+    if (!id) return;
+    e.preventDefault();
+    onSelectNode?.(id);
+  };
 
   const liveLoop = mission.node.repair?.state === 'repairing';
   const edges = useMemo<Edge[]>(
@@ -87,17 +111,18 @@ export function MissionGraph({ mission }: { mission: Mission }) {
       </h2>
 
       {hasPlan ? (
-        <div className="tace-graph w-full" style={{ height: layout.height + 16 }}>
+        <div className="tace-graph w-full" style={{ height: layout.height + 16 }} onKeyDown={onKeyDown}>
           <ReactFlow
             key={planKey}
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
+            onNodeClick={(_, node) => onSelectNode?.(node.id)}
             fitView
             fitViewOptions={fitViewOptions}
             nodesDraggable={false}
             nodesConnectable={false}
-            elementsSelectable={false}
+            elementsSelectable
             panOnScroll={false}
             zoomOnScroll={false}
             zoomOnDoubleClick={false}

@@ -72,22 +72,29 @@ function stepClass(state: StageState): string {
 }
 
 export function MissionHeader({ mission: m }: { mission: Mission }) {
-  const running = !m.finished && m.started !== null;
+  // The clock runs only while the stream is live. A lost or stopped stream is not shown as running.
+  const running = !m.finished && m.started !== null && m.stream === 'live';
   const now = useNow(running);
   const end = m.finished ? (m.lastTs ?? 0) : Math.max(m.lastTs ?? 0, now);
   const clock = m.started !== null ? formatClock(end - m.started) : '00:00.0';
 
   const status = m.finished
     ? { state: m.finished.status, text: m.finished.status === 'VERIFIED' ? 'Verified' : m.finished.status === 'PARTIAL' ? 'Partial' : 'Blocked' }
-    : m.started !== null
-      ? { state: 'running', text: m.reviewState === 'failed' ? 'Problem found' : 'Running' }
-      : { state: 'idle', text: 'Idle' };
+    : m.stream === 'lost'
+      ? { state: 'lost', text: 'Connection lost, retrying' }
+      : m.stream === 'stopped'
+        ? { state: 'stopped', text: 'Stopped without a finish event' }
+        : m.started !== null
+          ? { state: 'running', text: m.reviewState === 'failed' ? 'Problem found' : 'Running' }
+          : { state: 'idle', text: 'Idle' };
 
   const statusClass: Record<string, string> = {
     running: 'border-run-line bg-run-weak text-run',
     VERIFIED: 'border-ok-line bg-ok-weak text-ok',
     PARTIAL: 'border-bad-line bg-bad-weak text-bad',
     BLOCKED: 'border-bad-line bg-bad-weak text-bad',
+    lost: 'border-bad-line bg-bad-weak text-bad',
+    stopped: 'border-bad-line bg-bad-weak text-bad',
     idle: 'border-line bg-surface text-ink-2',
   };
   const dotClass: Record<string, string> = {
@@ -95,19 +102,23 @@ export function MissionHeader({ mission: m }: { mission: Mission }) {
     VERIFIED: 'bg-ok',
     PARTIAL: 'bg-bad',
     BLOCKED: 'bg-bad',
+    lost: 'bg-bad',
+    stopped: 'bg-bad',
     idle: 'bg-line-strong',
   };
 
   const title = m.runId === null ? 'Pick a scenario and run the mission' : m.title || 'Loading…';
+  // Profile from RUN_STARTED; "answered by" from the MODEL_CALL events that actually succeeded.
+  const answeredBy = [...new Set(m.modelCalls.filter((c) => c.ok && c.provider).map((c) => c.provider as string))];
   const agentChip =
     m.runId === null
       ? null
       : m.agents?.mode === 'model'
-        ? `Agents: ${m.agents.provider ?? 'model'} · ${m.agents.model ?? ''}`
-        : 'Code only';
+        ? `Profile ${m.agents.profile ?? 'n/a'} · answered by ${answeredBy.length ? answeredBy.join(', ') : 'nobody yet'}`
+        : m.agents?.mode === 'code' ? 'Code only' : null;
 
   return (
-    <section className="relative overflow-hidden border-b border-line bg-surface" aria-live="polite">
+    <section className="relative overflow-hidden border-b border-line bg-surface">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -170,7 +181,7 @@ export function MissionHeader({ mission: m }: { mission: Mission }) {
 
         <div className="flex flex-col items-end gap-1.5 max-[1000px]:flex-row max-[1000px]:items-center max-[1000px]:justify-between">
           <span
-            data-state={status.state}
+            role="status" data-state={status.state}
             className={cn(
               'inline-flex h-[30px] items-center gap-[7px] rounded-full border px-3 text-[13.5px] font-semibold',
               statusClass[status.state] ?? statusClass.idle,

@@ -84,11 +84,13 @@ export interface HumanQuestion {
 
 export interface Mission {
   runId: string | null;
+  events: LedgerEvent[];                   // raw ledger events in seq order, capped at 5000 (the inspector derives from these)
   questions: HumanQuestion[];              // HUMAN_QUESTION / HUMAN_ANSWER, in order
   title: string;
   goalText: string;
   paceMs: number;
-  agents: { mode: 'model' | 'code'; provider?: string; model?: string; note?: string } | null;
+  // profile and chain: RUN_STARTED.agents (router order of preference; MODEL_CALL names who actually answered)
+  agents: { mode: 'model' | 'code'; provider?: string; model?: string; note?: string; profile?: string | null; chain?: string[] } | null;
   planted: string[];                       // plain sentences from RUN_STARTED
   plantedHeading: string | null;           // "Planted on purpose for this demo" | "Changed for this scenario"
   deliverables: string[];
@@ -119,6 +121,9 @@ export interface Mission {
   started: number | null;                  // epoch ms of the first event
   lastTs: number | null;                   // epoch ms of the latest event
   lastSeq: number;                         // highest ledger seq folded (dedupes SSE replays)
+  // Stream health, set by useMission (not by the ledger). 'lost' = EventSource is reconnecting;
+  // 'stopped' = the stream closed with no RUN_FINISHED. Neither is shown as "running".
+  stream: 'idle' | 'live' | 'lost' | 'stopped' | 'ended';
   finished: {
     status: 'VERIFIED' | 'PARTIAL' | 'BLOCKED';
     checksPassed: number;
@@ -139,4 +144,11 @@ export interface RunInfo {
   title?: string;
   status?: string;
   [key: string]: unknown;
+}
+
+/** Body of POST /api/runs `overrides` (checked by checkOverrides in web/server.mjs). */
+export interface RunOverrides {
+  unavailable?: { mentor_id: string; day: string }[];
+  profile?: 'demo' | 'free' | 'cheap' | 'meta';
+  provider?: string;
 }

@@ -4,16 +4,19 @@
 
 import { useEffect, useState } from 'react';
 import type {
-  ArtifactRef, Check, FeedItem, HumanQuestion, LedgerEvent, Mission, NodeInfo, NodeState, RunInfo, ScenarioInfo, StageState, Tone,
+  ArtifactRef, RunOverrides, Check, FeedItem, HumanQuestion, LedgerEvent, Mission, NodeInfo, NodeState, RunInfo, ScenarioInfo, StageState, Tone,
 } from './types';
 
 export type * from './types';
 
 const STAGES = ['goal', 'plan', 'execute', 'verify', 'deliver'] as const;
+/** Raw events kept for the inspector. Older events are dropped first. */
+export const EVENT_CAP = 5000;
 
 export function initialMission(runId: string | null = null): Mission {
   return {
     runId,
+    events: [],
     questions: [],
     title: '',
     goalText: '',
@@ -48,6 +51,7 @@ export function initialMission(runId: string | null = null): Mission {
     started: null,
     lastTs: null,
     lastSeq: 0,
+    stream: 'idle',
     finished: null,
   };
 }
@@ -122,6 +126,23 @@ function addFeed(m: Mission, text: string, tone: FeedItem['tone'] = ''): Mission
   return { ...m, feed: [...m.feed, { t, text, tone }] };
 }
 
+/**
+ * Execute is green only when every task is done. Any FAILED, SKIPPED or BLOCKED task makes it bad
+ * (the run then has to say so, not look green). Stays as it was while tasks are still running.
+ */
+function executeStage(m: Mission): StageState {
+  const states = m.tasks.map((t) => m.node[t.id]?.state);
+  if (states.some((s) => s === 'failed' || s === 'skipped' || s === 'blocked')) return 'bad';
+  if (states.length && states.every((s) => s === 'done')) return 'done';
+  return m.stage.execute === 'idle' ? 'idle' : 'active';
+}
+
+/** The repair node spins only while a repair is really scheduled. A later review round ends it. */
+function settleRepair(m: Mission): Mission {
+  if (m.node.repair?.state !== 'repairing') return m;
+  return { ...m, node: { ...m.node, repair: { ...m.node.repair, state: 'done' } } };
+}
+
 /** Pure fold: one ledger event applied to a mission. Events already folded (seq <= lastSeq) are ignored. */
 export function reduce(m: Mission, e: LedgerEvent): Mission {
   if (e.seq <= m.lastSeq) return m;
@@ -129,6 +150,7 @@ export function reduce(m: Mission, e: LedgerEvent): Mission {
   const d = e.data ?? {};
   const base: Mission = {
     ...m,
+    events: m.events.length >= EVENT_CAP ? [...m.events.slice(m.events.length - EVENT_CAP + 1), e] : [...m.events, e],
     lastSeq: e.seq,
     started: m.started ?? ts,
     lastTs: ts,
@@ -140,7 +162,7 @@ export function reduce(m: Mission, e: LedgerEvent): Mission {
     case 'RUN_STARTED': {
       const planted = plantedSentences(d.plantedFault, d.changedConstraints, d.excludedSources);
       const agents = d.agents
-        ? { mode: d.agents.mode === 'model' ? 'model' as const : 'code' as const, provider: d.agents.provider, model: d.agents.model, note: d.agents.note }
+        ? { mode: d.agents.mode === 'model' ? 'model' as const : 'code' as const, provider: d.agents.provider, model: d.agents.model, note: d.agents.note, profile: d.agents.profile ?? null, chain: Array.isArray(d.agents.chain) ? d.agents.chain : [] }
         : null;
       let s: Mission = {
         ...base,
@@ -244,17 +266,19 @@ export function reduce(m: Mission, e: LedgerEvent): Mission {
       let s: Mission = { ...base, summaries: { ...base.summaries, [e.taskId]: d.summary } };
       s = withNode(s, e.taskId, 'done', summaryBadge(e.taskId, d.summary));
       s = addFeed(s, summarySentence(role, e.taskId, d.summary));
-      if (s.tasks.length && s.tasks.every((t) => s.node[t.id]?.state === 'done')) s = withStage(s, 'execute', 'done');
-      return s;
+      return withStage(s, 'execute', executeStage(s));
     }
 
     case 'TASK_FAILED': {
-      let s = e.taskId ? withNode(base, e.taskId, 'failed') : base;
+      const s = withStage(e.taskId ? withNode(base, e.taskId, 'failed') : base, 'execute', 'bad');
       return addFeed(s, `${role} failed: ${d.message}`, 'bad');
     }
 
-    case 'TASK_SKIPPED':
-      return e.taskId ? withNode(base, e.taskId, 'skipped') : base;
+    case 'TASK_SKIPPED': {
+      if (!e.taskId) return base;
+      const s = withNode(base, e.taskId, 'skipped');
+      return withStage(s, 'execute', executeStage(s));
+    }
 
     case 'TASK_RERUN': {
       if (!e.taskId) return base;
@@ -263,8 +287,8 @@ export function reduce(m: Mission, e: LedgerEvent): Mission {
     }
 
     case 'REVIEW_STARTED': {
-      let s: Mission = { ...base, reviewRound: d.round, reviewState: 'running' };
-      s = withStage(withStage(s, 'execute', 'done'), 'verify', 'active');
+      let s: Mission = settleRepair({ ...base, reviewRound: d.round, reviewState: 'running' });
+      s = withStage(withStage(s, 'execute', executeStage(s)), 'verify', 'active');
       s = withNode(s, 'review', 'running', { text: `round ${d.round}`, tone: 'plain' });
       return addFeed(s, `Reviewer round ${d.round}: re-opening every file`);
     }
@@ -329,9 +353,13 @@ export function reduce(m: Mission, e: LedgerEvent): Mission {
           reason: d.reason ?? null,
         },
       };
-      s = withStage(s, 'deliver', d.status === 'BLOCKED' ? 'bad' : 'done');
-      if (d.status !== 'BLOCKED') {
-        s = withNode(s, 'deliver', 'done', { text: `${d.checksPassed}/${d.checksTotal} checks`, tone: d.status === 'VERIFIED' ? 'ok' : 'bad' });
+      s = settleRepair(s);
+      // Deliver is green only on VERIFIED. PARTIAL and BLOCKED are shown as bad.
+      s = withStage(s, 'deliver', d.status === 'VERIFIED' ? 'done' : 'bad');
+      if (d.status === 'VERIFIED') {
+        s = withNode(s, 'deliver', 'done', { text: `${d.checksPassed}/${d.checksTotal} checks`, tone: 'ok' });
+      } else if (d.status === 'PARTIAL') {
+        s = withNode(s, 'deliver', 'failed', { text: `${d.checksPassed}/${d.checksTotal} checks`, tone: 'bad' });
       } else {
         s = withNode(s, 'blocked', 'blocked');
       }
@@ -401,6 +429,8 @@ export function useMission(runId: string | null): Mission {
     setM(initialMission(runId));
     if (!runId) return;
     const es = new EventSource(`/api/runs/${encodeURIComponent(runId)}/events`);
+    let finishedSeen = false;
+    es.onopen = () => setM((prev) => (prev.finished ? prev : { ...prev, stream: 'live' }));
     es.onmessage = (msg) => {
       let e: LedgerEvent;
       try {
@@ -408,9 +438,23 @@ export function useMission(runId: string | null): Mission {
       } catch {
         return;
       }
-      setM((prev) => reduce(prev, e));
+      if (e.type === 'RUN_FINISHED') finishedSeen = true;
+      setM((prev) => ({ ...reduce(prev, e), stream: 'live' }));
     };
-    es.addEventListener('end', () => es.close());
+    es.addEventListener('end', () => {
+      finishedSeen = true;
+      es.close();
+      setM((prev) => ({ ...prev, stream: prev.finished ? 'ended' : 'stopped' }));
+    });
+    es.onerror = () => {
+      // EventSource retries on its own while CONNECTING. CLOSED means the server ended the stream.
+      if (es.readyState === EventSource.CLOSED) {
+        es.close();
+        setM((prev) => ({ ...prev, stream: prev.finished || finishedSeen ? 'ended' : 'stopped' }));
+      } else {
+        setM((prev) => (prev.finished ? prev : { ...prev, stream: 'lost' }));
+      }
+    };
     return () => es.close();
   }, [runId]);
 
@@ -428,12 +472,17 @@ async function json<T>(res: Response): Promise<T> {
 export const api = {
   scenarios: (): Promise<ScenarioInfo[]> => fetch('/api/scenarios').then((r) => json<ScenarioInfo[]>(r)),
   runs: (): Promise<RunInfo[]> => fetch('/api/runs').then((r) => json<RunInfo[]>(r)),
-  start: (scenario: string, model?: 'off'): Promise<{ runId: string }> =>
-    fetch('/api/runs', {
+  /** Starts a REAL new run. overrides: {unavailable?, profile?, provider?}; model 'off' turns the model layer off. */
+  start: (scenario: string, overrides?: RunOverrides, model?: 'off'): Promise<{ runId: string }> => {
+    const body: Record<string, unknown> = { scenario };
+    if (model) body.model = model;
+    if (overrides && Object.keys(overrides).length) body.overrides = overrides;
+    return fetch('/api/runs', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(model ? { scenario, model } : { scenario }),
-    }).then((r) => json<{ runId: string }>(r)),
+      body: JSON.stringify(body),
+    }).then((r) => json<{ runId: string }>(r));
+  },
   fileText: (runId: string, path: string): Promise<string> =>
     fetch(`/api/runs/${encodeURIComponent(runId)}/file?path=${encodeURIComponent(path)}`).then(async (r) => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);

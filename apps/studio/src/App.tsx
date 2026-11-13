@@ -1,61 +1,96 @@
 import { useEffect, useState } from 'react';
-import { Lock } from 'lucide-react';
-import { TopBar } from '@/components/TopBar';
-import { MissionHeader } from '@/components/MissionHeader';
-import { GoalPanel } from '@/components/GoalPanel';
-import { SourcesPanel } from '@/components/SourcesPanel';
-import { ActivityFeed } from '@/components/ActivityFeed';
-import { MissionGraph } from '@/components/MissionGraph';
-import { ReviewPanel } from '@/components/ReviewPanel';
-import { QuestionCard } from '@/components/QuestionCard';
-import { AgentRoom } from '@/components/AgentRoom';
-import { ModelMeter } from '@/components/ModelMeter';
-import { FilesPanel } from '@/components/FilesPanel';
-import { useMission } from '@/state';
+import { AppShell } from '@/components/shell/AppShell';
+import { Sidebar } from '@/components/shell/Sidebar';
+import { PromptBar } from '@/components/shell/PromptBar';
+import { CommandPalette } from '@/components/shell/CommandPalette';
+import { MissionWorkspace } from '@/components/shell/MissionWorkspace';
+import { go, parseRoute, routeHash, routeRunId, type Route } from '@/components/shell/route';
+import { MissionsView } from '@/views/MissionsView';
+import { ModelsView } from '@/views/ModelsView';
+import { AgentsView } from '@/views/AgentsView';
+import { EvidenceView } from '@/views/EvidenceView';
+import { FilesView } from '@/views/FilesView';
+import { Command } from 'lucide-react';
+import { api, useMission } from '@/state';
 
 export default function App() {
-  const [runId, setRunId] = useState<string | null>(() => new URLSearchParams(window.location.search).get('run'));
-  const mission = useMission(runId);
+  const [route, setRoute] = useState<Route>(() => parseRoute(window.location.hash));
+  // The run the workspace is about. Views without a run in their hash (agents, models, missions) keep it.
+  const [currentRunId, setCurrentRunId] = useState<string | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
-    const url = runId ? `?run=${encodeURIComponent(runId)}` : window.location.pathname;
-    window.history.replaceState(null, '', url);
-  }, [runId]);
+    const onHash = () => setRoute(parseRoute(window.location.hash));
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  const routeRun = routeRunId(route);
+  useEffect(() => {
+    if (routeRun) setCurrentRunId(routeRun);
+  }, [routeRun]);
+
+  // No hash yet: open the most recent real run, or the empty mission page when there are none.
+  useEffect(() => {
+    if (route.name !== 'home') return;
+    let cancelled = false;
+    api
+      .runs()
+      .then((list) => {
+        if (cancelled) return;
+        const next: Route = list[0] ? { name: 'mission', runId: list[0].runId } : { name: 'mission', runId: null };
+        window.history.replaceState(null, '', routeHash(next));
+        setRoute(next);
+      })
+      .catch(() => {
+        if (!cancelled) setRoute({ name: 'mission', runId: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+    // Runs once on load; later hash changes are handled by the hashchange listener above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const activeRunId = routeRun ?? currentRunId;
+  const mission = useMission(activeRunId);
 
   return (
-    <div className="min-h-screen bg-bg font-sans text-ink">
-      <TopBar runId={runId} onRunChange={setRunId} />
-      <MissionHeader mission={mission} />
-
-      <main className="mx-auto grid max-w-[1600px] grid-cols-[300px_minmax(0,1fr)_400px] items-start gap-4 px-6 pt-4 max-[1280px]:grid-cols-[280px_minmax(0,1fr)] max-[860px]:grid-cols-[minmax(0,1fr)] max-[860px]:gap-3 max-[860px]:px-4 max-[860px]:pt-3">
-        <aside className="flex min-w-0 flex-col gap-4 max-[860px]:order-2">
-          <GoalPanel mission={mission} />
-          <SourcesPanel mission={mission} />
-          <ActivityFeed mission={mission} />
-        </aside>
-
-        <div className="flex min-w-0 flex-col gap-4 max-[860px]:order-1">
-          <QuestionCard mission={mission} />
-          <MissionGraph mission={mission} />
-          <AgentRoom mission={mission} />
-          <ModelMeter mission={mission} />
-        </div>
-
-        <aside className="flex min-w-0 flex-col gap-4 max-[1280px]:col-span-full max-[860px]:order-3">
-          <ReviewPanel mission={mission} />
-        </aside>
-      </main>
-
-      <section className="mx-auto mt-4 max-w-[1552px] max-[860px]:mx-4 max-[860px]:mt-3" aria-label="Files">
-        <FilesPanel mission={mission} />
-      </section>
-
-      <footer className="mx-auto flex items-center justify-center gap-2 px-6 pb-7 pt-[22px] text-center text-[13px] text-ink-3">
-        <Lock className="h-[15px] w-[15px] shrink-0" aria-hidden />
-        <span>
-          Synthetic data only. Workers are deterministic code. Nothing is sent: messages stay as drafts until a person approves them.
-        </span>
-      </footer>
-    </div>
+    <>
+      <AppShell
+        sidebar={<Sidebar route={route} mission={mission} />}
+        topbar={
+          <>
+            <div className="min-w-0 flex-1">
+              <PromptBar onRunStarted={(runId: string) => go({ name: 'mission', runId })} />
+            </div>
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              aria-label="Open command palette"
+              className="mono inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-field border border-line-strong bg-surface px-2.5 text-[13px] text-ink-2 hover:bg-sunken"
+            >
+              <Command className="h-3.5 w-3.5" aria-hidden />
+              K
+            </button>
+          </>
+        }
+      >
+        {route.name === 'mission' || route.name === 'home' ? (
+          <MissionWorkspace key={activeRunId ?? 'none'} mission={mission} runId={activeRunId} />
+        ) : route.name === 'missions' ? (
+          <MissionsView mission={mission} />
+        ) : route.name === 'agents' ? (
+          <AgentsView mission={mission} />
+        ) : route.name === 'evidence' ? (
+          <EvidenceView mission={mission} />
+        ) : route.name === 'files' ? (
+          <FilesView mission={mission} />
+        ) : (
+          <ModelsView />
+        )}
+      </AppShell>
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} currentRunId={activeRunId} />
+    </>
   );
 }

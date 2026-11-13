@@ -1,0 +1,100 @@
+{
+  "id": "report_only",
+  "title": "Smaller goal: report only",
+  "goalText": "Give me a performance report on the cohort with each learner’s skill gaps.",
+  "intakeSources": [
+    "trainees",
+    "assessments",
+    "skills"
+  ],
+  "proposal": {
+    "schemaVersion": "g02-goal-proposal-v0.2",
+    "intent": {
+      "summary": "Give a performance report on the cohort with the skill gaps",
+      "modes": [
+        "ANALYZE",
+        "CREATE"
+      ]
+    },
+    "relationToPrior": "NEW_GOAL",
+    "deliverables": [
+      {
+        "id": "gap_analysis",
+        "description": "Per-learner skill gaps with source rows",
+        "formatHint": "csv"
+      },
+      {
+        "id": "performance_summary",
+        "description": "Cohort performance summary",
+        "formatHint": "md"
+      }
+    ],
+    "subgoals": [
+      {
+        "id": "analyse",
+        "outcome": "Find skill gaps and summarise the cohort",
+        "dependsOn": [],
+        "deliverableIds": [
+          "gap_analysis",
+          "performance_summary"
+        ],
+        "sourceSlots": [
+          0,
+          1,
+          2
+        ],
+        "capabilityKinds": [
+          "READ_SOURCE",
+          "WRITE_ARTIFACT"
+        ],
+        "effectKinds": [
+          "READ_ONLY",
+          "LOCAL_ARTIFACT"
+        ]
+      }
+    ],
+    "sourceSlots": [
+      0,
+      1,
+      2
+    ],
+    "capabilityNeeds": [
+      {
+        "kind": "READ_SOURCE",
+        "reason": "Read the synthetic cohort files"
+      },
+      {
+        "kind": "WRITE_ARTIFACT",
+        "reason": "Write local result files"
+      }
+    ],
+    "effectClaims": [
+      {
+        "kind": "READ_ONLY",
+        "description": "Read synthetic inputs without changing them"
+      },
+      {
+        "kind": "LOCAL_ARTIFACT",
+        "description": "Write local files only"
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "id": "gaps_match",
+        "deliverableId": "gap_analysis",
+        "check": "Every gap matches a source row below threshold",
+        "method": "SOURCE_CROSSCHECK",
+        "evidenceExpectation": "Recomputed gaps equal reported gaps"
+      },
+      {
+        "id": "totals_match",
+        "deliverableId": "performance_summary",
+        "check": "Cohort numbers match the raw scores",
+        "method": "SOURCE_CROSSCHECK",
+        "evidenceExpectation": "Recomputed means and counts equal reported ones"
+      }
+    ],
+    "uncertainties": []
+  },
+  "inject": null
+}

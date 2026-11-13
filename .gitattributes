@@ -1,0 +1,6 @@
+# Keep LF everywhere so fixture bytes (and their sha256 digests) are identical on every machine.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.sqlite binary

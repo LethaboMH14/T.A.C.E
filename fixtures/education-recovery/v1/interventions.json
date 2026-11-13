@@ -1,0 +1,86 @@
+[
+  {
+    "intervention_id": "I-S1-M",
+    "skill_id": "S1",
+    "title": "1:1 mentor session: variables and types",
+    "kind": "mentor_session",
+    "minutes": 60
+  },
+  {
+    "intervention_id": "I-S1-P",
+    "skill_id": "S1",
+    "title": "Guided practice set: variables and types",
+    "kind": "practice",
+    "minutes": 45
+  },
+  {
+    "intervention_id": "I-S2-M",
+    "skill_id": "S2",
+    "title": "1:1 mentor session: control flow",
+    "kind": "mentor_session",
+    "minutes": 60
+  },
+  {
+    "intervention_id": "I-S2-P",
+    "skill_id": "S2",
+    "title": "Guided practice set: control flow",
+    "kind": "practice",
+    "minutes": 45
+  },
+  {
+    "intervention_id": "I-S3-M",
+    "skill_id": "S3",
+    "title": "1:1 mentor session: functions",
+    "kind": "mentor_session",
+    "minutes": 60
+  },
+  {
+    "intervention_id": "I-S3-P",
+    "skill_id": "S3",
+    "title": "Guided practice set: functions",
+    "kind": "practice",
+    "minutes": 45
+  },
+  {
+    "intervention_id": "I-S4-M",
+    "skill_id": "S4",
+    "title": "1:1 mentor session: data structures",
+    "kind": "mentor_session",
+    "minutes": 60
+  },
+  {
+    "intervention_id": "I-S4-P",
+    "skill_id": "S4",
+    "title": "Guided practice set: data structures",
+    "kind": "practice",
+    "minutes": 45
+  },
+  {
+    "intervention_id": "I-S5-M",
+    "skill_id": "S5",
+    "title": "1:1 mentor session: debugging",
+    "kind": "mentor_session",
+    "minutes": 60
+  },
+  {
+    "intervention_id": "I-S5-P",
+    "skill_id": "S5",
+    "title": "Guided practice set: debugging",
+    "kind": "practice",
+    "minutes": 45
+  },
+  {
+    "intervention_id": "I-S6-M",
+    "skill_id": "S6",
+    "title": "1:1 mentor session: git and version control",
+    "kind": "mentor_session",
+    "minutes": 60
+  },
+  {
+    "intervention_id": "I-S6-P",
+    "skill_id": "S6",
+    "title": "Guided practice set: git and version control",
+    "kind": "practice",
+    "minutes": 45
+  }
+]

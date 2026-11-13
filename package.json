@@ -1,0 +1,22 @@
+{
+  "name": "tace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "T.A.C.E runtime slice: goal -> planned task graph -> real files -> independent review -> targeted repair -> re-check.",
+  "type": "module",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "test": "node --test \"tools/**/*.test.mjs\" \"tests/**/*.test.mjs\"",
+    "test:unit": "node --test \"tests/unit/*.test.mjs\"",
+    "test:e2e": "node --test \"tests/e2e/*.test.mjs\"",
+    "fixtures": "node fixtures/education-recovery/generate.mjs && node fixtures/education-recovery/scenarios.mjs && node fixtures/education-recovery/validate.mjs",
+    "demo:baseline": "node cli/tace.mjs run --scenario baseline",
+    "demo:report_only": "node cli/tace.mjs run --scenario report_only",
+    "demo:inject_overlap": "node cli/tace.mjs run --scenario inject_overlap",
+    "demo:inject_wrong_aggregate": "node cli/tace.mjs run --scenario inject_wrong_aggregate",
+    "demo:mentor_unavailable": "node cli/tace.mjs run --scenario mentor_unavailable",
+    "demo:missing_source": "node cli/tace.mjs run --scenario missing_source",
+    "studio": "node web/server.mjs"
+  },
+  "license": "MIT"
+}

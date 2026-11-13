@@ -1,0 +1,5 @@
+runs/
+node_modules/
+*.sqlite
+*.sqlite-journal
+.DS_Store

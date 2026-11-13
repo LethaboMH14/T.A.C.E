@@ -1,0 +1,26 @@
+stateDiagram-v2
+    [*] --> NEW
+    NEW --> NEEDS_CLARIFICATION: essential missing input
+    NEW --> PLANNING: admitted goal
+    NEEDS_CLARIFICATION --> PLANNING: authenticated revision answer
+    NEEDS_CLARIFICATION --> BLOCKED: missing/expired answer
+    PLANNING --> READY: feasible plan and policy
+    PLANNING --> BLOCKED: unavailable capability or data
+    READY --> RUNNING: dispatch authorized tasks
+    RUNNING --> WAITING_APPROVAL: consequential action proposed
+    WAITING_APPROVAL --> RUNNING: exact fresh approval
+    WAITING_APPROVAL --> BLOCKED: denied/expired/changed
+    RUNNING --> VERIFYING: persisted outputs
+    VERIFYING --> VERIFIED: all required independent checks pass
+    VERIFYING --> REPAIRING: failed check and budget available
+    REPAIRING --> VERIFYING: repaired artifact version and recheck
+    VERIFYING --> PARTIAL: unresolved optional requirement
+    VERIFYING --> FAILED: required checks fail, retries exhausted
+    RUNNING --> FAILED: tool failure, no safe recovery
+    RUNNING --> CANCELLED: authenticated cancel accepted
+    READY --> CANCELLED
+    PARTIAL --> [*]
+    BLOCKED --> [*]
+    VERIFIED --> [*]
+    FAILED --> [*]
+    CANCELLED --> [*]

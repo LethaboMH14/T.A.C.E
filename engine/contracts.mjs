@@ -40,7 +40,7 @@ export const EVENT = Object.freeze({
   AGENT_JOINED: 'AGENT_JOINED',           // data: {agent, capabilityId, reason, by}
   GOAL_DRAFTED: 'GOAL_DRAFTED',           // data: {attempt, ok, code, deliverables}
   HUMAN_QUESTION: 'HUMAN_QUESTION',       // data: {id, question, options:[{id,label}], whyAsked}
-  HUMAN_ANSWER: 'HUMAN_ANSWER',           // data: {id, optionId, by}
+  HUMAN_ANSWER: 'HUMAN_ANSWER',           // data: {id, answer, by}
 });
 
 /** Final run status. */

@@ -81,6 +81,29 @@ const reportOnly = () => ({
   uncertainties: [],
 });
 
+// Baseline proposal plus three output files: calendar, spreadsheet and Monday brief.
+const weeklyCheckin = () => {
+  const p = full();
+  p.intent.summary = 'Run the weekly check-in: find who is slipping, book mentors, draft messages and produce the calendar, spreadsheet and Monday brief, without sending anything';
+  p.deliverables.push(
+    { id: 'calendar_ics', description: 'Booked mentor sessions as a calendar file (proposal only)', formatHint: 'ics' },
+    { id: 'schedule_xlsx', description: 'Mentor schedule as a spreadsheet with counts per mentor', formatHint: 'xlsx' },
+    { id: 'monday_brief', description: 'One-page Monday brief for the coordinator', formatHint: 'md' },
+  );
+  p.subgoals.push({
+    id: 'outputs', outcome: 'Produce the calendar, spreadsheet and Monday brief from verified results', dependsOn: ['schedule', 'drafts'],
+    deliverableIds: ['calendar_ics', 'schedule_xlsx', 'monday_brief'], sourceSlots: [3, 4],
+    capabilityKinds: ['READ_SOURCE', 'WRITE_ARTIFACT'], effectKinds: ['READ_ONLY', 'LOCAL_ARTIFACT'],
+  });
+  p.acceptanceCriteria.push(
+    { id: 'calendar_matches', deliverableId: 'calendar_ics', check: 'Every booked session is one calendar event and nothing else', method: 'ARTIFACT_REOPEN', evidenceExpectation: 'Re-opened calendar has one event per booked session' },
+    { id: 'xlsx_reopens', deliverableId: 'schedule_xlsx', check: 'The spreadsheet re-opens and its schedule rows equal the schedule file', method: 'ARTIFACT_REOPEN', evidenceExpectation: 'Re-opened sheet rows equal the schedule rows' },
+    { id: 'brief_numbers', deliverableId: 'monday_brief', check: 'The brief figures equal the counts in the files', method: 'ARTIFACT_REOPEN', evidenceExpectation: 'Stated at-risk, booked and unsent counts equal recomputed counts' },
+  );
+  p.effectClaims = p.effectClaims.map((c) => (c.kind === 'LOCAL_ARTIFACT' ? { ...c, description: 'Write local files only; nothing is sent or published' } : c));
+  return p;
+};
+
 const GOAL = 'Using the results for our 36 bootcamp learners, find who is falling behind and why, plan support for each gap, book our 3 mentors without clashes, and draft messages to learners and mentors. Do not send anything.';
 
 export const SCENARIOS = [
@@ -90,6 +113,8 @@ export const SCENARIOS = [
   { id: 'inject_wrong_aggregate', title: 'Self-correction: the report counts missing scores as zero', goalText: GOAL, intakeSources: ALL, proposal: full(), inject: { kind: 'wrong_aggregate', skill_id: 'S3' } },
   { id: 'mentor_unavailable', title: 'Changed constraint: Mentor B is away on Thursday', goalText: GOAL, intakeSources: ALL, proposal: full(), inject: null, unavailable: [{ mentor_id: 'M-B', day: 'Thu' }] },
   { id: 'missing_source', title: 'Missing input: no assessment file', goalText: GOAL, intakeSources: ALL, proposal: full(), inject: null, excludeSources: ['assessments'] },
+  { id: 'vague_goal', title: 'Vague goal: the Goal Reader may ask one question', goalText: 'Help the learners who are struggling this week.', intakeSources: ALL, proposal: full(), inject: null },
+  { id: 'weekly_checkin', title: 'Weekly check-in: calendar, spreadsheet and Monday brief', goalText: GOAL, intakeSources: ALL, proposal: weeklyCheckin(), inject: null },
 ];
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {

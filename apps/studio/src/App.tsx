@@ -7,6 +7,7 @@ import { SourcesPanel } from '@/components/SourcesPanel';
 import { ActivityFeed } from '@/components/ActivityFeed';
 import { MissionGraph } from '@/components/MissionGraph';
 import { ReviewPanel } from '@/components/ReviewPanel';
+import { QuestionCard } from '@/components/QuestionCard';
 import { AgentRoom } from '@/components/AgentRoom';
 import { ModelMeter } from '@/components/ModelMeter';
 import { FilesPanel } from '@/components/FilesPanel';
@@ -34,6 +35,7 @@ export default function App() {
         </aside>
 
         <div className="flex min-w-0 flex-col gap-4 max-[860px]:order-1">
+          <QuestionCard mission={mission} />
           <MissionGraph mission={mission} />
           <AgentRoom mission={mission} />
           <ModelMeter mission={mission} />

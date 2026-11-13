@@ -46,8 +46,11 @@ const MissionState = Annotation.Root({
  * @param {'off'|'auto'|object} [o.model]  'off' = code only; 'auto' = model from env if a key is set; or a model object
  * @param {object} [o.env]           environment for 'auto' (defaults to process.env)
  * @param {(e:object)=>void} [o.onEvent]
+ * @param {null|((q:{id:string, question:string, options:any[], whyAsked:string})=>Promise<string|null>|string|null)} [o.askHuman]
+ *           asks a person one Goal Reader question; resolves with the answer text, or null (= no answer)
+ * @param {number} [o.askTimeoutMs]  how long to wait for an answer before treating it as none (default 180000)
  */
-export async function runMission({ scenario, domain, sourcesDir, runDir, runId, trustedContext, paceMs = 0, onEvent, clock, model = 'off', env = process.env }) {
+export async function runMission({ scenario, domain, sourcesDir, runDir, runId, trustedContext, paceMs = 0, onEvent, clock, model = 'off', env = process.env, askHuman = null, askTimeoutMs = 180000 }) {
   if (fs.existsSync(runDir) && fs.readdirSync(runDir).length > 0) {
     throw Object.assign(new Error(`run folder already used: ${runDir} (pick a new --run-id)`), { code: 'RUN_EXISTS' });
   }
@@ -67,8 +70,9 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
   if (model === 'auto') {
     // Provider router: profile order from MODEL_PROFILE (demo | free | cheap | meta), visible fallbacks, per-run budget.
     const { routerFromEnv } = await import('./providers.mjs');
+    M.answeredBy = new Set();
     M.model = routerFromEnv(env, {
-      onCall: (c) => emit(EVENT.MODEL_CALL, c, { taskId: null, role: c.agent }),
+      onCall: (c) => { if (c.ok) M.answeredBy.add(`${c.provider}:${c.model}`); emit(EVENT.MODEL_CALL, c, { taskId: null, role: c.agent }); },
       onFallback: (f) => emit(EVENT.MODEL_FALLBACK, f, { taskId: null, role: f.agent }),
     });
   } else if (model && typeof model === 'object') {
@@ -85,7 +89,8 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
     emit(EVENT.RUN_STARTED, {
       scenarioId: scenario.id, title: scenario.title, goalText: scenario.goalText, pacedMs: paceMs, contract: CONTRACT_VERSION,
       plantedFault: scenario.inject ?? null, changedConstraints: scenario.unavailable ?? null, excludedSources: scenario.excludeSources ?? null,
-      agents: agentsOn ? { mode: 'model', provider: M.model.provider, model: M.model.model } : { mode: 'code', note: model === 'off' ? 'Model turned off for this run' : 'No model key configured' },
+      // In model mode this is the router's ORDER of preference, not who answered: every MODEL_CALL names the provider that did.
+      agents: agentsOn ? { mode: 'model', provider: M.model.provider, model: M.model.model, profile: M.model.profile ?? null, chain: M.model.chain ?? [M.model.provider] } : { mode: 'code', note: model === 'off' ? 'Model turned off for this run' : 'No model key configured' },
     });
     await sleep(paceMs);
     const intake = normalizeGoalTurn({ goal: scenario.goalText, sources: scenario.intakeSources.map((r) => ({ kind: 'upload', ref: r })) }, trustedContext);
@@ -99,12 +104,47 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
     let source = 'fixture';
     if (agentsOn) {
       const { readGoal } = await import('../agents/goal-reader.mjs');
+      const MAX_CLARIFY_ROUNDS = 2;
+      const clarifications = [];
+      let asked = 0;
+      let questionCount = 0;
+      const askOne = async (q) => {
+        if (!askHuman) return null;
+        let timer;
+        const timeout = new Promise((resolve) => { timer = setTimeout(() => resolve(null), askTimeoutMs); });
+        try {
+          const a = await Promise.race([Promise.resolve().then(() => askHuman(q)), timeout]);
+          const text = typeof a === 'string' ? a.trim() : '';
+          return text ? text.slice(0, 500) : null; // never invent an answer
+        } catch { return null; } finally { clearTimeout(timer); }
+      };
       try {
-        const r = await readGoal({ model: M.model, intake: M.intake, catalog: domain.catalog || [], messenger: M.messenger, emit, domainContext: domain.goalContext || null, example: domain.goalExample || null });
-        if (r.status === 'NEEDS_CLARIFICATION') {
-          for (const [i, q] of r.questions.entries()) emit(EVENT.HUMAN_QUESTION, { id: `Q-${i + 1}`, question: q.question, code: q.code, options: q.options ?? [], whyAsked: 'The Goal Reader marked this as blocking: the plan would change with the answer.' }, { taskId: null, role: 'Goal Reader' });
-          M.blockedReason = `Needs an answer before planning: ${r.questions.map((q) => q.question).join(' / ')}`;
-          return { next: 'finish', status: RUN_STATUS.BLOCKED, trail: ['goal:needs-answer'] };
+        let r = await readGoal({ model: M.model, intake: M.intake, catalog: domain.catalog || [], messenger: M.messenger, emit, domainContext: domain.goalContext || null, example: domain.goalExample || null, clarifications });
+        while (r.status === 'NEEDS_CLARIFICATION') {
+          const questions = r.questions.map((q) => ({ id: `Q-${++questionCount}`, question: q.question, code: q.code, options: q.options ?? [] }));
+          for (const q of questions) emit(EVENT.HUMAN_QUESTION, { id: q.id, question: q.question, code: q.code, options: q.options, whyAsked: 'The Goal Reader marked this as blocking: the plan would change with the answer.' }, { taskId: null, role: 'Goal Reader' });
+          const asks = questions.map((q) => q.question).join(' / ');
+          if (asked >= MAX_CLARIFY_ROUNDS) {
+            M.blockedReason = `Still unclear after ${MAX_CLARIFY_ROUNDS} question rounds: ${asks}`;
+            return { next: 'finish', status: RUN_STATUS.BLOCKED, trail: ['goal:needs-answer'] };
+          }
+          if (!askHuman) {
+            M.blockedReason = `Needs an answer before planning: ${asks}`;
+            return { next: 'finish', status: RUN_STATUS.BLOCKED, trail: ['goal:needs-answer'] };
+          }
+          asked += 1;
+          const answers = [];
+          for (const q of questions) answers.push(await askOne(q));
+          const missing = questions.filter((_, i) => answers[i] === null);
+          if (missing.length) {
+            M.blockedReason = `Needs an answer before planning (no answer given): ${missing.map((q) => q.question).join(' / ')}`;
+            return { next: 'finish', status: RUN_STATUS.BLOCKED, trail: ['goal:needs-answer'] };
+          }
+          questions.forEach((q, i) => {
+            emit(EVENT.HUMAN_ANSWER, { id: q.id, answer: answers[i], by: 'coordinator' }, { taskId: null, role: 'Coordinator' });
+            clarifications.push({ question: q.question, answer: answers[i] });
+          });
+          r = await readGoal({ model: M.model, intake: M.intake, catalog: domain.catalog || [], messenger: M.messenger, emit, domainContext: domain.goalContext || null, example: domain.goalExample || null, clarifications });
         }
         if (r.status !== 'ACCEPTED') {
           M.blockedReason = String(r.code).startsWith('MODEL_')
@@ -245,6 +285,7 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
     if (fixable.length === 0) return { next: 'finish', status: RUN_STATUS.PARTIAL, trail: ['repair:none-fixable'] };
 
     const rerun = new Set();
+    const rerunRepairs = [];
     M.feedback = {};
     let progressed = false;
     for (const job of fixable) {
@@ -255,13 +296,15 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
         rerun.add(job.rerunSelf);
         for (const d of descendants(M.tasks, job.rerunSelf)) rerun.add(d);
         M.feedback[job.rerunSelf] = failed.filter((c) => job.checkIds.includes(c.id)).flatMap((c) => c.detail?.problems ?? [{ checkId: c.id, issue: c.message }]);
-        M.repairs.push({ round, kind: job.kind, checkIds: job.checkIds, strategy: job.strategy, rerun: job.rerunSelf });
+        const entry = { round, kind: job.kind, checkIds: job.checkIds, strategy: job.strategy, rerun: job.rerunSelf };
+        M.repairs.push(entry);
+        rerunRepairs.push({ entry, before: primaryOf(M.store, job.kind) });
         progressed = true;
         continue;
       }
       let res;
       try {
-        res = await domain.applyRepair({ store: M.store, sources: M.admitted, scenario }, job, failed.filter((c) => job.checkIds.includes(c.id)));
+        res = await domain.applyRepair({ store: M.store, sources: M.admitted, scenario, history: M.repairs }, job, failed.filter((c) => job.checkIds.includes(c.id)));
       } catch (err) {
         res = { unfixable: true, reason: `Repair could not run: ${err.code || ''} ${err.message}`.trim() };
       }
@@ -284,6 +327,14 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
       for (const id of [...rerun].sort()) emit(EVENT.TASK_RERUN, { reason: M.feedback[id] ? 'checker feedback' : 'input changed by repair', round }, { taskId: id, role: M.tasks.find((t) => t.id === id)?.role });
       const again = await runGraph(M.tasks, { execute, emit, only: rerun });
       for (const f of again.failed) M.reasons.push(`Re-run of ${f.id} failed: ${f.message}`);
+      // A re-run repair is a repair too: record which version it replaced, so the autopsy can show it.
+      for (const { entry, before } of rerunRepairs) {
+        const after = primaryOf(M.store, entry.kind);
+        if (!after || (before && after.digest === before.digest)) continue;
+        entry.from = before ? tag(before) : null; entry.to = tag(after);
+        entry.changes = [{ field: 're-run', from: entry.from, to: entry.to, strategy: entry.strategy, reason: `Re-ran ${entry.rerun} with the checker's feedback` }];
+        emit(EVENT.ARTIFACT_REPAIRED, { round, from: entry.from, to: entry.to, changes: entry.changes, checkIds: entry.checkIds, rerun: entry.rerun }, { taskId: 'repair', role: 'Repair' });
+      }
     }
     M.feedback = null;
     return { next: 'review', trail: [`repair:${round}`] };
@@ -300,7 +351,7 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
     if (!status) status = realUnsupported.length ? RUN_STATUS.PARTIAL : RUN_STATUS.VERIFIED;
     const reason = status === RUN_STATUS.VERIFIED ? null : (M.blockedReason || [...new Set(M.reasons)].join(' · ') || null);
     const passed = M.checks.filter((c) => c.status === CHECK_STATUS.PASS).length;
-    const manifest = buildManifest({ runId, scenario, status, store: M.store, admitted: M.admitted, checks: M.checks, repairs: M.repairs, unsupported: M.unsupported, domain, reason, agents: agentsOn ? { provider: M.model.provider, model: M.model.model } : null });
+    const manifest = buildManifest({ runId, scenario, status, store: M.store, admitted: M.admitted, checks: M.checks, repairs: M.repairs, unsupported: M.unsupported, domain, reason, agents: agentsOn ? { profile: M.model.profile ?? null, chain: M.model.chain ?? [M.model.provider], answeredBy: [...(M.answeredBy ?? [])] } : null });
     const mref = M.store.write({ kind: 'final_manifest', name: 'final-manifest.json', content: JSON.stringify(manifest, null, 2) + '\n', producer: 'runner' });
     emit(EVENT.ARTIFACT_WRITTEN, mref);
     emit(EVENT.RUN_FINISHED, { status, checksPassed: passed, checksTotal: M.checks.length, repairs: M.repairs.filter((r) => r.to || r.rerun).length, reason });
@@ -380,7 +431,7 @@ function buildManifest({ runId, scenario, status, store, admitted, checks, repai
     unsupported,
     reason,
     honesty: agents
-      ? `Agents use ${agents.provider}:${agents.model}. Model decisions (goal contract, team, repair route, draft wording) are checked by code before use; explanatory text (join reasons, verdicts) is shown as the model wrote it. The numbers, schedule and checks are code. Synthetic data only. Nothing was sent.`
+      ? `Model agents answered via ${agents.answeredBy?.length ? agents.answeredBy.join(', ') : 'no successful call'} (router profile ${agents.profile ?? 'n/a'}). Model decisions (goal contract, team, repair route, draft wording) are checked by code before use; explanatory text (join reasons, verdicts) is shown as the model wrote it. The numbers, schedule and checks are code. Synthetic data only. Nothing was sent.`
       : 'Workers are deterministic code. Synthetic data only. Nothing was sent.',
   };
 }

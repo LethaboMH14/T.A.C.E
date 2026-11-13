@@ -6,7 +6,15 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 const NAME_RE = /^[a-z0-9][a-z0-9._-]{0,80}$/;
-const MIME = Object.freeze({ '.csv': 'text/csv', '.json': 'application/json', '.md': 'text/markdown' });
+const MIME = Object.freeze({
+  '.csv': 'text/csv',
+  '.json': 'application/json',
+  '.md': 'text/markdown',
+  '.ics': 'text/calendar',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+});
+/** Extensions whose content is binary (a Buffer). Every other extension takes a string. */
+const BINARY_EXT = new Set(['.xlsx']);
 
 function fail(code, message) {
   const err = new Error(message);
@@ -75,10 +83,11 @@ export function createArtifactStore(runDir) {
     }
     const ext = path.extname(name);
     if (!Object.hasOwn(MIME, ext)) {
-      throw fail('BAD_NAME', `artifact name must end in .csv, .json or .md: ${name}`);
+      throw fail('BAD_NAME', `artifact name must end in .csv, .json, .md, .ics or .xlsx: ${name}`);
     }
-    if (typeof content !== 'string') {
-      throw fail('BAD_CONTENT', 'artifact content must be a string');
+    const binary = BINARY_EXT.has(ext);
+    if (binary ? !Buffer.isBuffer(content) : typeof content !== 'string') {
+      throw fail('BAD_CONTENT', binary ? `${ext} content must be a Buffer` : 'artifact content must be a string');
     }
     const stem = name.slice(0, -ext.length);
     if (stem.length === 0) throw fail('BAD_NAME', `bad artifact name: ${name}`);
@@ -126,11 +135,16 @@ export function createArtifactStore(runDir) {
   }
 
   function read(ref) {
+    return readBuffer(ref).toString('utf8');
+  }
+
+  /** Raw bytes of a ref, re-hashed against its recorded digest before they are returned. */
+  function readBuffer(ref) {
     const bytes = fs.readFileSync(abs(ref));
     if (sha256(bytes) !== ref.digest) {
       throw fail('DIGEST_MISMATCH', `file changed since it was written: ${ref.file}`);
     }
-    return bytes.toString('utf8');
+    return bytes;
   }
 
   function latestByKind(kind) {
@@ -149,5 +163,5 @@ export function createArtifactStore(runDir) {
     return loadRefs().slice().sort(byNameThenVersion);
   }
 
-  return { write, read, latestByKind, latestByName, list, abs };
+  return { write, read, readBuffer, latestByKind, latestByName, list, abs };
 }

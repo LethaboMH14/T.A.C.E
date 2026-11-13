@@ -23,6 +23,9 @@ const repo = path.resolve(here, '..');
 const runsDir = path.resolve(repo, process.env.TACE_RUNS || 'runs');
 const PORT = Number(process.env.PORT || 4173);
 const active = new Map(); // runId -> promise
+// runId -> the one open Goal Reader question waiting for a coordinator answer ({ id, done(text|null) })
+const pendingAnswers = new Map();
+const ASK_TIMEOUT_MS = 180000;
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.json': 'application/json; charset=utf-8', '.csv': 'text/plain; charset=utf-8', '.md': 'text/plain; charset=utf-8' };
 const RUN_ID = /^[A-Za-z0-9_-]{1,80}$/;
@@ -78,7 +81,17 @@ function startRun(body) {
   const pace = Math.max(0, Math.min(3000, Number(body.pace ?? 650)));
   const runId = stampRunId(scenario.id);
   const runDir = path.join(runsDir, runId);
-  const p = runMission({ scenario, domain: EDU_DOMAIN, sourcesDir: EDU_DOMAIN.sourcesDir, runDir, runId, trustedContext: TRUSTED_FIXTURE_CONTEXT, paceMs: pace, model: body.model === 'off' ? 'off' : 'auto' })
+  // The run waits here for a coordinator answer (POST /api/runs/:id/answer). No answer in time = no answer.
+  const askHuman = ({ id }) => new Promise((resolve) => {
+    const done = (text) => {
+      clearTimeout(timer);
+      if (pendingAnswers.get(runId)?.id === id) pendingAnswers.delete(runId);
+      resolve(text);
+    };
+    const timer = setTimeout(() => done(null), ASK_TIMEOUT_MS);
+    pendingAnswers.set(runId, { id, done });
+  });
+  const p = runMission({ scenario, domain: EDU_DOMAIN, sourcesDir: EDU_DOMAIN.sourcesDir, runDir, runId, trustedContext: TRUSTED_FIXTURE_CONTEXT, paceMs: pace, model: body.model === 'off' ? 'off' : 'auto', askHuman, askTimeoutMs: ASK_TIMEOUT_MS })
     .catch((err) => { console.error(`[run ${runId}]`, err); })
     .finally(() => active.delete(runId));
   active.set(runId, p);
@@ -114,6 +127,20 @@ const server = http.createServer(async (req, res) => {
         const runId = parts[2];
         if (!fs.existsSync(path.join(runsDir, runId))) return send(res, 404, { error: 'no such run' });
         if (parts[3] === 'events') return streamEvents(req, res, runId);
+        if (parts[3] === 'answer' && req.method === 'POST') {
+          // Same rules as POST /api/runs: same-origin JSON only.
+          const origin = req.headers.origin;
+          if (origin && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return send(res, 403, { error: 'cross-origin request refused' });
+          if (!String(req.headers['content-type'] || '').startsWith('application/json')) return send(res, 415, { error: 'send JSON' });
+          let raw = ''; for await (const c of req) { raw += c; if (raw.length > 4096) return send(res, 413, { error: 'too large' }); }
+          let body; try { body = JSON.parse(raw || '{}'); } catch { return send(res, 400, { error: 'bad JSON' }); }
+          const answer = typeof body.answer === 'string' ? body.answer.trim() : '';
+          if (answer.length < 1 || answer.length > 500) return send(res, 400, { error: 'answer must be 1 to 500 characters' });
+          const open = pendingAnswers.get(runId);
+          if (!open || open.id !== String(body.id || '')) return send(res, 404, { error: 'no open question with that id (it may have expired)' });
+          open.done(answer);
+          return send(res, 200, { ok: true });
+        }
         if (parts[3] === 'file') {
           const rel = url.searchParams.get('path') || '';
           if (!/^artifacts\/[a-z0-9][a-z0-9._-]*\.(csv|json|md)$/.test(rel)) return send(res, 400, { error: 'bad path' });

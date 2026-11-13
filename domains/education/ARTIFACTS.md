@@ -102,3 +102,45 @@ needs a person's approval" banner.
 | C11_drafts_match_schedule | message_drafts | every learner draft matches a BOOKED session (mentor, day, start) in the latest schedule |
 | C12_artifacts_intact | (all) | every latest artifact re-reads with its recorded sha256 |
 | C13_source_digests | (all) | every source input recorded on an artifact matches the admitted digest |
+
+## 6. `mentor-sessions.ics` (kind `calendar_ics`) — task `export_calendar`, role Calendar Writer
+RFC 5545 VCALENDAR, CRLF line endings, lines folded at 75 octets (continuation lines start with one space).
+Header: `PRODID:-//T.A.C.E//EN`, `VERSION:2.0`, `CALSCALE:GREGORIAN`, `METHOD:PUBLISH`, then a VTIMEZONE for
+`Africa/Johannesburg` (SAST, +0200, no DST). One VEVENT per BOOKED row of the latest `mentor-schedule.csv`:
+`UID:<session_id>@tace.local`, `DTSTAMP:20261113T000000Z` (fixed), `DTSTART;TZID=Africa/Johannesburg:<date>T<start>00`,
+the matching DTEND, `SUMMARY:Mentor session: <skill name>`, `DESCRIPTION:<learner> with <mentor>. Proposal only — not sent.`,
+`STATUS:TENTATIVE`. No ATTENDEE, ORGANIZER or mailto: anywhere. UNSCHEDULED rows produce no event.
+
+## 7. `mentor-schedule.xlsx` (kind `schedule_xlsx`) — task `export_schedule_xlsx`, role Spreadsheet Writer
+Built with exceljs (MIT). Sheet `Schedule`: bold frozen header `Session, Learner, Skill, Mentor, Day, Date, Start, End,
+Status`, one row per schedule row in CSV order (learner and mentor shown by display name). Sheet `By mentor`:
+`Mentor, Booked sessions, Capacity, Within capacity`. Workbook creator `T.A.C.E`, created and modified 2026-11-13.
+Zip entry timestamps are rewritten to a fixed date (`fixZipTimes`) so two runs give identical bytes.
+Written as a Buffer; the store checks the digest on read (`readBuffer`).
+
+## 8. `monday-brief.md` (kind `monday_brief`) — task `monday_brief`, role Brief Writer
+One page, no timestamps. Sections: `## Who needs help this week` (at-risk learners with top gap and booked session),
+`## What is booked` (per mentor), `## What needs your approval`, `## What we could not do`. The figures are on fixed lines
+the reviewer reads back:
+- `At-risk learners: N`
+- `Booked sessions: N`
+- `Unsent drafts: N`
+
+## Reviewer checks C15-C17 (added for the output files)
+- **C15_calendar_matches_schedule** (artifact `mentor-sessions.ics`): every BOOKED row has exactly one VEVENT with the
+  matching UID, DTSTART date and time in Africa/Johannesburg, and the mentor name in DESCRIPTION; no extra events;
+  CRLF only; no ATTENDEE, ORGANIZER or mailto:.
+- **C16_xlsx_matches_schedule** (artifact `mentor-schedule.xlsx`): re-opened through `readBuffer` (digest re-checked) and
+  parsed with exceljs. The Schedule sheet header and every row (session, learner, mentor, day, start, status) equal the
+  latest `mentor-schedule.csv`.
+- **C17_brief_numbers_match** (artifact `monday-brief.md`): the three stated figures equal the recomputed values: at-risk
+  learners from the reviewer's own recomputation, BOOKED rows from the schedule, UNSENT drafts from the drafts JSON.
+Each check is skipped when its file is absent. Routing to repair is the lead's decision (see the report).
+
+## Store extensions (engine/artifacts.mjs)
+`.ics` is written as a string (`text/calendar`). `.xlsx` must be written as a Buffer (`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`).
+`readBuffer(ref)` returns the bytes after the sha256 check. `read(ref)` is unchanged for every existing extension.
+
+## Scenario `weekly_checkin`
+The baseline proposal plus the three output deliverables, and a subgoal `outputs` (depends on `schedule` and `drafts`)
+with one ARTIFACT_REOPEN acceptance criterion per deliverable.

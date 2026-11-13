@@ -81,7 +81,7 @@ test('E2E-03 mentor_unavailable: no Thursday booking for M-B, verified or partia
   });
 });
 
-test('E2E-04/05 inject_overlap: fail, repair v1 to v2, rerun drafts, pass', async () => {
+test('E2E-04/05 inject_overlap: fail, smallest fix rejected by the Reviewer, escalated fix passes', async () => {
   await withTempDir(async (tmp) => {
     const runDir = path.join(tmp, 'run');
     const result = await runScenario({ scenario: loadScenario('inject_overlap'), runDir, runId: 'overlap-1' });
@@ -89,10 +89,15 @@ test('E2E-04/05 inject_overlap: fail, repair v1 to v2, rerun drafts, pass', asyn
 
     const i1 = findFrom(events, 0, (e) => e.type === EVENT.VERIFICATION_FAILED && e.data.failed.includes('C04_schedule_no_overlap'));
     const i2 = findFrom(events, i1 + 1, ev(EVENT.REPAIR_SCHEDULED));
-    const i3 = findFrom(events, i2 + 1, (e) => e.type === EVENT.ARTIFACT_REPAIRED && e.data.from === 'mentor-schedule.csv@v1' && e.data.to === 'mentor-schedule.csv@v2');
+    const i3 = findFrom(events, i2 + 1, (e) => e.type === EVENT.ARTIFACT_REPAIRED && e.data.from === 'mentor-schedule.csv@v1' && e.data.to === 'mentor-schedule.csv@v2'
+      && e.data.changes.some((c) => c.strategy === 'shift_one_hour'));
     const i4 = findFrom(events, i3 + 1, (e) => e.type === EVENT.TASK_RERUN && e.taskId === 'draft_messages');
-    const i5 = findFrom(events, i4 + 1, ev(EVENT.VERIFICATION_PASSED));
-    assert.ok(i1 >= 0 && i2 > i1 && i3 > i2 && i4 > i3 && i5 > i4, `event order wrong: ${[i1, i2, i3, i4, i5]}`);
+    // The Reviewer judges the smallest change on the real schedule and rejects it: it creates a new clash.
+    const i4b = findFrom(events, i4 + 1, (e) => e.type === EVENT.VERIFICATION_FAILED && e.data.round === 2 && e.data.failed.includes('C04_schedule_no_overlap'));
+    const i4c = findFrom(events, i4b + 1, (e) => e.type === EVENT.ARTIFACT_REPAIRED && e.data.from === 'mentor-schedule.csv@v2' && e.data.to === 'mentor-schedule.csv@v3'
+      && e.data.changes.every((c) => c.strategy === 'first_free_valid_slot'));
+    const i5 = findFrom(events, i4c + 1, ev(EVENT.VERIFICATION_PASSED));
+    assert.ok(i1 >= 0 && i2 > i1 && i3 > i2 && i4 > i3 && i4b > i4 && i4c > i4b && i5 > i4c, `event order wrong: ${[i1, i2, i3, i4, i4b, i4c, i5]}`);
 
     const artDir = path.join(runDir, 'artifacts');
     const v1Path = path.join(artDir, 'mentor-schedule.v1.csv');
@@ -116,8 +121,9 @@ test('E2E-04/05 inject_overlap: fail, repair v1 to v2, rerun drafts, pass', asyn
     const index = readIndex(runDir);
     const r1 = index.find((r) => r.name === 'mentor-schedule.csv' && r.version === 1);
     const r2 = latestRef(index, 'mentor-schedule.csv');
-    assert.equal(r2.version, 2);
+    assert.equal(r2.version, 3, 'v2 (rejected smallest change) and v1 are kept; v3 is the accepted fix');
     assert.notEqual(r1.digest, r2.digest);
+    assert.ok(index.some((r) => r.name === 'mentor-schedule.csv' && r.version === 2), 'the rejected v2 must stay on record');
 
     const byId1 = new Map(v1.rows.map((r) => [r.session_id, r]));
     const changed = v2.rows.filter((r) => {

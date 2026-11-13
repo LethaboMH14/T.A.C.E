@@ -7,6 +7,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import ExcelJS from 'exceljs'; // a PARSER, used here only to read the .xlsx back (not worker code)
 import { CHECK_STATUS, KIND } from '../../engine/contracts.mjs';
 import { parseCsv } from '../../engine/csv.mjs';
 import {
@@ -28,6 +29,9 @@ const NAMES = Object.freeze({
   plan: 'improvement-plan.json',
   schedule: 'mentor-schedule.csv',
   drafts: 'unsent-message-drafts.json',
+  calendar: 'mentor-sessions.ics',
+  xlsx: 'mentor-schedule.xlsx',
+  brief: 'monday-brief.md',
 });
 
 const TITLES = Object.freeze({
@@ -45,6 +49,9 @@ const TITLES = Object.freeze({
   C12_artifacts_intact: 'Every artifact re-reads with its recorded digest',
   C13_source_digests: 'Source inputs match the admitted files',
   C14_drafts_text_matches: 'Learner draft text states the booked day, start time and mentor',
+  C15_calendar_matches_schedule: 'Calendar file has one event per booked session and nothing else',
+  C16_xlsx_matches_schedule: 'Spreadsheet schedule rows equal the latest schedule file',
+  C17_brief_numbers_match: 'Monday brief figures equal the recomputed counts',
 });
 
 const GAP_COLUMNS = ['trainee_id', 'display_name', 'skill_id', 'score', 'threshold', 'shortfall', 'at_risk', 'source_file', 'source_row'];
@@ -899,6 +906,168 @@ function checkSourceDigests(ref, sources) {
   });
 }
 
+// ---- output files: calendar, spreadsheet, Monday brief (C15-C17) ----
+
+/** Unfold RFC 5545 continuation lines (CRLF + one space or tab). */
+function unfoldIcs(text) {
+  const out = [];
+  for (const raw of text.split('\r\n')) {
+    if ((raw.startsWith(' ') || raw.startsWith('\t')) && out.length) out[out.length - 1] += raw.slice(1);
+    else out.push(raw);
+  }
+  return out;
+}
+
+/** Each VEVENT as { PROPNAME: [{ value, params }] }. */
+function parseIcsEvents(lines) {
+  const events = [];
+  let cur = null;
+  for (const line of lines) {
+    if (line === 'BEGIN:VEVENT') { cur = {}; continue; }
+    if (line === 'END:VEVENT') { if (cur) events.push(cur); cur = null; continue; }
+    if (!cur) continue;
+    const colon = line.indexOf(':');
+    if (colon < 0) continue;
+    const [name, ...params] = line.slice(0, colon).split(';');
+    (cur[name.toUpperCase()] ??= []).push({ value: line.slice(colon + 1), params });
+  }
+  return events;
+}
+
+const uidOf = (e) => e.UID?.[0]?.value ?? '';
+
+function checkCalendar(store, ref, schedule, names) {
+  if (schedule.problem) throw new Error(schedule.problem);
+  const text = openText(store, ref);
+  const problems = [];
+  if (/(^|[^\r])\n/.test(text)) problems.push('a line ends with LF only, not CRLF');
+  const banned = /ATTENDEE|ORGANIZER|mailto:/i.exec(text);
+  if (banned) problems.push(`the file contains ${banned[0]}, which must not appear`);
+
+  const events = parseIcsEvents(unfoldIcs(text));
+  const booked = schedule.rows.filter(({ r }) => r.status === 'BOOKED');
+  for (const { r } of booked) {
+    const uid = `${r.session_id}@tace.local`;
+    const hits = events.filter((e) => uidOf(e) === uid);
+    if (hits.length !== 1) {
+      problems.push(`${r.session_id} has ${hits.length} events in the calendar, expected 1`);
+      continue;
+    }
+    const e = hits[0];
+    const wantStart = `${r.date.replace(/-/g, '')}T${r.start.replace(':', '')}00`;
+    const dt = e.DTSTART?.[0];
+    if (!dt || dt.value !== wantStart || !dt.params.includes('TZID=Africa/Johannesburg')) {
+      problems.push(`${r.session_id} starts at ${dt ? dt.value : 'nothing'}, expected ${wantStart} in Africa/Johannesburg`);
+    }
+    const mentor = names.get(r.mentor_id) ?? '';
+    const desc = e.DESCRIPTION?.[0]?.value ?? '';
+    if (!mentor || !desc.includes(`with ${mentor}`)) {
+      problems.push(`${r.session_id} does not name mentor ${mentor || r.mentor_id}`);
+    }
+  }
+  const bookedUids = new Set(booked.map(({ r }) => `${r.session_id}@tace.local`));
+  const extra = events.filter((e) => !bookedUids.has(uidOf(e)));
+  if (extra.length) problems.push(`${extra.length} event(s) do not match any booked session`);
+
+  const evidence = booked.map(({ row }) => ({ sourceId: NAMES.schedule, row }));
+  const expected = booked.length;
+  const observed = events.length;
+  if (problems.length === 0) {
+    return pass({ expected, observed, evidence, message: `${expected} booked sessions and ${observed} events match one to one.` });
+  }
+  return fail({
+    expected, observed, evidence, detail: { problems },
+    message: `${problems[0]}${problems.length > 1 ? ` (and ${problems.length - 1} more)` : ''}.`,
+  });
+}
+
+/** Re-open the spreadsheet with exceljs (a parser). Reads the Schedule sheet as displayed text. */
+async function readXlsxSchedule(store, ref) {
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(store.readBuffer(ref)); // digest re-checked first
+  const ws = wb.getWorksheet('Schedule');
+  if (!ws) throw new Error('the spreadsheet has no Schedule sheet');
+  const header = [];
+  for (let c = 1; c <= 9; c += 1) header.push(String(ws.getRow(1).getCell(c).text ?? '').trim());
+  const rows = [];
+  ws.eachRow((row, n) => {
+    if (n === 1) return;
+    const cell = (c) => String(row.getCell(c).text ?? '');
+    rows.push({ row: n, session: cell(1), learner: cell(2), mentor: cell(4), day: cell(5), start: cell(7), status: cell(9) });
+  });
+  return { header, rows };
+}
+
+function checkXlsx(xl, schedule, names, sources) {
+  if (schedule.problem) throw new Error(schedule.problem);
+  const trainees = requireSource(sources.trainees, 'trainees');
+  const learners = new Map(withRows(trainees).map((t) => [t.r.trainee_id, t.r.display_name]));
+  const want = ['Session', 'Learner', 'Skill', 'Mentor', 'Day', 'Date', 'Start', 'End', 'Status'];
+  const problems = [];
+  if (xl.header.join('|') !== want.join('|')) problems.push(`the header row is ${xl.header.join(', ')}`);
+
+  const expRows = schedule.rows.map(({ r, row }) => ({
+    row,
+    session: r.session_id,
+    learner: learners.get(r.trainee_id) ?? '',
+    mentor: r.mentor_id ? names.get(r.mentor_id) ?? '' : '',
+    day: r.day,
+    start: r.start,
+    status: r.status,
+  }));
+  if (xl.rows.length !== expRows.length) {
+    problems.push(`the Schedule sheet has ${xl.rows.length} rows but the schedule file has ${expRows.length}`);
+  }
+  const fields = ['session', 'learner', 'mentor', 'day', 'start', 'status'];
+  for (let i = 0; i < Math.min(xl.rows.length, expRows.length); i += 1) {
+    const got = xl.rows[i];
+    const exp = expRows[i];
+    const diff = fields.find((f) => got[f] !== exp[f]);
+    if (diff) {
+      problems.push(`row ${i + 1} ${diff} is "${got[diff]}" but the schedule says "${exp[diff]}"`);
+      break;
+    }
+  }
+
+  const evidence = expRows.map((e) => ({ sourceId: NAMES.schedule, row: e.row }));
+  const expected = expRows.length;
+  const observed = xl.rows.length;
+  if (problems.length === 0) {
+    return pass({ expected, observed, evidence, message: `All ${expected} schedule rows in the spreadsheet match the schedule file.` });
+  }
+  return fail({ expected, observed, evidence, detail: { problems }, message: `${problems[0]}.` });
+}
+
+/** Reads the three figure lines from the brief and recounts them from the latest files. */
+function checkBrief(store, ref, model, schedule, draftsJson) {
+  if (schedule.problem) throw new Error(schedule.problem);
+  const text = openText(store, ref);
+  const read = (label) => {
+    const m = new RegExp(`^${label}: (\\d+)$`, 'm').exec(text);
+    return m ? Number(m[1]) : null;
+  };
+  const stated = { atRisk: read('At-risk learners'), booked: read('Booked sessions'), unsent: read('Unsent drafts') };
+  const recomputed = {
+    atRisk: model.atRiskIds.length,
+    booked: schedule.rows.filter(({ r }) => r.status === 'BOOKED').length,
+    unsent: (Array.isArray(draftsJson.drafts) ? draftsJson.drafts : []).filter((d) => d.status === 'UNSENT').length,
+  };
+  const labels = { atRisk: 'At-risk learners', booked: 'Booked sessions', unsent: 'Unsent drafts' };
+  const mismatches = Object.keys(recomputed)
+    .filter((k) => stated[k] !== recomputed[k])
+    .map((k) => ({ field: labels[k], expected: recomputed[k], observed: stated[k] }));
+  const expected = Object.keys(recomputed).map((k) => `${labels[k]} ${recomputed[k]}`).join('; ');
+  if (mismatches.length === 0) {
+    return pass({ expected, observed: expected, message: `The brief states ${expected}, matching the files.` });
+  }
+  const first = mismatches[0];
+  return fail({
+    expected, observed: Object.keys(stated).map((k) => `${labels[k]} ${stated[k] ?? 'missing'}`).join('; '),
+    detail: { mismatches },
+    message: `The brief says ${first.field} ${first.observed ?? 'missing'} but the files give ${first.expected}.`,
+  });
+}
+
 /**
  * Independent review of the latest artifacts.
  * @param {{sources: Record<string, any>, store: any, scenario?: any}} ctx
@@ -941,6 +1110,41 @@ export async function review(ctx) {
     attempt(checks, 'C10_drafts_unsent', draftsRef, KIND.MESSAGE_DRAFTS, () => checkDraftsUnsent(store, draftsRef));
     attempt(checks, 'C11_drafts_match_schedule', draftsRef, KIND.MESSAGE_DRAFTS, () => checkDraftsMatchSchedule(store, draftsRef, schRef));
     attempt(checks, 'C14_drafts_text_matches', draftsRef, KIND.MESSAGE_DRAFTS, () => checkDraftsText(store, draftsRef, schRef, names));
+  }
+
+  // ---- output files (C15-C17). Each is skipped when its file is absent. ----
+  const icsRef = store.latestByName(NAMES.calendar);
+  if (icsRef) {
+    attempt(checks, 'C15_calendar_matches_schedule', icsRef, 'calendar_ics', () => {
+      if (!schRef) throw new Error('no mentor schedule exists to compare the calendar with');
+      return checkCalendar(store, icsRef, scheduleRows(store, schRef), names);
+    });
+  }
+
+  const xlsxRef = store.latestByName(NAMES.xlsx);
+  if (xlsxRef) {
+    // exceljs reads the workbook asynchronously; the result (or its error) is then checked synchronously.
+    let opened;
+    try {
+      opened = { data: await readXlsxSchedule(store, xlsxRef) };
+    } catch (err) {
+      opened = { error: err.message };
+    }
+    attempt(checks, 'C16_xlsx_matches_schedule', xlsxRef, 'schedule_xlsx', () => {
+      if (opened.error) throw new Error(opened.error);
+      if (!schRef) throw new Error('no mentor schedule exists to compare the spreadsheet with');
+      return checkXlsx(opened.data, scheduleRows(store, schRef), names, sources);
+    });
+  }
+
+  const briefRef = store.latestByName(NAMES.brief);
+  if (briefRef) {
+    attempt(checks, 'C17_brief_numbers_match', briefRef, 'monday_brief', () => {
+      requireModel(model, problem);
+      if (!schRef) throw new Error('no mentor schedule exists to recount bookings from');
+      if (!draftsRef) throw new Error('no message drafts exist to recount unsent drafts from');
+      return checkBrief(store, briefRef, model, scheduleRows(store, schRef), parseJsonArtifact(store, draftsRef));
+    });
   }
 
   // Integrity checks run on every latest file, then fold into ONE check per rule so the

@@ -6,6 +6,7 @@ import { computeGaps } from './analyst.mjs';
 import { recommendInterventions } from './interventions.mjs';
 import { scheduleMentors } from './scheduler.mjs';
 import { writePerformanceSummary, draftMessages } from './writer.mjs';
+import { exportCalendar, exportScheduleXlsx, writeMondayBrief, KIND_CALENDAR, KIND_SCHEDULE_XLSX, KIND_MONDAY_BRIEF } from './outputs.mjs';
 
 export const EDU_CAPABILITIES = Object.freeze([
   {
@@ -33,6 +34,21 @@ export const EDU_CAPABILITIES = Object.freeze([
     consumes: [KIND.MENTOR_SCHEDULE, KIND.SRC_MENTORS, KIND.SRC_TRAINEES],
     produces: [KIND.MESSAGE_DRAFTS], run: writeDrafts,
   },
+  {
+    id: 'export_calendar', role: 'Calendar Writer', label: 'Write booked mentor sessions as a calendar file',
+    consumes: [KIND.MENTOR_SCHEDULE, KIND.SRC_MENTORS, KIND.SRC_TRAINEES, KIND.SRC_SKILLS],
+    produces: [KIND_CALENDAR], run: exportCalendar,
+  },
+  {
+    id: 'export_schedule_xlsx', role: 'Spreadsheet Writer', label: 'Write the mentor schedule as a spreadsheet',
+    consumes: [KIND.MENTOR_SCHEDULE, KIND.SRC_MENTORS, KIND.SRC_TRAINEES, KIND.SRC_SKILLS],
+    produces: [KIND_SCHEDULE_XLSX], run: exportScheduleXlsx,
+  },
+  {
+    id: 'monday_brief', role: 'Brief Writer', label: 'Write the one-page Monday brief for the coordinator',
+    consumes: [KIND.GAPS, KIND.PERFORMANCE_SUMMARY, KIND.MENTOR_SCHEDULE, KIND.MESSAGE_DRAFTS, KIND.SRC_MENTORS, KIND.SRC_TRAINEES],
+    produces: [KIND_MONDAY_BRIEF], run: writeMondayBrief,
+  },
 ]);
 
 // With a model configured, the wording is written by the model (facts are still copied by code
@@ -52,4 +68,7 @@ export const EDU_CATALOG = Object.freeze([
   { id: 'improvement_plan', description: 'Support plan linked to verified gaps (json + md)' },
   { id: 'mentor_schedule', description: 'Clash-free mentor sessions (csv)' },
   { id: 'message_drafts', description: 'Unsent message drafts for a person to approve (json + md)' },
+  { id: 'calendar_ics', description: 'Booked mentor sessions as a calendar file (ics), proposal only' },
+  { id: 'schedule_xlsx', description: 'Mentor schedule as a spreadsheet (xlsx) with counts per mentor' },
+  { id: 'monday_brief', description: 'One-page Monday brief: who needs help, what is booked, what needs approval (md)' },
 ]);

@@ -53,7 +53,8 @@ export const PROFILES = Object.freeze({
   meta: ['meta'],
 });
 
-const RETRYABLE = /^MODEL_(HTTP_(429|5\d\d)|TIMEOUT|NETWORK|EMPTY|BAD_JSON)$/;
+// 402 credits exhausted, 404/410 model retired, 408 timeout, 422 unsupported parameter: try the next provider (live, 13 Nov).
+const RETRYABLE = /^MODEL_(HTTP_(402|404|408|410|422|429|5\d\d)|TIMEOUT|NETWORK|EMPTY|BAD_JSON)$/;
 
 function fail(code, message, extra = {}) {
   return Object.assign(new Error(message), { code, ...extra });

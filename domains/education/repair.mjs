@@ -28,6 +28,9 @@ export function planRepairs(failed) {
     else if (SUMMARY_CHECKS.has(c.id)) add('summary', { kind: 'performance_summary', strategy: 'recompute_affected_numbers', fixable: true, rerun: ['performance_summary'] }, c.id);
     else if (DRAFT_CHECKS.has(c.id)) add('drafts', { kind: 'message_drafts', strategy: 'regenerate_from_latest_schedule', fixable: true, rerun: [] , rerunSelf: 'draft_messages' }, c.id);
     else if (c.id === 'C01_gaps_match') add('gaps', { kind: 'gap_analysis', strategy: 'rerun_producer', fixable: true, rerun: [], rerunSelf: 'compute_gaps' }, c.id);
+    else if (c.id === 'C15_calendar_matches_schedule') add('ics', { kind: 'calendar_ics', strategy: 'rerun_producer', fixable: true, rerun: [], rerunSelf: 'export_calendar' }, c.id);
+    else if (c.id === 'C16_xlsx_matches_schedule') add('xlsx', { kind: 'schedule_xlsx', strategy: 'rerun_producer', fixable: true, rerun: [], rerunSelf: 'export_schedule_xlsx' }, c.id);
+    else if (c.id === 'C17_brief_numbers_match') add('brief', { kind: 'monday_brief', strategy: 'rerun_producer', fixable: true, rerun: [], rerunSelf: 'monday_brief' }, c.id);
     else if (c.id === 'C09_plan_refs') add('plan', { kind: 'improvement_plan', strategy: 'rerun_producer', fixable: true, rerun: [], rerunSelf: 'recommend_interventions' }, c.id);
     else add('integrity:' + c.id, { kind: c.kind, strategy: 'none', fixable: false, rerun: [], reason: 'Integrity problem (a file or source changed outside the run). A person must look at it.' }, c.id);
   }
@@ -60,8 +63,19 @@ function mentorSlots(mentorId, sources, scenario) {
 
 const describe = (r) => (r.status === 'BOOKED' ? `${r.mentor_id} ${r.day} ${r.start}` : 'unscheduled');
 
-/** Re-place only the sessions that break a rule; every valid session keeps its exact slot. */
-export function repairSchedule(rows, sources, scenario) {
+/**
+ * Re-place only the sessions that break a rule; every valid session keeps its exact slot.
+ *
+ * Propose-and-verify ladder (per session, using the run's repair history):
+ *   level 0  smallest change first: same mentor, same day, one hour later (if that slot is in
+ *            the mentor's window). Repair does NOT pre-check clashes here; the independent
+ *            Reviewer judges the result. If it clashes, the Reviewer rejects it and the next
+ *            round escalates.
+ *   level 1+ full re-placement: first free valid slot (same mentor first, then another mentor
+ *            with the skill), fully checked against everything kept.
+ * Whether level 0 is rejected depends only on the real schedule; nothing is scripted.
+ */
+export function repairSchedule(rows, sources, scenario, history = []) {
   const mentors = new Map(sources.mentors.rows.map(m => [m.mentor_id, { skills: new Set(m.skills.split(';')), capacity: Number(m.capacity) }]));
   const mentorIds = [...mentors.keys()].sort();
   const slotsOf = new Map(mentorIds.map(id => [id, mentorSlots(id, sources, scenario)]));
@@ -75,27 +89,45 @@ export function repairSchedule(rows, sources, scenario) {
     return !used(r.mentor_id).some(k => k.day === r.day && k.start === r.start);
   };
   const changes = [];
-  const ordered = [...rows].sort((a, b) => (a.session_id < b.session_id ? -1 : 1));
-  // Pass 1: keep every session that already obeys the rules (first booking wins a contested slot).
+  const movedBefore = new Map();
+  for (const h of history) for (const c of h.changes || []) if (c.session_id) movedBefore.set(c.session_id, (movedBefore.get(c.session_id) || 0) + 1);
+  // Pass 1: keep every session that already obeys the rules. Sessions Repair never touched win a
+  // contested slot, so a session Repair moved earlier yields instead of bumping an innocent one.
+  const bySession = (a, b) => (a.session_id < b.session_id ? -1 : 1);
+  const ordered = [...rows].sort((a, b) => (movedBefore.has(a.session_id) - movedBefore.has(b.session_id)) || bySession(a, b));
   const broken = [];
   for (const r of ordered) {
     if (r.status === 'BOOKED' && valid(r)) kept.push({ ...r });
     else broken.push(r);
   }
-  // Pass 2: move only the broken ones into slots that are free given everything kept.
+  // Pass 2: move only the broken ones.
   for (const r of broken) {
-    const candidates = [r.mentor_id, ...mentorIds.filter(id => id !== r.mentor_id)].filter(id => mentors.get(id)?.skills.has(r.skill_id));
-    let placed = null;
-    for (const id of candidates) {
-      if (used(id).length >= mentors.get(id).capacity) continue;
-      const slot = slotsOf.get(id).find(s => !used(id).some(k => k.day === s.day && k.start === s.start));
-      if (slot) { placed = { ...r, mentor_id: id, ...slot, status: 'BOOKED' }; break; }
+    const level = movedBefore.get(r.session_id) || 0;
+    let next = null;
+    let strategy = 'first_free_valid_slot';
+    if (level === 0 && r.status === 'BOOKED') {
+      const target = toHhmm(toMin(r.start) + SESSION_MINUTES);
+      const s = (slotsOf.get(r.mentor_id) || []).find(x => x.day === r.day && x.start === target);
+      if (s && used(r.mentor_id).length < mentors.get(r.mentor_id).capacity) {
+        next = { ...r, ...s, status: 'BOOKED' };
+        strategy = 'shift_one_hour';
+      }
     }
-    const next = placed || { ...r, mentor_id: '', day: '', date: '', start: '', end: '', status: 'UNSCHEDULED' };
+    if (!next) {
+      const candidates = [r.mentor_id, ...mentorIds.filter(id => id !== r.mentor_id)].filter(id => mentors.get(id)?.skills.has(r.skill_id));
+      for (const id of candidates) {
+        if (used(id).length >= mentors.get(id).capacity) continue;
+        const slot = slotsOf.get(id).find(s => !used(id).some(k => k.day === s.day && k.start === s.start));
+        if (slot) { next = { ...r, mentor_id: id, ...slot, status: 'BOOKED' }; break; }
+      }
+    }
+    next = next || { ...r, mentor_id: '', day: '', date: '', start: '', end: '', status: 'UNSCHEDULED' };
     kept.push(next);
     if (describe(next) !== describe(r)) {
-      changes.push({ session_id: r.session_id, trainee_id: r.trainee_id, from: describe(r), to: describe(next),
-        reason: r.status === 'BOOKED' ? 'Broke a schedule rule; moved to the first free valid slot' : 'Was unscheduled; a free valid slot exists' });
+      changes.push({ session_id: r.session_id, trainee_id: r.trainee_id, from: describe(r), to: describe(next), strategy, attempt: level + 1,
+        reason: strategy === 'shift_one_hour'
+          ? 'Smallest change first: same mentor, one hour later. The independent Reviewer decides whether it holds.'
+          : r.status === 'BOOKED' ? 'Escalated: moved to the first free slot that passes every schedule rule' : 'Was unscheduled; a free valid slot exists' });
     }
   }
   kept.sort((a, b) => (a.session_id < b.session_id ? -1 : 1));
@@ -144,7 +176,7 @@ export async function applyRepair(ctx, job, failedChecks) {
   if (job.kind === 'mentor_schedule') {
     const ref = store.latestByName('mentor-schedule.csv');
     const parsed = parseCsv(store.read(ref));
-    const { rows, changes } = repairSchedule(parsed.rows, sources, scenario);
+    const { rows, changes } = repairSchedule(parsed.rows, sources, scenario, ctx.history || []);
     if (!changes.length) return { unfixable: true, reason: 'No valid free slot exists for the affected sessions. A person must add mentor time or change capacity.' };
     const to = store.write({ kind: ref.kind, name: ref.name, content: toCsv(parsed.header, rows), producer: 'repair', inputs: ref.inputs });
     return { from: `${ref.name}@v${ref.version}`, to: `${to.name}@v${to.version}`, toRef: to, changes };

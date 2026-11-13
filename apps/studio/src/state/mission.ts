@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import type {
-  ArtifactRef, Check, FeedItem, LedgerEvent, Mission, NodeInfo, NodeState, RunInfo, ScenarioInfo, StageState, Tone,
+  ArtifactRef, Check, FeedItem, HumanQuestion, LedgerEvent, Mission, NodeInfo, NodeState, RunInfo, ScenarioInfo, StageState, Tone,
 } from './types';
 
 export type * from './types';
@@ -14,6 +14,7 @@ const STAGES = ['goal', 'plan', 'execute', 'verify', 'deliver'] as const;
 export function initialMission(runId: string | null = null): Mission {
   return {
     runId,
+    questions: [],
     title: '',
     goalText: '',
     paceMs: 0,
@@ -363,8 +364,30 @@ export function reduce(m: Mission, e: LedgerEvent): Mission {
       return addFeed(s, `${d.agent} switched model ${d.from} → ${d.to} (${why})`, 'redo');
     }
 
+    case 'HUMAN_QUESTION': {
+      const options = (d.options ?? []).map((o: unknown) =>
+        typeof o === 'string' ? { id: o, label: o } : { id: String((o as { id?: unknown }).id ?? ''), label: String((o as { label?: unknown }).label ?? '') },
+      );
+      const q: HumanQuestion = {
+        id: String(d.id ?? `Q-${base.questions.length + 1}`),
+        question: String(d.question ?? ''),
+        whyAsked: d.whyAsked ?? null,
+        options,
+        answered: false,
+        answer: null,
+        seq: e.seq,
+      };
+      return addFeed({ ...base, questions: [...base.questions, q] }, `Goal Reader asks: ${q.question}`, 'redo');
+    }
+
+    case 'HUMAN_ANSWER': {
+      const answer = String(d.answer ?? '');
+      const questions = base.questions.map((q) => (q.id === d.id && !q.answered ? { ...q, answered: true, answer } : q));
+      return addFeed({ ...base, questions }, `Coordinator answered: ${answer}`, 'ok');
+    }
+
     default:
-      // HUMAN_QUESTION / HUMAN_ANSWER and unknown types: no state change yet.
+      // Unknown event types: no state change.
       return base;
   }
 }
@@ -416,6 +439,12 @@ export const api = {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.text();
     }),
+  answer: (runId: string, id: string, answer: string): Promise<{ ok: boolean }> =>
+    fetch(`/api/runs/${encodeURIComponent(runId)}/answer`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id, answer }),
+    }).then((r) => json<{ ok: boolean }>(r)),
   sourceLines: (file: string): Promise<string> =>
     fetch(`/api/sources/${encodeURIComponent(file)}`).then(async (r) => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);

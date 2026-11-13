@@ -72,8 +72,19 @@ export interface FeedItem {
   tone: '' | 'ok' | 'bad' | 'redo';
 }
 
+export interface HumanQuestion {
+  id: string;                              // Q-1, Q-2 ... as the engine wrote them
+  question: string;
+  whyAsked: string | null;
+  options: { id: string; label: string }[];
+  answered: boolean;
+  answer: string | null;                   // HUMAN_ANSWER.answer, once it arrives
+  seq: number;
+}
+
 export interface Mission {
   runId: string | null;
+  questions: HumanQuestion[];              // HUMAN_QUESTION / HUMAN_ANSWER, in order
   title: string;
   goalText: string;
   paceMs: number;

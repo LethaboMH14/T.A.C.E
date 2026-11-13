@@ -49,6 +49,8 @@ const line = (e) => {
     case 'AGENT_JOINED': return `  ${who}joined: ${d.reason}`;
     case 'AGENT_MESSAGE': return `  ${(d.from + ' → ' + d.to).padEnd(30)} ${d.type}: ${d.reason}`;
     case 'GOAL_DRAFTED': return `  Goal Reader     draft ${d.attempt}: ${d.ok ? 'accepted by validator' : 'rejected (' + d.code + ')'}`;
+    case 'HUMAN_QUESTION': return `? Goal Reader asks: ${d.question}`;
+    case 'HUMAN_ANSWER': return `  answer (${d.by}): ${d.answer}`;
     case 'GOAL_VALIDATED': return `✓ goal accepted (structure only) → deliverables: ${d.deliverables.join(', ')}`;
     case 'GOAL_REJECTED': return `✗ goal rejected: ${d.code}`;
     case 'SOURCE_ADMITTED': return `  source ${d.file} v${d.version.replace(/^v/, '')} · ${d.rows} rows · ${d.digest.slice(0, 12)}`;
@@ -117,11 +119,14 @@ async function main() {
   if (!/^[A-Za-z0-9_-]+$/.test(runId)) throw new Error('bad run id');
   const runDir = path.join(runsDir, runId);
   const quiet = !!a.json;
+  if (a.answer !== undefined && (a.answer === true || a.answer.trim().length < 1 || a.answer.length > 500)) throw new Error('--answer needs 1 to 500 characters of text');
+  // --answer gives the same reply to every Goal Reader question (non-interactive). Without it, the run blocks on a question.
+  const askHuman = a.answer !== undefined ? async () => String(a.answer) : null;
   loadLocalEnv();
   const result = await runMission({
     scenario, domain: EDU_DOMAIN, sourcesDir: EDU_DOMAIN.sourcesDir, runDir, runId,
     trustedContext: TRUSTED_FIXTURE_CONTEXT, paceMs: a.pace ? Number(a.pace) : 0,
-    model: a.model === 'off' ? 'off' : 'auto',
+    model: a.model === 'off' ? 'off' : 'auto', askHuman,
     onEvent: quiet ? undefined : (e) => { const s = line(e); if (s) console.log(s); },
   });
   if (quiet) console.log(JSON.stringify({ runId: result.runId, status: result.status, checksPassed: result.checksPassed, checksTotal: result.checksTotal, repairs: result.repairs.length, runDir: result.runDir }));

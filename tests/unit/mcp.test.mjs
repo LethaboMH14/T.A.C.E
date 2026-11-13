@@ -78,7 +78,7 @@ test('read_file version 1 of mentor-schedule.csv shows the double booking', asyn
 test('read_file without version returns the latest version', async () => {
   const r = await call('read_file', { runId, name: 'mentor-schedule.csv' });
   assert.equal(r.isError, false, r.text);
-  assert.equal(r.json.version, 2);
+  assert.equal(r.json.version, 3); // v2 = smallest change, rejected by the Reviewer; v3 = escalated fix
 });
 
 test('review_run returns all PASS for the run', async () => {

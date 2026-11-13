@@ -12,6 +12,11 @@ import { TRUSTED_FIXTURE_CONTEXT } from '../fixtures/education-recovery/scenario
 
 const repoRoot = fileURLToPath(new URL('..', import.meta.url));
 
+/** Load repo/.env (git-ignored) if present. The key is read by engine/model.mjs and never printed. */
+export function loadLocalEnv() {
+  try { process.loadEnvFile(path.join(repoRoot, '.env')); } catch { /* no .env: model stays off */ }
+}
+
 function args(argv) {
   const out = { _: [] };
   for (let i = 0; i < argv.length; i++) {
@@ -38,7 +43,11 @@ const line = (e) => {
   const who = (e.role ? `${e.role}` : '').padEnd(16);
   const d = e.data || {};
   switch (e.type) {
-    case 'RUN_STARTED': return `▶ ${d.title}\n  goal: ${d.goalText}`;
+    case 'RUN_STARTED': return `▶ ${d.title}\n  goal: ${d.goalText}\n  agents: ${d.agents?.mode === 'model' ? `${d.agents.provider} · ${d.agents.model}` : `code only (${d.agents?.note ?? 'no model'})`}`;
+    case 'MODEL_CALL': return `  ${who}model ${d.ok ? 'ok' : 'FAILED ' + (d.error ?? '')} · ${d.ms} ms · ${d.usage?.total ?? 0} tokens`;
+    case 'AGENT_JOINED': return `  ${who}joined: ${d.reason}`;
+    case 'AGENT_MESSAGE': return `  ${(d.from + ' → ' + d.to).padEnd(30)} ${d.type}: ${d.reason}`;
+    case 'GOAL_DRAFTED': return `  Goal Reader     draft ${d.attempt}: ${d.ok ? 'accepted by validator' : 'rejected (' + d.code + ')'}`;
     case 'GOAL_VALIDATED': return `✓ goal accepted (structure only) → deliverables: ${d.deliverables.join(', ')}`;
     case 'GOAL_REJECTED': return `✗ goal rejected: ${d.code}`;
     case 'SOURCE_ADMITTED': return `  source ${d.file} v${d.version.replace(/^v/, '')} · ${d.rows} rows · ${d.digest.slice(0, 12)}`;
@@ -73,7 +82,7 @@ async function main() {
     return 0;
   }
   if (cmd !== 'run' || !a.scenario) {
-    console.log('usage: node cli/tace.mjs run --scenario <id> [--pace ms] [--runs dir] [--run-id id] [--json]\n       node cli/tace.mjs list');
+    console.log('usage: node cli/tace.mjs run --scenario <id> [--model off] [--pace ms] [--runs dir] [--run-id id] [--json]\n       node cli/tace.mjs list\n  agents use the model in repo/.env (MODEL_API_KEY) when present; --model off forces code only');
     return cmd === 'help' ? 0 : 1;
   }
   const scenario = loadScenario(String(a.scenario));
@@ -82,9 +91,11 @@ async function main() {
   if (!/^[A-Za-z0-9_-]+$/.test(runId)) throw new Error('bad run id');
   const runDir = path.join(runsDir, runId);
   const quiet = !!a.json;
+  loadLocalEnv();
   const result = await runMission({
     scenario, domain: EDU_DOMAIN, sourcesDir: EDU_DOMAIN.sourcesDir, runDir, runId,
     trustedContext: TRUSTED_FIXTURE_CONTEXT, paceMs: a.pace ? Number(a.pace) : 0,
+    model: a.model === 'off' ? 'off' : 'auto',
     onEvent: quiet ? undefined : (e) => { const s = line(e); if (s) console.log(s); },
   });
   if (quiet) console.log(JSON.stringify({ runId: result.runId, status: result.status, checksPassed: result.checksPassed, checksTotal: result.checksTotal, repairs: result.repairs.length, runDir: result.runDir }));

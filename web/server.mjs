@@ -15,7 +15,8 @@ import { runMission } from '../engine/run.mjs';
 import { EDU_DOMAIN } from '../domains/education/index.mjs';
 import { TRUSTED_FIXTURE_CONTEXT } from '../fixtures/education-recovery/scenarios.mjs';
 import { safeJoin } from '../engine/artifacts.mjs';
-import { loadScenario, stampRunId } from '../cli/tace.mjs';
+import { loadScenario, stampRunId, loadLocalEnv } from '../cli/tace.mjs';
+loadLocalEnv();
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
@@ -77,7 +78,7 @@ function startRun(body) {
   const pace = Math.max(0, Math.min(3000, Number(body.pace ?? 650)));
   const runId = stampRunId(scenario.id);
   const runDir = path.join(runsDir, runId);
-  const p = runMission({ scenario, domain: EDU_DOMAIN, sourcesDir: EDU_DOMAIN.sourcesDir, runDir, runId, trustedContext: TRUSTED_FIXTURE_CONTEXT, paceMs: pace })
+  const p = runMission({ scenario, domain: EDU_DOMAIN, sourcesDir: EDU_DOMAIN.sourcesDir, runDir, runId, trustedContext: TRUSTED_FIXTURE_CONTEXT, paceMs: pace, model: body.model === 'off' ? 'off' : 'auto' })
     .catch((err) => { console.error(`[run ${runId}]`, err); })
     .finally(() => active.delete(runId));
   active.set(runId, p);

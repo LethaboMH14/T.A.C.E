@@ -31,6 +31,25 @@ export const EDU_CAPABILITIES = Object.freeze([
   {
     id: 'draft_messages', role: 'Message Writer', label: 'Draft messages for a person to approve',
     consumes: [KIND.MENTOR_SCHEDULE, KIND.SRC_MENTORS, KIND.SRC_TRAINEES],
-    produces: [KIND.MESSAGE_DRAFTS], run: draftMessages,
+    produces: [KIND.MESSAGE_DRAFTS], run: writeDrafts,
   },
+]);
+
+// With a model configured, the wording is written by the model (facts are still copied by code
+// and checked by C11/C14). Without one, the deterministic writer is used and labelled as code.
+async function writeDrafts(ctx) {
+  if (ctx.model?.available) {
+    const { draftMessagesWithModel } = await import('./message-writer.mjs');
+    return draftMessagesWithModel(ctx);
+  }
+  return draftMessages(ctx);
+}
+
+/** Deliverable ids this pack can produce (shown to the Goal Reader model). */
+export const EDU_CATALOG = Object.freeze([
+  { id: 'gap_analysis', description: 'Per-learner skill gaps with source rows (csv)' },
+  { id: 'performance_summary', description: 'Cohort performance summary (md + json)' },
+  { id: 'improvement_plan', description: 'Support plan linked to verified gaps (json + md)' },
+  { id: 'mentor_schedule', description: 'Clash-free mentor sessions (csv)' },
+  { id: 'message_drafts', description: 'Unsent message drafts for a person to approve (json + md)' },
 ]);

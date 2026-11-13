@@ -8,7 +8,7 @@ import { renderSummaryMd } from './writer.mjs';
 
 const SCHEDULE_CHECKS = new Set(['C04_schedule_no_overlap', 'C05_schedule_in_availability', 'C06_schedule_capacity', 'C07_schedule_skill_match', 'C08_schedule_covers_at_risk']);
 const SUMMARY_CHECKS = new Set(['C02_summary_numbers', 'C03_summary_text_matches']);
-const DRAFT_CHECKS = new Set(['C10_drafts_unsent', 'C11_drafts_match_schedule']);
+const DRAFT_CHECKS = new Set(['C10_drafts_unsent', 'C11_drafts_match_schedule', 'C14_drafts_text_matches']);
 
 /**
  * Group failed checks into repair jobs.

@@ -25,6 +25,10 @@ const FIXTURE = path.resolve(HERE, '../../fixtures/education-recovery/v1');
 const admitted = admitSources(FIXTURE, EDU_SOURCE_SPECS);
 assert.equal(admitted.status, 'ADMITTED', `fixtures must admit: ${JSON.stringify(admitted.problems)}`);
 const S = admitted.sources;
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const dayLabel = (iso) => { const d = new Date(iso + 'T00:00:00Z'); return `${WEEKDAYS[d.getUTCDay()]} ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`; };
+const mentorName = (id) => S.mentors.rows.find((m) => m.mentor_id === id)?.display_name ?? id;
 const BASELINE = JSON.parse(fs.readFileSync(path.join(FIXTURE, 'scenarios', 'baseline.json'), 'utf8'));
 
 const GAP_HEADER = ['trainee_id', 'display_name', 'skill_id', 'score', 'threshold', 'shortfall', 'at_risk', 'source_file', 'source_row'];
@@ -197,8 +201,9 @@ function buildContents(opts = {}) {
   const drafts = [];
   booked.forEach((r, idx) => drafts.push({
     draft_id: `D-${String(idx + 1).padStart(2, '0')}`, to_role: 'learner', to_id: r.trainee_id, session_id: r.session_id,
-    subject: `Your mentor session on ${r.day} ${r.date}`,
-    body: `Your mentor session is on ${r.day} ${r.date} at ${r.start} with ${r.mentor_id}.`,
+    subject: `Your mentor session on ${dayLabel(r.date)}`,
+    // C14 rule: the body names the day label, the start time and the mentor's display name.
+    body: `Your mentor session is on ${dayLabel(r.date)} at ${r.start}–${r.end} with ${mentorName(r.mentor_id)}.`,
     day: r.day, date: r.date, start: r.start, mentor_id: r.mentor_id, status: DRAFT_STATUS,
   }));
   const mentorIds = [...new Set(booked.map((r) => r.mentor_id))].sort(cmp);

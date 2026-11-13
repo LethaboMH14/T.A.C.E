@@ -44,6 +44,7 @@ const TITLES = Object.freeze({
   C11_drafts_match_schedule: 'Learner drafts match the booked schedule',
   C12_artifacts_intact: 'Every artifact re-reads with its recorded digest',
   C13_source_digests: 'Source inputs match the admitted files',
+  C14_drafts_text_matches: 'Learner draft text states the booked day, start time and mentor',
 });
 
 const GAP_COLUMNS = ['trainee_id', 'display_name', 'skill_id', 'score', 'threshold', 'shortfall', 'at_risk', 'source_file', 'source_row'];
@@ -726,6 +727,100 @@ function checkDraftsMatchSchedule(store, ref, schRef) {
   });
 }
 
+// ---- C14 (learner draft text) ----
+const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+// Any weekday name in the text, full or short. Matched case-sensitively as a whole word.
+const WEEKDAY_WORD_RE = /\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Mon|Tues?|Wed|Thu(?:rs?)?|Fri|Sat|Sun)\b/g;
+const CLOCK_RE = /\b(\d{1,2}):(\d{2})\b/g;
+
+/** "2026-11-17" -> "Tue 17 Nov", computed here (not shared with any worker). */
+function dayLabelOf(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso ?? ''));
+  if (!m) throw new Error(`booked row has a date that is not ISO: ${JSON.stringify(iso)}`);
+  const dt = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  return `${WEEKDAY_SHORT[dt.getUTCDay()]} ${Number(m[3])} ${MONTH_SHORT[Number(m[2]) - 1]}`;
+}
+
+/** Problems in one learner draft body, against its booked session. Each has a plain message. */
+function draftProblems(d, row, mentorName) {
+  const body = typeof d.body === 'string' ? d.body : '';
+  const id = d.draft_id ?? '?';
+  const label = dayLabelOf(row.date);
+  const startMin = minutesOf(row.start);
+  const endMin = minutesOf(row.end);
+  const startHm = hhmm(startMin);
+  const out = [];
+  const base = { session_id: d.session_id ?? null, draft_id: d.draft_id ?? null };
+
+  if (!body.includes(label)) {
+    out.push({ ...base, issue: 'day_label_missing', expected: label, found: null,
+      say: `Draft ${id} does not give the day ${label}.` });
+  }
+
+  const times = [...body.matchAll(CLOCK_RE)].map((m) => Number(m[1]) * 60 + Number(m[2]));
+  if (!times.includes(startMin)) {
+    const first = times.length ? hhmm(times[0]) : null;
+    out.push({ ...base, issue: 'start_missing', expected: startHm, found: first,
+      say: first
+        ? `Draft ${id} says ${first} but the session starts at ${startHm}.`
+        : `Draft ${id} does not give the start time ${startHm}.` });
+  }
+  for (const t of times) {
+    if (t !== startMin && t !== endMin) {
+      out.push({ ...base, issue: 'time_wrong', expected: startHm, found: hhmm(t),
+        say: `Draft ${id} says ${hhmm(t)} but the session starts at ${startHm}.` });
+    }
+  }
+
+  for (const m of body.matchAll(WEEKDAY_WORD_RE)) {
+    if (m[1].slice(0, 3) !== row.day) {
+      out.push({ ...base, issue: 'weekday_wrong', expected: row.day, found: m[1],
+        say: `Draft ${id} says ${m[1]} but the session is on ${row.day}.` });
+    }
+  }
+
+  if (!body.includes(mentorName)) {
+    out.push({ ...base, issue: 'mentor_missing', expected: mentorName, found: null,
+      say: `Draft ${id} does not name the mentor ${mentorName}.` });
+  }
+  return out;
+}
+
+function checkDraftsText(store, ref, schRef, names) {
+  const drafts = parseJsonArtifact(store, ref);
+  if (!isPlainObject(drafts) || !Array.isArray(drafts.drafts)) return fail({ message: 'unsent-message-drafts.json has no drafts list.' });
+  if (!schRef) throw new Error('mentor-schedule.csv is missing, so draft text has nothing to check against');
+  const sch = scheduleRows(store, schRef);
+  if (sch.problem) return fail({ message: sch.problem });
+  const bySession = new Map();
+  for (const { r } of sch.rows) {
+    if (r.status === 'BOOKED' && !bySession.has(r.session_id)) bySession.set(r.session_id, r);
+  }
+
+  const learner = drafts.drafts.filter((d) => d?.to_role === 'learner');
+  const problems = [];
+  for (const d of learner) {
+    const row = bySession.get(d.session_id);
+    if (!row) continue; // a draft for an unbooked session is C11's finding
+    if (!names.has(row.mentor_id)) throw new Error(`mentor ${row.mentor_id} is not in the mentors source`);
+    problems.push(...draftProblems(d, row, names.get(row.mentor_id)));
+  }
+
+  if (problems.length === 0) {
+    return pass({ expected: learner.length, observed: learner.length, evidence: [], message: `All ${learner.length} learner drafts give the day, start time and mentor.` });
+  }
+  const first = problems[0];
+  const shown = problems.map(({ say, ...p }) => p);
+  return fail({
+    expected: first.expected,
+    observed: first.found,
+    evidence: [],
+    detail: { problems: shown },
+    message: `${first.say ?? first.issue}${problems.length > 1 ? ` ${problems.length - 1} more problem(s) in the drafts.` : ''}`,
+  });
+}
+
 // ---- C12 / C13 (all latest artifacts) ----
 function latestPerName(store) {
   const best = new Map();
@@ -830,6 +925,7 @@ export async function review(ctx) {
   if (draftsRef) {
     attempt(checks, 'C10_drafts_unsent', draftsRef, KIND.MESSAGE_DRAFTS, () => checkDraftsUnsent(store, draftsRef));
     attempt(checks, 'C11_drafts_match_schedule', draftsRef, KIND.MESSAGE_DRAFTS, () => checkDraftsMatchSchedule(store, draftsRef, schRef));
+    attempt(checks, 'C14_drafts_text_matches', draftsRef, KIND.MESSAGE_DRAFTS, () => checkDraftsText(store, draftsRef, schRef, names));
   }
 
   // Integrity checks run on every latest file, then fold into ONE check per rule so the

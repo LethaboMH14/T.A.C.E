@@ -33,6 +33,13 @@ export const EVENT = Object.freeze({
   ARTIFACT_REPAIRED: 'ARTIFACT_REPAIRED', // data: {from: name@vN, to: name@vN+1, changes:[...]}
   TASK_RERUN: 'TASK_RERUN',               // data: {reason, because: name@vN}
   RUN_FINISHED: 'RUN_FINISHED',           // data: {status, checksPassed, checksTotal, repairs}
+  // ---- agent layer (see engine/AGENTS-SPEC.md) ----
+  MODEL_CALL: 'MODEL_CALL',               // data: {agent, provider, model, ok, ms, usage:{prompt,completion,total}, error?}  (never the key, never full prompts)
+  AGENT_MESSAGE: 'AGENT_MESSAGE',         // data: AgentMessage (typed, validated with zod)
+  AGENT_JOINED: 'AGENT_JOINED',           // data: {agent, capabilityId, reason, by}
+  GOAL_DRAFTED: 'GOAL_DRAFTED',           // data: {attempt, ok, code, deliverables}
+  HUMAN_QUESTION: 'HUMAN_QUESTION',       // data: {id, question, options:[{id,label}], whyAsked}
+  HUMAN_ANSWER: 'HUMAN_ANSWER',           // data: {id, optionId, by}
 });
 
 /** Final run status. */

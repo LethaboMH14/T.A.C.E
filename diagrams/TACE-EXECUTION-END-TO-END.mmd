@@ -1,0 +1,27 @@
+flowchart TD
+    USER["User / API goal"] --> GATE["Trusted intake gateway (G07 future)"]
+    GATE --> NORM["G02.01 normalize raw and derived text"]
+    NORM --> PROMPT["G02.03 role-safe prompt assembly"]
+    PROMPT --> PROPOSAL["G02.02 validate candidate goal proposal"]
+    PROPOSAL --> CLAR{"G02.04 clarify?"}
+    CLAR -->|Question| UI["Guided Alignment + Mission Home"]
+    UI --> GATE
+    CLAR -->|Enough information| CONTRACT["Server policy-bound GoalContract"]
+    CONTRACT --> SOURCE["G03 authorized source + citations"]
+    SOURCE --> CAP["G04 real capability registry"]
+    CAP --> PLAN["G04 feasible dynamic plan"]
+    PLAN --> GRAPH["G05 durable DAG/checkpoint"]
+    GRAPH --> WORKERS["G06 bounded real workers"]
+    WORKERS --> TOOL["G07 scoped tool/approval gateway"]
+    TOOL --> ARTIFACT["Persist versioned artifacts + receipts"]
+    ARTIFACT --> REVIEW["G09 independent verifier"]
+    REVIEW -->|Failure| REPAIR["Targeted repair within budget"]
+    REPAIR --> WORKERS
+    REVIEW -->|Passed| DONE["Verified evidence + manifest"]
+    REVIEW -->|Unresolved| BLOCKED["Honest PARTIAL / BLOCKED"]
+    GRAPH --> EVENTS["Authoritative RunEvent stream"]
+    EVENTS --> UI
+    DONE --> UI
+    BLOCKED --> UI
+    ARTIFACT --> MEMORY["G08 scoped memory only if authorized"]
+    MEMORY --> SOURCE

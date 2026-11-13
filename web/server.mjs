@@ -10,7 +10,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { runMission } from '../engine/run.mjs';
 import { EDU_DOMAIN } from '../domains/education/index.mjs';
 import { TRUSTED_FIXTURE_CONTEXT } from '../fixtures/education-recovery/scenarios.mjs';
@@ -76,8 +76,35 @@ function streamEvents(req, res, runId) {
   req.on('close', () => { clearInterval(timer); clearInterval(ping); });
 }
 
+const PROFILES_OK = new Set(['demo', 'free', 'cheap', 'meta']);
+const DAYS_OK = new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
+/** Validate "run again with a change" overrides. Unknown keys are rejected, never ignored. */
+function checkOverrides(o) {
+  if (o == null) return {};
+  if (typeof o !== 'object' || Array.isArray(o)) throw new Error('overrides must be an object');
+  for (const k of Object.keys(o)) if (!['unavailable', 'profile', 'provider'].includes(k)) throw new Error(`unknown override: ${k}`);
+  const out = {};
+  if (o.unavailable != null) {
+    if (!Array.isArray(o.unavailable) || o.unavailable.length > 10) throw new Error('unavailable must be a short list');
+    out.unavailable = o.unavailable.map((u) => {
+      if (!u || !/^M-[A-Z]$/.test(u.mentor_id) || !DAYS_OK.has(u.day)) throw new Error('unavailable entries need mentor_id like M-B and day Mon..Fri');
+      return { mentor_id: u.mentor_id, day: u.day };
+    });
+  }
+  if (o.profile != null) { if (!PROFILES_OK.has(o.profile)) throw new Error('profile must be demo, free, cheap or meta'); out.profile = o.profile; }
+  if (o.provider != null) { if (!/^[a-z]{2,20}$/.test(o.provider)) throw new Error('bad provider name'); out.provider = o.provider; }
+  return out;
+}
+
+/**
+ * Start a REAL run. body: { scenario: id } | { scenarioObject } (built and validated by an API module),
+ * plus optional { model: 'off', pace, overrides }. Returns { runId, scenarioId, pace }.
+ */
 function startRun(body) {
-  const scenario = loadScenario(String(body.scenario || ''));
+  const base = body.scenarioObject ? body.scenarioObject : loadScenario(String(body.scenario || ''));
+  const overrides = checkOverrides(body.overrides);
+  const scenario = { ...base, ...(overrides.unavailable ? { unavailable: overrides.unavailable, title: `${base.title} (changed: ${overrides.unavailable.map((u) => `${u.mentor_id} away ${u.day}`).join(', ')})` } : {}) };
+  const env = { ...process.env, ...(overrides.profile ? { MODEL_PROFILE: overrides.profile } : {}), ...(overrides.provider ? { MODEL_PROVIDER: overrides.provider } : {}) };
   const pace = Math.max(0, Math.min(3000, Number(body.pace ?? 650)));
   const runId = stampRunId(scenario.id);
   const runDir = path.join(runsDir, runId);
@@ -91,11 +118,30 @@ function startRun(body) {
     const timer = setTimeout(() => done(null), ASK_TIMEOUT_MS);
     pendingAnswers.set(runId, { id, done });
   });
-  const p = runMission({ scenario, domain: EDU_DOMAIN, sourcesDir: EDU_DOMAIN.sourcesDir, runDir, runId, trustedContext: TRUSTED_FIXTURE_CONTEXT, paceMs: pace, model: body.model === 'off' ? 'off' : 'auto', askHuman, askTimeoutMs: ASK_TIMEOUT_MS })
+  const p = runMission({ scenario, domain: EDU_DOMAIN, sourcesDir: EDU_DOMAIN.sourcesDir, runDir, runId, trustedContext: TRUSTED_FIXTURE_CONTEXT, paceMs: pace, model: body.model === 'off' ? 'off' : 'auto', env, askHuman, askTimeoutMs: ASK_TIMEOUT_MS })
     .catch((err) => { console.error(`[run ${runId}]`, err); })
     .finally(() => active.delete(runId));
   active.set(runId, p);
   return { runId, scenarioId: scenario.id, pace };
+}
+
+/** Same-origin JSON body reader for API modules (≤ maxBytes). Returns the parsed object or sends the error and returns null. */
+async function readJson(req, res, maxBytes = 4096) {
+  const origin = req.headers.origin;
+  if (origin && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) { send(res, 403, { error: 'cross-origin request refused' }); return null; }
+  if (!String(req.headers['content-type'] || '').startsWith('application/json')) { send(res, 415, { error: 'send JSON' }); return null; }
+  let raw = ''; for await (const c of req) { raw += c; if (raw.length > maxBytes) { send(res, 413, { error: 'too large' }); return null; } }
+  try { return JSON.parse(raw || '{}'); } catch { send(res, 400, { error: 'invalid JSON' }); return null; }
+}
+
+// API route modules: every web/api/*.mjs exports `async handle(req, res, url, parts, ctx) -> boolean` (true = handled).
+const apiCtx = { send, readJson, startRun, listRuns, runsDir, repo, active, env: process.env, RUN_ID };
+const apiDir = path.join(here, 'api');
+const apiModules = [];
+if (fs.existsSync(apiDir)) {
+  for (const f of fs.readdirSync(apiDir).filter((n) => n.endsWith('.mjs') && !n.endsWith('.test.mjs')).sort()) {
+    apiModules.push(await import(pathToFileURL(path.join(apiDir, f)).href));
+  }
 }
 
 const server = http.createServer(async (req, res) => {
@@ -120,7 +166,8 @@ const server = http.createServer(async (req, res) => {
           if (!String(req.headers['content-type'] || '').startsWith('application/json')) return send(res, 415, { error: 'send JSON' });
           if (active.size > 0) return send(res, 409, { error: 'a run is already in progress; wait for it to finish' });
           let raw = ''; for await (const c of req) { raw += c; if (raw.length > 4096) return send(res, 413, { error: 'too large' }); }
-          try { return send(res, 202, startRun(JSON.parse(raw || '{}'))); } catch (e) { return send(res, 400, { error: e.message }); }
+          // Allowlist: a browser may pick a scenario id, model off, pace and overrides. It can never send a scenario object.
+          try { const b = JSON.parse(raw || '{}'); return send(res, 202, startRun({ scenario: b.scenario, model: b.model, pace: b.pace, overrides: b.overrides })); } catch (e) { return send(res, 400, { error: e.message }); }
         }
       }
       if (parts[1] === 'runs' && RUN_ID.test(parts[2] || '')) {
@@ -154,6 +201,7 @@ const server = http.createServer(async (req, res) => {
         if (!fs.existsSync(abs)) return send(res, 404, { error: 'not found' });
         return send(res, 200, fs.readFileSync(abs), MIME[path.extname(abs)]);
       }
+      for (const m of apiModules) if (await m.handle(req, res, url, parts, apiCtx)) return;
       return send(res, 404, { error: 'unknown endpoint' });
     }
 

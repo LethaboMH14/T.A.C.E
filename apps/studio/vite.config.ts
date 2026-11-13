@@ -11,8 +11,9 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   server: {
+    // TACE_API lets parallel builders test against their own studio server (e.g. PORT=4181 node web/server.mjs).
     proxy: {
-      '/api': 'http://localhost:4173',
+      '/api': process.env.TACE_API || 'http://localhost:4173',
     },
   },
   build: {

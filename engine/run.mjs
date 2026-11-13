@@ -102,6 +102,11 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
     M.intake = intake.record;
     let proposal = scenario.proposal;
     let source = 'fixture';
+    if (!agentsOn && !proposal) {
+      // A free-text goal (prompt box) has no prepared contract: only the Goal Reader model can draft one.
+      M.blockedReason = 'This goal was typed in free text, so a model must read it first. Configure a model key (see .env.example), or pick a prepared scenario.';
+      return { next: 'finish', status: RUN_STATUS.BLOCKED, trail: ['goal:needs-model'] };
+    }
     if (agentsOn) {
       const { readGoal } = await import('../agents/goal-reader.mjs');
       const MAX_CLARIFY_ROUNDS = 2;

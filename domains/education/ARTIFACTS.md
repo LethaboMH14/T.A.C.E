@@ -144,3 +144,106 @@ Each check is skipped when its file is absent. Routing to repair is the lead's d
 ## Scenario `weekly_checkin`
 The baseline proposal plus the three output deliverables, and a subgoal `outputs` (depends on `schedule` and `drafts`)
 with one ARTIFACT_REOPEN acceptance criterion per deliverable.
+
+## Personal support (live snapshot files) — rules `edu-rules-v1`, extension of §1, §4, §5 and checks C18–C19
+
+These sections change what the code does for learners who gave the live snapshot their own data. Fixture
+runs do not list the optional files, so their artifacts keep the same checks, counts, schedule and
+statuses. Only the learner draft objects gain new fields (see below).
+
+**Optional source files** (in the run's `sourcesDir`; loaded only when `scenario.intakeSources` lists them):
+
+| file | columns | key | source id |
+|---|---|---|---|
+| `help_requests.csv` | `request_id,trainee_id,skill_id,category,text,at` | `request_id` | `help_requests` |
+| `learner_prefs.csv` | `trainee_id,format,language` | `trainee_id` | `learner_prefs` |
+| `memory.csv` | `trainee_id,fact,source_run,at` | none (many rows per learner) | `memory` |
+
+They are defined as `EDU_OPTIONAL_SOURCE_SPECS` in `sources.mjs`, not in `EDU_SOURCE_SPECS`. Reason: the
+engine's `admitSources` reports a missing file as `MISSING_SOURCE` and does not skip optional specs, so
+putting them in the required list would break every fixture run. A live run must pass
+`[...EDU_SOURCE_SPECS, ...EDU_OPTIONAL_SOURCE_SPECS]` as its domain `sourceSpecs`. A listed file that is
+missing still blocks the run through the engine's `MISSING_SOURCE` (the engine is not changed here).
+
+**Plain-word definitions** (`rules.mjs`). A learner is *supported* when at risk OR requested. A learner is
+*requested* when `help_requests.csv` has at least one row for them. At risk is unchanged by requests.
+`REQUEST_QUOTE_MAX = 140`. Preference values: format `text|visual|audio`, language a short code (`en`, `zu`, …).
+Unknown or missing values fall back to `text` and `en`.
+
+**§1 `gaps.json` trainee entries** gain:
+```json
+"requested": [ { "request_id": "R-01", "skill_id": "S4", "category": "explain", "text": "…" } ],
+"support_reason": "at_risk | requested | both | null"
+```
+`requested` is `[]` and `support_reason` is `null` for everyone without a request. A request whose skill is
+blank or unknown has `skill_id: null` (not a skill). `priority_skill` is now: the requested skill (first request
+by `request_id` that names a known skill) if there is one; otherwise the largest shortfall for an at-risk learner
+or a requested learner; otherwise `null`. The earlier wording "priority_skill only when at_risk" is superseded.
+Gap and at-risk numbers for everyone else are unchanged.
+
+**§4 `mentor-schedule.csv`**: learners are booked in this order: at-risk learners (plan `mentor_session`
+items, as before), then requested learners who are not in the plan, sorted by `trainee_id`. A requested learner's
+skill is their `priority_skill`. A requester with no skill and no gap has no row (nothing to book; no
+UNSCHEDULED row without a skill). The greedy rules, capacity and `UNSCHEDULED` status are unchanged.
+
+**§5 `unsent-message-drafts.json`**: the learner drafts are, in order:
+1. one per BOOKED session (as before), then
+2. one per requester with no booked session (`session_id: ""`, `day/date/start/mentor_id: ""`,
+   subject `Your support plan`), then
+3. the mentor drafts (as before).
+
+Each learner draft gains these fields (both writers):
+- `format` (from `learner_prefs`, default `text`), `language` (default `en`).
+- `why`: code-built, e.g. `Your Variables and types score is 48; the pass mark is 60.` followed by
+  `You asked: '<their text, whitespace collapsed, max 140 characters>'.`
+- `what_to_work_on`: skill names from the gaps plus the requested skill, sorted by skill_id.
+- `steps`: three typed items, in this order:
+  1. `{type:'worked_example', skill_id, title, body}` on the focus skill (the weakest gap; with no gap, the requested skill).
+  2. `{type:'retrieval_quiz', skill_id, title, body}`: three retrieval questions on the same skill.
+  3. `{type:'if_then_plan', text}`: `If <their situation>, then I will <action> at <session day and start, or a 30-minute study slot this week>.`
+  A learner with no skill gets the same three types with `skill_id: null` and generic bodies.
+- `payload`: `{skills:[{id,name,score,threshold}], steps, session:{mentor,day_label,start,end}|null,
+  machine_translated, memory:[…], reviewer_note?}`. `payload.steps` has the same shape as `steps`.
+  `machine_translated` is `language !== 'en'`. For a non-English language, `reviewer_note` is
+  `needs a fluent reviewer`.
+- `nudge_sms`, `nudge_email`: `Hi <name>, your support plan is in your T.A.C.E portal inbox.` These are
+  unsent drafts. English text only.
+
+Model writer (`message-writer.mjs`): the model writes `subject`, `body` and the texts of the worked example,
+the quiz and the if-then sentence. Those texts are checked by code: at most 600 characters, no link, email or
+phone number, and no skill name other than the learner's own. A text that fails is replaced by the code
+template for that step. The model writes the body in the learner's language when `language` is not `en`. The
+day label, start, end and mentor name stay exactly as in the facts (C14 still applies to booked sessions).
+A session-less draft mentions no day, time or mentor. The request text is passed to the model as a quote and
+is labelled as data, not instructions.
+
+**Formula-like request text** (for example `=cmd|' /C calc'!A0`) is stored and shown as plain text. Nothing
+evaluates it, and no artifact copies it into a CSV.
+
+**Evidence for the format choice.** The typed step set and the choice of formats cite the research note
+`docs/research-1113/R6-personalised-formats.md`. That file is outside this repository and was not verified
+here. There is no adult or bootcamp-specific evidence for these formats: the sources are secondary and
+general. Treat the formats as a design choice to test with the learners, not as a proven effect.
+
+**Checks C18 and C19** (emitted only when the optional files were admitted):
+
+| id | passes when | detail on FAIL |
+|---|---|---|
+| C18_requests_answered | every help request has a learner draft for that trainee whose `what_to_work_on` includes the requested skill's name (or, with no known skill, whose `why` contains `You asked: '<quote>'` with the same 140-character rule); if there is no drafts file, it fails | `problems[]` with `request_id`, `draft_id`, `session_id` (or `REQ-<id>`) |
+| C19_privacy_in_drafts | no learner draft's subject, body, why, steps, `what_to_work_on` or nudges names another learner by id or display name (whole-word match, own name removed first); no draft carries a link, email address or a phone number (9 or more digits) | `problems[]` with `issue`: `other_learner_named`, `contact_or_link`, `contact_or_phone` |
+
+C11 is extended: a learner draft with no session is accepted only for a requester with no booked session, and
+then it may not set `day`, `date`, `start` or `mentor_id`.
+
+**Routing.** The code routes check failures in `repair.mjs` (not part of this change). C18 and C19 should route to
+rerunning `draft_messages` with the checker's problems as feedback. The code writer is deterministic, so a rerun
+in code mode gives the same drafts; only the model writer can change its wording on a rerun. A C19 problem caused
+by a learner's own request text can therefore not be fixed by a rerun in code mode.
+
+**Known limits of this change**
+- `monday_brief` (`outputs.mjs`, not changed here) expects every at-risk learner's `priority_skill` to be one of
+  their gaps. A requested skill that is not a gap therefore fails the brief for that learner. Until that
+  file accepts a requested priority, the live run ends PARTIAL when such a learner exists.
+- The `memory` file is passed in `payload.memory` only. The wording does not use it.
+- Mentor drafts list their own learners by design, so C19 does not apply to their names; it does apply to
+  contact details.

@@ -71,6 +71,28 @@ export async function computeGaps(ctx) {
     });
   });
 
+  // help requests (optional live source): a requester is supported even when not at risk
+  const requestsBy = new Map();
+  if (ctx.sources.help_requests) {
+    const reqCsv = ctx.sources.help_requests;
+    reqCsv.rows.forEach((r, i) => {
+      const line = reqCsv.rowNumbers[i];
+      if (!traineeIds.has(r.trainee_id)) {
+        throw fail('UNKNOWN_TRAINEE', `help_requests.csv line ${line}: trainee ${r.trainee_id} is not in trainees.csv`);
+      }
+      const sid = String(r.skill_id ?? '').trim();
+      const list = requestsBy.get(r.trainee_id) ?? [];
+      list.push({
+        request_id: r.request_id,
+        skill_id: thresholds.has(sid) ? sid : null, // an unknown or blank skill is not a skill
+        category: r.category,
+        text: String(r.text ?? '').replace(/s+/g, ' ').trim(),
+      });
+      requestsBy.set(r.trainee_id, list);
+    });
+    for (const list of requestsBy.values()) list.sort((a, b) => byString(a.request_id, b.request_id));
+  }
+
   const out = [];
   const csvRows = [];
   let totalGaps = 0;
@@ -108,13 +130,21 @@ export async function computeGaps(ctx) {
     const lateLogin = firstLoginDay >= LATE_LOGIN_DAY;
     const atRisk = gaps.length >= AT_RISK_MIN_GAPS || (lateLogin && gaps.length >= 1);
 
-    // priority skill: largest shortfall, tie -> lowest skill_id (gaps are already in skill_id order,
-    // so a strictly-greater comparison keeps the lowest id on ties)
-    let priority = null;
-    if (atRisk) {
+    const requested = requestsBy.get(t.trainee_id) ?? [];
+    const reqSkill = requested.find((r) => r.skill_id)?.skill_id ?? null;
+    const supportReason = atRisk && requested.length ? 'both' : atRisk ? 'at_risk' : requested.length ? 'requested' : null;
+
+    // priority skill: the requested skill if one was given; otherwise the largest shortfall (at risk,
+    // or requested without a skill). Ties -> lowest skill_id (gaps are already in skill_id order).
+    let priorityId = null;
+    if (reqSkill) {
+      priorityId = reqSkill;
+    } else if (atRisk || requested.length) {
+      let best = null;
       for (const g of gaps) {
-        if (priority === null || g.shortfall > priority.shortfall) priority = g;
+        if (best === null || g.shortfall > best.shortfall) best = g;
       }
+      priorityId = best ? best.skill_id : null;
     }
 
     out.push({
@@ -124,7 +154,9 @@ export async function computeGaps(ctx) {
       gaps,
       missing,
       at_risk: atRisk,
-      priority_skill: atRisk ? priority.skill_id : null,
+      requested: requested.map((r) => ({ request_id: r.request_id, skill_id: r.skill_id, category: r.category, text: r.text })),
+      support_reason: supportReason,
+      priority_skill: priorityId,
     });
 
     totalGaps += gaps.length;

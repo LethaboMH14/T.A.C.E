@@ -1,7 +1,7 @@
 // The education domain pack, as the generic runner sees it.
 import { fileURLToPath } from 'node:url';
 import { EDU_CAPABILITIES, EDU_CATALOG } from './capabilities.mjs';
-import { EDU_SOURCE_SPECS } from './sources.mjs';
+import { EDU_SOURCE_SPECS, EDU_OPTIONAL_SOURCE_SPECS } from './sources.mjs';
 import { review } from './reviewer.mjs';
 import { planRepairs, applyRepair } from './repair.mjs';
 import { RULES_VERSION } from './rules.mjs';
@@ -24,7 +24,8 @@ export const EDU_DOMAIN = Object.freeze({
     'interventions.json lists the support activities available per skill.',
     'Messages are drafts for a person to approve; nothing is ever sent.',
   ].join(' '),
-  sourceSpecs: EDU_SOURCE_SPECS,
+  // Optional live files load only when a scenario lists them in intakeSources (run.mjs filters by intake).
+  sourceSpecs: [...EDU_SOURCE_SPECS, ...EDU_OPTIONAL_SOURCE_SPECS],
   review,
   planRepairs,
   applyRepair,

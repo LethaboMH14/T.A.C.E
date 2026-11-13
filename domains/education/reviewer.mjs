@@ -17,6 +17,7 @@ import {
   LATE_LOGIN_DAY,
   MEAN_DECIMALS,
   NUMBER_TOLERANCE,
+  REQUEST_QUOTE_MAX,
   RULES_VERSION,
   SESSION_MINUTES,
   WEEK_OF,
@@ -52,6 +53,8 @@ const TITLES = Object.freeze({
   C15_calendar_matches_schedule: 'Calendar file has one event per booked session and nothing else',
   C16_xlsx_matches_schedule: 'Spreadsheet schedule rows equal the latest schedule file',
   C17_brief_numbers_match: 'Monday brief figures equal the recomputed counts',
+  C18_requests_answered: 'Every help request has a learner draft that answers it',
+  C19_privacy_in_drafts: 'Drafts carry no other learner name and no contact details',
 });
 
 const GAP_COLUMNS = ['trainee_id', 'display_name', 'skill_id', 'score', 'threshold', 'shortfall', 'at_risk', 'source_file', 'source_row'];
@@ -695,7 +698,7 @@ function checkDraftsUnsent(store, ref) {
   });
 }
 
-function checkDraftsMatchSchedule(store, ref, schRef) {
+function checkDraftsMatchSchedule(store, ref, schRef, sources) {
   const drafts = parseJsonArtifact(store, ref);
   if (!isPlainObject(drafts) || !Array.isArray(drafts.drafts)) return fail({ message: 'unsent-message-drafts.json has no drafts list.' });
   if (!schRef) throw new Error('mentor-schedule.csv is missing, so learner drafts have nothing to match');
@@ -707,7 +710,16 @@ function checkDraftsMatchSchedule(store, ref, schRef) {
   }
   const learner = drafts.drafts.filter((d) => d?.to_role === 'learner');
   const mismatches = [];
+  // A learner who asked for help and has no booked session has a draft with NO session fields.
+  const requesters = new Set(sources?.help_requests ? withRows(sources.help_requests).map(({ r }) => r.trainee_id) : []);
+  const bookedTrainees = new Set([...bySession.values()].map((r) => r.trainee_id));
   for (const d of learner) {
+    if (!d.session_id && requesters.has(d.to_id) && !bookedTrainees.has(d.to_id)) {
+      for (const field of ['day', 'date', 'start', 'mentor_id']) {
+        if ((d[field] ?? '') !== '') mismatches.push({ draft_id: d.draft_id, session_id: '', field, expected: '', observed: d[field] });
+      }
+      continue;
+    }
     const row = bySession.get(d.session_id);
     if (!row) {
       mismatches.push({ draft_id: d.draft_id, session_id: d.session_id ?? null, field: 'session_id', expected: 'a BOOKED session', observed: d.session_id ?? null });
@@ -840,6 +852,116 @@ function checkDraftsText(store, ref, schRef, names) {
     evidence: [],
     detail: { problems: shown },
     message: `${first.say ?? first.issue}${problems.length > 1 ? ` ${problems.length - 1} more problem(s) in the drafts.` : ''}`,
+  });
+}
+
+// ---- C18 / C19 (personal support in the drafts). Own code: repeats the quote rule, never worker code. ----
+const collapseSpaces = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
+const draftKey = (d) => d.session_id || `REQ-${d.to_id}`;
+
+function checkRequestsAnswered(store, ref, sources) {
+  const drafts = parseJsonArtifact(store, ref);
+  if (!isPlainObject(drafts) || !Array.isArray(drafts.drafts)) return fail({ message: 'unsent-message-drafts.json has no drafts list.' });
+  const skillName = new Map(withRows(sources.skills).map(({ r }) => [r.skill_id, r.name]));
+  const learner = drafts.drafts.filter((d) => d?.to_role === 'learner');
+  const requests = withRows(sources.help_requests);
+  const problems = [];
+  for (const { r } of requests) {
+    const mine = learner.filter((d) => d.to_id === r.trainee_id);
+    const name = skillName.get(String(r.skill_id ?? '').trim()); // undefined when blank or unknown
+    const quote = `You asked: '${collapseSpaces(r.text).slice(0, REQUEST_QUOTE_MAX)}'`;
+    const answered = mine.some((d) => (name !== undefined
+      ? Array.isArray(d.what_to_work_on) && d.what_to_work_on.includes(name)
+      : typeof d.why === 'string' && d.why.includes(quote)));
+    if (answered) continue;
+    const draft = mine[0] ?? null;
+    const need = name !== undefined ? `include "${name}" in what_to_work_on` : 'quote the request in why';
+    problems.push({
+      request_id: r.request_id,
+      draft_id: draft?.draft_id ?? null,
+      session_id: draft ? draftKey(draft) : `REQ-${r.trainee_id}`,
+      issue: 'request_unanswered',
+      expected: need,
+      found: draft ? 'draft does not do that' : 'no learner draft',
+      message: `Help request ${r.request_id} has no draft that answers it: the draft must ${need}.`,
+    });
+  }
+  if (problems.length === 0) {
+    return pass({ expected: requests.length, observed: requests.length, evidence: [], message: `All ${requests.length} help requests have a learner draft that answers them.` });
+  }
+  return fail({
+    expected: requests.length,
+    observed: requests.length - problems.length,
+    evidence: [],
+    detail: { problems },
+    message: `${problems[0].message}${problems.length > 1 ? ` ${problems.length - 1} more request(s) unanswered.` : ''}`,
+  });
+}
+
+const PRIVACY_TEXT_FIELDS = ['subject', 'body', 'why', 'nudge_sms', 'nudge_email'];
+const LINK_OR_EMAIL_RE = /https?:\/\/\S+|www\.\S+|[\w.+-]+@[\w-]+\.[\w.]+/;
+const PHONE_RUN_RE = /\+?\d[\d\s().-]{6,}\d/g;
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const wholeWord = (s, flags) => new RegExp(`(?<![\\p{L}\\p{N}])${escapeRe(s)}(?![\\p{L}\\p{N}])`, flags);
+
+/** Every string a draft carries (text fields, skill names, step texts; not the step type or skill_id). */
+function draftTexts(d) {
+  const out = PRIVACY_TEXT_FIELDS.map((k) => d[k]).filter((v) => typeof v === 'string');
+  if (Array.isArray(d.what_to_work_on)) out.push(...d.what_to_work_on.filter((v) => typeof v === 'string'));
+  if (Array.isArray(d.steps)) {
+    for (const st of d.steps) {
+      if (!st || typeof st !== 'object') continue;
+      for (const [k, v] of Object.entries(st)) {
+        if (k !== 'type' && k !== 'skill_id' && typeof v === 'string') out.push(v);
+      }
+    }
+  }
+  return out;
+}
+
+function checkPrivacy(store, ref, sources) {
+  const drafts = parseJsonArtifact(store, ref);
+  if (!isPlainObject(drafts) || !Array.isArray(drafts.drafts)) return fail({ message: 'unsent-message-drafts.json has no drafts list.' });
+  const people = withRows(sources.trainees).map(({ r }) => ({ id: r.trainee_id, name: r.display_name }));
+  const problems = [];
+  for (const d of drafts.drafts) {
+    const id = d?.draft_id ?? null;
+    const sid = d?.session_id || null;
+    const texts = draftTexts(d);
+    for (const t of texts) {
+      if (LINK_OR_EMAIL_RE.test(t)) {
+        problems.push({ draft_id: id, session_id: sid, issue: 'contact_or_link', expected: 'no links, emails or phone numbers', found: 'link or email', message: `Draft ${id} contains a link or an email address.` });
+      }
+      for (const m of t.matchAll(PHONE_RUN_RE)) {
+        if (m[0].replace(/\D/g, '').length >= 9) {
+          problems.push({ draft_id: id, session_id: sid, issue: 'contact_or_phone', expected: 'no phone numbers', found: 'phone number', message: `Draft ${id} contains a phone number.` });
+          break;
+        }
+      }
+    }
+    if (d?.to_role !== 'learner') continue; // a mentor draft lists its own learners by design
+    const own = people.find((p) => p.id === d.to_id);
+    const ownWords = own ? [wholeWord(own.id, 'giu'), wholeWord(own.name, 'giu')] : [];
+    for (const t of texts) {
+      let rest = t;
+      for (const re of ownWords) rest = rest.replace(re, ' ');
+      const other = people.find((p) => p.id !== d.to_id
+        && (wholeWord(p.id, 'iu').test(rest) || wholeWord(p.name, 'iu').test(rest)));
+      if (other) {
+        problems.push({ draft_id: id, session_id: sid, issue: 'other_learner_named', expected: 'only the learner\'s own name', found: other.id, message: `Draft ${id} names another learner (${other.id}).` });
+      }
+    }
+  }
+  if (problems.length === 0) {
+    return pass({ expected: drafts.drafts.length, observed: drafts.drafts.length, evidence: [], message: `All ${drafts.drafts.length} drafts are free of other learners' names and of contact details.` });
+  }
+  const first = problems[0];
+  return fail({
+    expected: drafts.drafts.length,
+    observed: drafts.drafts.length - problems.length,
+    evidence: [],
+    detail: { problems },
+    message: `${first.message}${problems.length > 1 ? ` ${problems.length - 1} more privacy problem(s) in the drafts.` : ''}`,
   });
 }
 
@@ -1108,8 +1230,21 @@ export async function review(ctx) {
   const draftsRef = store.latestByName(NAMES.drafts);
   if (draftsRef) {
     attempt(checks, 'C10_drafts_unsent', draftsRef, KIND.MESSAGE_DRAFTS, () => checkDraftsUnsent(store, draftsRef));
-    attempt(checks, 'C11_drafts_match_schedule', draftsRef, KIND.MESSAGE_DRAFTS, () => checkDraftsMatchSchedule(store, draftsRef, schRef));
+    attempt(checks, 'C11_drafts_match_schedule', draftsRef, KIND.MESSAGE_DRAFTS, () => checkDraftsMatchSchedule(store, draftsRef, schRef, sources));
     attempt(checks, 'C14_drafts_text_matches', draftsRef, KIND.MESSAGE_DRAFTS, () => checkDraftsText(store, draftsRef, schRef, names));
+  }
+
+  // ---- personal support (C18, C19). Emitted only when the optional live files were admitted. ----
+  if (sources.help_requests) {
+    if (draftsRef) {
+      attempt(checks, 'C18_requests_answered', draftsRef, KIND.MESSAGE_DRAFTS, () => checkRequestsAnswered(store, draftsRef, sources));
+    } else {
+      emit(checks, 'C18_requests_answered', { name: NAMES.drafts, version: 0 }, KIND.MESSAGE_DRAFTS,
+        fail({ expected: withRows(sources.help_requests).length, observed: 0, message: 'No message drafts exist, so no help request was answered.' }));
+    }
+  }
+  if (draftsRef && (sources.help_requests || sources.learner_prefs || sources.memory)) {
+    attempt(checks, 'C19_privacy_in_drafts', draftsRef, KIND.MESSAGE_DRAFTS, () => checkPrivacy(store, draftsRef, sources));
   }
 
   // ---- output files (C15-C17). Each is skipped when its file is absent. ----

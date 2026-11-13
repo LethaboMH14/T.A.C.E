@@ -30,3 +30,13 @@ export const NUMBER_TOLERANCE = 0.05;
 
 /** Drafts are never sent. Every draft carries status exactly "UNSENT". */
 export const DRAFT_STATUS = 'UNSENT';
+
+/** Support: a learner is SUPPORTED when at risk OR requested. A requested learner has >= 1 row in help_requests.csv. */
+/** Support reason: 'at_risk' | 'requested' | 'both' | null (not supported). At-risk itself is unchanged by requests. */
+/** Requested priority skill = the skill named in the learner's first request (by request_id) that names a known skill. */
+/** A help-request text is quoted in a draft at most REQUEST_QUOTE_MAX characters (whitespace collapsed first). */
+export const REQUEST_QUOTE_MAX = 140;
+/** Learner preferences (learner_prefs.csv). Unknown or missing values fall back to these defaults. */
+export const FORMATS = Object.freeze(['text', 'visual', 'audio']);
+export const DEFAULT_FORMAT = 'text';
+export const DEFAULT_LANGUAGE = 'en';

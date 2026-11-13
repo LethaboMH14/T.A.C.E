@@ -347,7 +347,9 @@ export async function writeMondayBrief(ctx) {
 
   const atRiskTrainees = gaps.trainees.filter((t) => t.at_risk).sort((a, b) => byText(a.trainee_id, b.trainee_id));
   const atRisk = atRiskTrainees.map((t) => {
-    const top = t.gaps.find((g) => g.skill_id === t.priority_skill);
+    // A requested priority skill may not be a gap; then the brief names the largest gap (tie -> lowest skill_id).
+    const top = t.gaps.find((g) => g.skill_id === t.priority_skill)
+      ?? t.gaps.slice().sort((a, b) => ((b.threshold - b.score) - (a.threshold - a.score)) || byText(a.skill_id, b.skill_id))[0];
     if (!top) throw fail('NO_PRIORITY', `${t.trainee_id} is at risk but has no priority gap`);
     const session = booked.find((r) => r.trainee_id === t.trainee_id);
     return {

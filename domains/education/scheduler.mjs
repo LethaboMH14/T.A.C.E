@@ -113,6 +113,22 @@ export async function scheduleMentors(ctx) {
     }))
     .sort((a, b) => (b.gaps - a.gaps) || (a.trainee_id < b.trainee_id ? -1 : a.trainee_id > b.trainee_id ? 1 : 0));
 
+  // Requested learners (optional live source) who are not in the plan are booked after the at-risk ones.
+  // Their skill is the priority skill the analyst recorded (the requested skill, or the largest gap).
+  if (sources.help_requests) {
+    const gapsRef = store.latestByKind('gaps');
+    if (!gapsRef) throw fail('NO_GAPS', 'help requests exist but no gaps artifact does');
+    const gapsJson = JSON.parse(store.read(gapsRef));
+    const inPlan = new Set(learners.map((l) => l.trainee_id));
+    const requested = gapsJson.trainees
+      // a requester with no skill (none given, no gap) has nothing to book: no UNSCHEDULED row without a skill
+      .filter((t) => Array.isArray(t.requested) && t.requested.length > 0 && !inPlan.has(t.trainee_id) && t.priority_skill)
+      .sort((a, b) => (a.trainee_id < b.trainee_id ? -1 : a.trainee_id > b.trainee_id ? 1 : 0));
+    for (const t of requested) {
+      learners.push({ trainee_id: t.trainee_id, skill_id: t.priority_skill ?? '', intervention_id: '', gaps: gapCount.get(t.trainee_id) ?? 0 });
+    }
+  }
+
   const mentors = sources.mentors.rows
     .map((r) => ({
       id: r.mentor_id,

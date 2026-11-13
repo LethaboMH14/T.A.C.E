@@ -14,3 +14,17 @@ export const EDU_SOURCE_SPECS = Object.freeze([
     requiredColumns: ['mentor_id', 'day', 'start', 'end'], keyColumns: ['mentor_id', 'day', 'start'] },
   { sourceId: 'interventions', kind: KIND.SRC_INTERVENTIONS, file: 'interventions.json', version: 'v1', format: 'json' },
 ]);
+
+// Optional live snapshot files (written by the LMS snapshot into the run's sourcesDir). They are NOT in
+// EDU_SOURCE_SPECS: engine admitSources reports a missing file as MISSING_SOURCE and does not skip optional
+// specs, so the required list stays exact for every fixture run. A live run passes
+// [...EDU_SOURCE_SPECS, ...EDU_OPTIONAL_SOURCE_SPECS] as its domain sourceSpecs; sourcesNode then loads a
+// file only when the scenario lists it in intakeSources.
+export const EDU_OPTIONAL_SOURCE_SPECS = Object.freeze([
+  { optional: true, sourceId: 'help_requests', kind: 'source:help_requests', file: 'help_requests.csv', version: 'v1', format: 'csv',
+    requiredColumns: ['request_id', 'trainee_id', 'skill_id', 'category', 'text', 'at'], keyColumns: ['request_id'] },
+  { optional: true, sourceId: 'learner_prefs', kind: 'source:learner_prefs', file: 'learner_prefs.csv', version: 'v1', format: 'csv',
+    requiredColumns: ['trainee_id', 'format', 'language'], keyColumns: ['trainee_id'] },
+  { optional: true, sourceId: 'memory', kind: 'source:memory', file: 'memory.csv', version: 'v1', format: 'csv',
+    requiredColumns: ['trainee_id', 'fact', 'source_run', 'at'] },
+]);

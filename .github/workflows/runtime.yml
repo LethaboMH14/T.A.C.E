@@ -1,0 +1,38 @@
+name: T.A.C.E runtime slice (engine, education pack, end-to-end)
+
+on:
+  push:
+    branches: [main, feat/mission-engine]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime:
+    name: npm test + live self-correction scenario
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # checkout v4, pinned
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # setup-node v4.4.0, pinned
+        with:
+          node-version: '24'
+      - name: Node runtime
+        run: node --version
+      - name: All tests (unit, E2E, existing G01/G02 gates)
+        run: npm test
+      - name: Self-correction run must end VERIFIED after a real repair
+        run: |
+          node cli/tace.mjs run --scenario inject_overlap --run-id ci-overlap
+          grep -q '"type":"VERIFICATION_FAILED"' runs/ci-overlap/events.jsonl
+          grep -q '"type":"ARTIFACT_REPAIRED"' runs/ci-overlap/events.jsonl
+          grep -q '"type":"VERIFICATION_PASSED"' runs/ci-overlap/events.jsonl
+          test -f runs/ci-overlap/artifacts/mentor-schedule.v1.csv
+          test -f runs/ci-overlap/artifacts/mentor-schedule.v2.csv
+      - name: Missing input must be BLOCKED (exit 3), never guessed
+        run: |
+          set +e
+          node cli/tace.mjs run --scenario missing_source --run-id ci-missing
+          test $? -eq 3

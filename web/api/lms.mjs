@@ -121,14 +121,17 @@ async function status(req, res, ctx) {
 function live(req, res, ctx, url) {
   const c = lmsOf(ctx);
   if (!c.adminConfigured) return ctx.send(res, 503, { configured: c.configured, error: 'LMS admin is not configured' });
-  res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-store', connection: 'keep-alive', 'x-content-type-options': 'nosniff' });
+  res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-store, no-transform', connection: 'keep-alive', 'x-content-type-options': 'nosniff', 'x-accel-buffering': 'no' });
+  res.write(':' + ' '.repeat(2048) + '\n\n'); // pushes the stream past proxy buffers (tunnels, CDNs)
   let closed = false;
   let busy = false;
   let afterAttempt = 0; let afterHelp = 0; let totalAttempts = 0; let totalHelp = 0;
   const seen = new Set();
   let names = new Map();
   let lastCounts = '';
-  const write = (event, data) => { if (!closed) res.write(`${event ? `event: ${event}\n` : ''}data: ${JSON.stringify(data)}\n\n`); };
+  // Each update carries a comment pad so proxies that buffer small chunks (e.g. a Cloudflare tunnel) forward it at once.
+  const PAD = `:${' '.repeat(4096)}\n\n`;
+  const write = (event, data) => { if (!closed) res.write(`${event ? `event: ${event}\n` : ''}data: ${JSON.stringify(data)}\n\n${PAD}`); };
   const refreshNames = async () => {
     const ps = await c.rpc('lms_list_profiles');
     names = new Map(ps.map((p) => [p.id, p.display_name]));

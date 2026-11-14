@@ -59,7 +59,8 @@ function listRuns() {
 
 function streamEvents(req, res, runId) {
   const file = path.join(runsDir, runId, 'events.jsonl');
-  res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-store', connection: 'keep-alive' });
+  res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-store, no-transform', connection: 'keep-alive', 'x-accel-buffering': 'no' });
+  res.write(':' + ' '.repeat(2048) + '\n\n'); // pushes the stream past proxy buffers (tunnels, CDNs)
   let offset = 0; let buf = ''; let done = false;
   const pump = () => {
     if (!fs.existsSync(file)) return;

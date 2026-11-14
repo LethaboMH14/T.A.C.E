@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 770" width="1340" height="770" role="img" aria-labelledby="t d" font-family="Arial, Helvetica, sans-serif">
+  <title id="t">T.A.C.E architecture</title>
+  <desc id="d">Learner portal and Supabase LMS feed a Studio server, which snapshots the LMS into a LangGraph mission graph with an independent reviewer and repair loop. Artifacts and a ledger stream to Mission Studio, a coordinator approves, and plans reach portal inboxes. A free-first model router and an MCP server attach to the graph.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#374151"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#15803d"/></marker>
+  </defs>
+  <rect width="1340" height="770" fill="#ffffff"/>
+  <text x="30" y="40" font-size="22" font-weight="700" fill="#111827">T.A.C.E system architecture</text>
+  <text x="30" y="62" font-size="13" fill="#4b5563">The model proposes, code decides. Nothing is sent until a coordinator approves.</text>
+
+  <!-- left column -->
+  <g stroke="#374151" stroke-width="1.5">
+    <rect x="30" y="110" width="200" height="84" rx="8" fill="#eef2ff"/>
+    <rect x="30" y="290" width="200" height="110" rx="8" fill="#eef2ff"/>
+    <rect x="30" y="520" width="200" height="110" rx="8" fill="#fdf4ff"/>
+  </g>
+  <g fill="#111827" font-size="13" text-anchor="middle">
+    <text x="130" y="136" font-weight="700">Learner portal</text>
+    <text x="130" y="156">Vercel, React</text>
+    <text x="130" y="174">phones and laptops</text>
+    <text x="130" y="316" font-weight="700">Supabase LMS</text>
+    <text x="130" y="336">RPC only</text>
+    <text x="130" y="354">tables are deny-all</text>
+    <text x="130" y="372">PIN login, DB-marked quizzes</text>
+    <text x="130" y="546" font-weight="700">Portal inboxes</text>
+    <text x="130" y="566">each person's own plan</text>
+    <text x="130" y="584">(format and language)</text>
+    <text x="130" y="608">+ optional Brevo notice</text>
+  </g>
+  <line x1="130" y1="194" x2="130" y2="288" stroke="#374151" stroke-width="1.5" marker-end="url(#a)" marker-start="url(#a)"/>
+  <text x="140" y="246" font-size="12" fill="#374151">RPC calls</text>
+  <text x="140" y="260" font-size="12" fill="#374151">help, quiz, prefs</text>
+
+  <!-- studio server column -->
+  <g stroke="#374151" stroke-width="1.5">
+    <rect x="290" y="110" width="190" height="84" rx="8" fill="#f3f4f6"/>
+    <rect x="290" y="290" width="190" height="110" rx="8" fill="#f3f4f6"/>
+    <rect x="290" y="520" width="190" height="110" rx="8" fill="#ecfeff"/>
+    <rect x="290" y="670" width="190" height="64" rx="8" fill="#fff7ed"/>
+  </g>
+  <g fill="#111827" font-size="13" text-anchor="middle">
+    <text x="385" y="136" font-weight="700">LMS snapshot</text>
+    <text x="385" y="156">live marks, help text,</text>
+    <text x="385" y="174">availability, memory</text>
+    <text x="385" y="316" font-weight="700">Studio server</text>
+    <text x="385" y="336">Node, laptop only</text>
+    <text x="385" y="354">coordinator sign-in</text>
+    <text x="385" y="372">admin token in .env</text>
+    <text x="385" y="546" font-weight="700">Mission Studio</text>
+    <text x="385" y="566">React, live over SSE</text>
+    <text x="385" y="584">graph, autopsy,</text>
+    <text x="385" y="602">evidence X-ray</text>
+    <text x="385" y="698" font-weight="700">Coordinator approval</text>
+    <text x="385" y="716">deliver with confirm</text>
+  </g>
+  <line x1="232" y1="345" x2="288" y2="345" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="236" y="336" font-size="11" fill="#374151">export</text>
+  <line x1="385" y1="290" x2="385" y2="196" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="482" y1="152" x2="556" y2="152" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="385" y1="630" x2="385" y2="668" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+  <path d="M290 702 H130 V632" fill="none" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="140" y="690" font-size="11" fill="#374151">deliver to inboxes</text>
+
+  <!-- mission graph -->
+  <rect x="540" y="80" width="570" height="400" rx="12" fill="#f9fafb" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="556" y="104" font-size="14" font-weight="700" fill="#111827">LangGraph mission graph</text>
+  <g stroke="#374151" stroke-width="1.5" fill="#ffffff">
+    <rect x="556" y="130" width="130" height="44" rx="6"/>
+    <rect x="720" y="130" width="130" height="44" rx="6"/>
+  </g>
+  <g fill="#111827" font-size="12" text-anchor="middle">
+    <text x="621" y="148" font-weight="700">Goal Reader</text><text x="621" y="164">contract, G02 check</text>
+    <text x="785" y="148" font-weight="700">Planner</text><text x="785" y="164">only the steps needed</text>
+  </g>
+  <line x1="688" y1="152" x2="718" y2="152" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+  <path d="M850 152 H1090 V204" fill="none" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="866" y="146" font-size="11" fill="#374151">staffs the team</text>
+  <g stroke="#374151" stroke-width="1.5" fill="#fffbeb">
+    <rect x="556" y="206" width="96" height="52" rx="6"/>
+    <rect x="660" y="206" width="96" height="52" rx="6"/>
+    <rect x="764" y="206" width="96" height="52" rx="6"/>
+    <rect x="868" y="206" width="96" height="52" rx="6"/>
+    <rect x="972" y="206" width="124" height="52" rx="6"/>
+  </g>
+  <g fill="#111827" font-size="12" text-anchor="middle">
+    <text x="604" y="228" font-weight="700">Analyst</text><text x="604" y="244">gaps, risk</text>
+    <text x="708" y="228" font-weight="700">Report Writer</text><text x="708" y="244">summary</text>
+    <text x="812" y="228" font-weight="700">Support Planner</text><text x="812" y="244">per learner</text>
+    <text x="916" y="228" font-weight="700">Scheduler</text><text x="916" y="244">mentor slots</text>
+    <text x="1034" y="228" font-weight="700">Message Writer</text><text x="1034" y="244">model wording</text>
+  </g>
+  <text x="556" y="284" font-size="12" fill="#6b7280">Workers write real files. Numbers and the schedule are code; wording is the model's.</text>
+  <path d="M700 292 V318" fill="none" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="556" y="320" width="270" height="120" rx="8" fill="#f0fdf4" stroke="#15803d" stroke-width="2"/>
+  <g fill="#111827" font-size="12" text-anchor="middle">
+    <text x="691" y="344" font-size="13" font-weight="700">Independent Reviewer</text>
+    <text x="691" y="364">19 checks (C01-C19), plain code</text>
+    <text x="691" y="382">recomputes from raw sources</text>
+    <text x="691" y="400">imports no worker code</text>
+    <text x="691" y="424" fill="#15803d" font-weight="700">PASS or FAIL with evidence</text>
+  </g>
+  <rect x="880" y="320" width="210" height="120" rx="8" fill="#fff7ed" stroke="#c2410c" stroke-width="2"/>
+  <g fill="#111827" font-size="12" text-anchor="middle">
+    <text x="985" y="344" font-size="13" font-weight="700">Targeted Repair</text>
+    <text x="985" y="364">fixes only the failed artifact</text>
+    <text x="985" y="382">writes a new version</text>
+    <text x="985" y="400">v1 is kept, never overwritten</text>
+    <text x="985" y="424">budget: 2 rounds</text>
+  </g>
+  <line x1="828" y1="360" x2="878" y2="360" stroke="#c2410c" stroke-width="1.8" marker-end="url(#a)"/>
+  <line x1="878" y1="404" x2="828" y2="404" stroke="#15803d" stroke-width="1.8" marker-end="url(#ag)"/>
+  <text x="832" y="352" font-size="10" fill="#c2410c">flag</text>
+  <text x="832" y="420" font-size="10" fill="#15803d">re-check</text>
+
+  <!-- artifacts -->
+  <path d="M691 442 V518" fill="none" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="540" y="520" width="570" height="110" rx="8" fill="#f3f4f6" stroke="#374151" stroke-width="1.5"/>
+  <g fill="#111827" font-size="13" text-anchor="middle">
+    <text x="825" y="548" font-weight="700">Artifacts and ledger</text>
+    <text x="825" y="570">versioned files, each with a sha256 and read-back check</text>
+    <text x="825" y="590">SQLite ledger mirrored to events.jsonl</text>
+    <text x="825" y="610" font-size="12" fill="#4b5563">the UI renders only ledger events and files</text>
+  </g>
+  <line x1="538" y1="575" x2="482" y2="575" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="494" y="568" font-size="11" fill="#374151">SSE</text>
+
+  <!-- right column -->
+  <rect x="1140" y="110" width="190" height="170" rx="8" fill="#faf5ff" stroke="#374151" stroke-width="1.5"/>
+  <g fill="#111827" font-size="12" text-anchor="middle">
+    <text x="1235" y="134" font-size="13" font-weight="700">Model router</text>
+    <text x="1235" y="154">free-first fallback chain</text>
+    <text x="1235" y="178">Groq</text><text x="1235" y="194">then Gemini</text><text x="1235" y="210">then OpenRouter</text><text x="1235" y="226">then Meta (paid)</text>
+    <text x="1235" y="250" fill="#4b5563">per-run token and USD budget</text>
+    <text x="1235" y="266" fill="#4b5563">fallbacks shown on screen</text>
+  </g>
+  <rect x="1140" y="320" width="190" height="110" rx="8" fill="#faf5ff" stroke="#374151" stroke-width="1.5"/>
+  <g fill="#111827" font-size="12" text-anchor="middle">
+    <text x="1235" y="344" font-size="13" font-weight="700">MCP server (stdio)</text>
+    <text x="1235" y="366">list scenarios, run mission</text>
+    <text x="1235" y="384">read files, re-review a run</text>
+    <text x="1235" y="408" fill="#4b5563">for other agents and tools</text>
+  </g>
+  <path d="M1138 160 H1112" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a)"/>
+  <path d="M1138 375 H1112" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a)"/>
+
+  <!-- legend -->
+  <g font-size="12" fill="#374151">
+    <line x1="560" y1="680" x2="600" y2="680" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/><text x="610" y="684">data flow</text>
+    <line x1="700" y1="680" x2="740" y2="680" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a)"/><text x="750" y="684">attached service</text>
+    <rect x="880" y="671" width="16" height="16" fill="#f0fdf4" stroke="#15803d" stroke-width="2"/><text x="904" y="684">checks (code)</text>
+    <rect x="1000" y="671" width="16" height="16" fill="#fffbeb" stroke="#374151"/><text x="1024" y="684">workers</text>
+  </g>
+  <text x="560" y="722" font-size="12" fill="#4b5563">Synthetic data only. Delivery to the portal and any notice happen only after a coordinator confirms.</text>
+</svg>

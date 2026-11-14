@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" width="960" height="400" role="img" aria-labelledby="t d" font-family="Arial, Helvetica, sans-serif">
+  <title id="t">Self-correction loop</title>
+  <desc id="d">A worker writes version 1. The independent reviewer flags a failure. Repair writes version 2. The reviewer re-checks from the raw sources; if it still fails, repair tries a stronger fix as version 3. When the re-check passes the run is verified and every version is kept.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#374151"/></marker>
+  </defs>
+  <rect width="960" height="400" fill="#ffffff"/>
+  <text x="30" y="36" font-size="20" font-weight="700" fill="#111827">Review, repair, re-check</text>
+  <text x="30" y="58" font-size="13" fill="#4b5563">The checker recomputes from raw sources. It never asks a model "are you sure?".</text>
+
+  <rect x="30" y="100" width="170" height="90" rx="8" fill="#fffbeb" stroke="#374151" stroke-width="1.5"/>
+  <text x="115" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">Worker output v1</text>
+  <text x="115" y="148" text-anchor="middle" font-size="12" fill="#111827">mentor-schedule.csv</text>
+  <text x="115" y="166" text-anchor="middle" font-size="12" fill="#6b7280">fault planted on purpose</text>
+
+  <rect x="250" y="100" width="190" height="90" rx="8" fill="#f0fdf4" stroke="#15803d" stroke-width="2"/>
+  <text x="345" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">1. Independent review</text>
+  <text x="345" y="148" text-anchor="middle" font-size="12" fill="#111827">C01-C19 from raw data</text>
+  <text x="345" y="166" text-anchor="middle" font-size="12" fill="#b91c1c" font-weight="700">FAIL: Mentor B twice Tue 09:00</text>
+
+  <rect x="490" y="100" width="190" height="90" rx="8" fill="#fff7ed" stroke="#c2410c" stroke-width="2"/>
+  <text x="585" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">2. Targeted repair</text>
+  <text x="585" y="148" text-anchor="middle" font-size="12" fill="#111827">moves only the clashing</text>
+  <text x="585" y="166" text-anchor="middle" font-size="12" fill="#111827">session, writes v2</text>
+
+  <rect x="730" y="100" width="200" height="90" rx="8" fill="#f0fdf4" stroke="#15803d" stroke-width="2"/>
+  <text x="830" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">3. Re-check v2</text>
+  <text x="830" y="148" text-anchor="middle" font-size="12" fill="#111827">same checks, fresh read</text>
+  <text x="830" y="166" text-anchor="middle" font-size="12" fill="#111827">of the new file</text>
+
+  <line x1="202" y1="145" x2="248" y2="145" stroke="#374151" stroke-width="1.8" marker-end="url(#a)"/>
+  <line x1="442" y1="145" x2="488" y2="145" stroke="#374151" stroke-width="1.8" marker-end="url(#a)"/>
+  <line x1="682" y1="145" x2="728" y2="145" stroke="#374151" stroke-width="1.8" marker-end="url(#a)"/>
+
+  <path d="M830 192 V250" fill="none" stroke="#15803d" stroke-width="2" marker-end="url(#a)"/>
+  <text x="842" y="226" font-size="12" fill="#15803d" font-weight="700">passes</text>
+  <rect x="730" y="252" width="200" height="64" rx="8" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+  <text x="830" y="278" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">VERIFIED</text>
+  <text x="830" y="298" text-anchor="middle" font-size="12" fill="#111827">drafts re-run from v2</text>
+
+  <path d="M780 192 V222 H585 V192" fill="none" stroke="#c2410c" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#a)"/>
+  <text x="520" y="244" font-size="12" fill="#c2410c" font-weight="700">still fails: stronger fix writes v3, re-check again</text>
+  <text x="520" y="262" font-size="12" fill="#c2410c">budget: 2 repair rounds, then the run reports failure</text>
+
+  <rect x="30" y="286" width="640" height="96" rx="8" fill="#f9fafb" stroke="#9ca3af" stroke-width="1"/>
+  <text x="46" y="310" font-size="13" font-weight="700" fill="#111827">What stays on the record</text>
+  <text x="46" y="330" font-size="12" fill="#374151">v1, v2 (and v3 if needed) are all kept, each with its sha256. Nothing is overwritten.</text>
+  <text x="46" y="348" font-size="12" fill="#374151">Whether the first fix is accepted depends only on the real schedule; it is not scripted.</text>
+  <text x="46" y="366" font-size="12" fill="#374151">If a source is missing, the run stops as BLOCKED instead of guessing.</text>
+</svg>

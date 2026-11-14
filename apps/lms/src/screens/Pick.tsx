@@ -10,25 +10,45 @@ export function Pick({ kind }: { kind: Kind }) {
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState('');
-
-  useEffect(() => {
-    rpc<Profile[]>('lms_list_profiles')
-      .then((all) => setProfiles(all.filter((p) => p.kind === kind)))
-      .catch((e: Error) => setError(e.message));
-  }, [kind]);
-
   // After a session ends, the profile to re-enter comes first and is highlighted.
   const preselect = new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('preselect');
-  const shown = (profiles ?? [])
+  // 'new': only free profiles, so nobody picks a name someone else already holds.
+  // 'back': only taken profiles, for people signing back in with their own PIN.
+  const [mode, setMode] = useState<'new' | 'back'>(preselect ? 'back' : 'new');
+
+  useEffect(() => {
+    let alive = true;
+    const load = () =>
+      rpc<Profile[]>('lms_list_profiles')
+        .then((all) => { if (alive) { setProfiles(all.filter((p) => p.kind === kind)); setError(null); } })
+        .catch((e: Error) => { if (alive) setError(e.message); });
+    load();
+    const t = window.setInterval(load, 8000); // a name someone else just took drops out of the free list
+    return () => { alive = false; window.clearInterval(t); };
+  }, [kind]);
+
+  const inMode = (profiles ?? []).filter((p) => (mode === 'new' ? !p.claimed : p.claimed));
+  const shown = inMode
     .filter((p) => `${p.display_name} ${p.id}`.toLowerCase().includes(q.trim().toLowerCase()))
     .sort((a, b) => Number(b.id === preselect) - Number(a.id === preselect));
-  const title = kind === 'learner' ? 'Who are you?' : 'Which mentor are you?';
+  const title = mode === 'back' ? 'Sign back in' : kind === 'learner' ? 'Who are you?' : 'Which mentor are you?';
+  const takenCount = (profiles ?? []).filter((p) => p.claimed).length;
+  const freeCount = (profiles ?? []).length - takenCount;
 
   return (
     <Public back={{ href: '#/', label: 'Back' }}>
       <header className="mb-5">
         <h1 className="text-[28px] font-bold leading-tight text-ink lg:text-[34px]">{title}</h1>
-        <p className="mt-2 text-[16px] text-ink-2">Tap your name. Taken names still open with their PIN.</p>
+        <p className="mt-2 text-[16px] text-ink-2">
+          {mode === 'back' ? 'Find your name and enter the PIN you chose.' : 'Pick a free name and choose a PIN. Names other people have taken are hidden.'}
+        </p>
+        <button
+          type="button"
+          onClick={() => { setMode(mode === 'new' ? 'back' : 'new'); setQ(''); }}
+          className="mt-3 min-h-11 rounded-field border border-line-strong bg-surface px-4 text-[15px] font-semibold text-accent transition-colors hover:border-accent"
+        >
+          {mode === 'new' ? `Already joined? Sign back in (${takenCount})` : `New here? Pick a free name (${freeCount})`}
+        </button>
       </header>
       <DemoNote />
       <label className="relative mb-4 mt-4 block">
@@ -45,8 +65,12 @@ export function Pick({ kind }: { kind: Kind }) {
       {error && <Notice tone="bad">{error} Check the connection and reload.</Notice>}
       {!profiles && !error && <Loading what="profiles" />}
       {profiles && shown.length === 0 && (
-        <Empty title={profiles.length === 0 ? 'No profiles in the workspace yet.' : 'No match.'}>
-          {profiles.length === 0 ? 'The coordinator has not seeded this workspace. Ask at the front desk.' : 'Try another search.'}
+        <Empty title={profiles.length === 0 ? 'No profiles in the workspace yet.' : inMode.length === 0 ? (mode === 'new' ? 'Every name is taken.' : 'Nobody has joined yet.') : 'No match.'}>
+          {profiles.length === 0
+            ? 'The coordinator has not seeded this workspace. Ask at the front desk.'
+            : inMode.length === 0
+              ? (mode === 'new' ? 'Go back and choose “Create my own learner profile”.' : 'Pick a free name to join.')
+              : 'Try another search.'}
         </Empty>
       )}
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -63,10 +87,10 @@ export function Pick({ kind }: { kind: Kind }) {
                 <Mono>{p.id}</Mono>
                 <span
                   className={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${
-                    p.claimed ? 'bg-sunken text-ink-3' : 'bg-ok-weak text-ok'
+                    p.claimed ? 'bg-sunken text-ink-2' : 'bg-ok-weak text-ok'
                   }`}
                 >
-                  {p.claimed ? 'taken' : 'free'}
+                  {p.claimed ? 'yours? sign in' : 'free'}
                 </span>
               </span>
             </a>

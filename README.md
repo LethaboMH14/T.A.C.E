@@ -26,6 +26,8 @@
 
 Mission Studio runs on the presenter's laptop (`npm run studio`). During the demo it is published through a Cloudflare tunnel with coordinator sign-in; that link works only while the laptop is on.
 
+**Demo coordinator sign-in (judges):** email `you@example.com`, password `Melsoft2026!`. This is a shared demo account on synthetic data only. Every run and delivery it makes is logged with the coordinator as approver. The password will be changed after judging.
+
 ## What it does
 
 - **One goal in, a plan out.** A coordinator types a sentence. The Goal Reader turns it into a checked contract (and asks one multiple-choice question only if the goal is genuinely unclear). The Planner builds a task graph with only the steps that goal needs: a smaller goal gets a smaller team.

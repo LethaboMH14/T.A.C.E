@@ -1,0 +1,2529 @@
+{
+  "at": "2026-11-13T19:32:26.509184+00:00",
+  "help": [],
+  "latest": [
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 72,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 1,
+      "profile_id": "L-01"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 58,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 2,
+      "profile_id": "L-01"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 87,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 3,
+      "profile_id": "L-01"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 75,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 4,
+      "profile_id": "L-01"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 71,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 5,
+      "profile_id": "L-01"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 74,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 6,
+      "profile_id": "L-01"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 63,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 7,
+      "profile_id": "L-02"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 47,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 8,
+      "profile_id": "L-02"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 32,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 9,
+      "profile_id": "L-02"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 52,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 10,
+      "profile_id": "L-02"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 67,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 11,
+      "profile_id": "L-02"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 38,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 12,
+      "profile_id": "L-02"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 13,
+      "profile_id": "L-03"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 87,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 14,
+      "profile_id": "L-03"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 79,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 15,
+      "profile_id": "L-03"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 59,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 16,
+      "profile_id": "L-03"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 73,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 17,
+      "profile_id": "L-03"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 66,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 18,
+      "profile_id": "L-03"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 63,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 19,
+      "profile_id": "L-04"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 75,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 20,
+      "profile_id": "L-04"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 75,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 21,
+      "profile_id": "L-04"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 91,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 22,
+      "profile_id": "L-04"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 58,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 23,
+      "profile_id": "L-04"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 66,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 24,
+      "profile_id": "L-04"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 64,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 25,
+      "profile_id": "L-05"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 84,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 26,
+      "profile_id": "L-05"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 65,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 27,
+      "profile_id": "L-05"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 60,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 28,
+      "profile_id": "L-05"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 94,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 29,
+      "profile_id": "L-05"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 58,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 30,
+      "profile_id": "L-05"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 69,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 31,
+      "profile_id": "L-06"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 78,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 32,
+      "profile_id": "L-06"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 82,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 33,
+      "profile_id": "L-06"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 91,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 34,
+      "profile_id": "L-06"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 64,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 35,
+      "profile_id": "L-06"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 87,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 36,
+      "profile_id": "L-06"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 64,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 37,
+      "profile_id": "L-07"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 38,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 38,
+      "profile_id": "L-07"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 54,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 39,
+      "profile_id": "L-07"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 37,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 40,
+      "profile_id": "L-07"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 64,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 41,
+      "profile_id": "L-07"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 42,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 42,
+      "profile_id": "L-07"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 36,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 43,
+      "profile_id": "L-08"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 43,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 44,
+      "profile_id": "L-08"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 42,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 45,
+      "profile_id": "L-08"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 47,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 46,
+      "profile_id": "L-08"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 61,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 47,
+      "profile_id": "L-08"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 39,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 48,
+      "profile_id": "L-08"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 54,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 49,
+      "profile_id": "L-09"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 40,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 50,
+      "profile_id": "L-09"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 39,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 51,
+      "profile_id": "L-09"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 52,
+      "profile_id": "L-09"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 36,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 53,
+      "profile_id": "L-09"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 61,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 54,
+      "profile_id": "L-09"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 75,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 55,
+      "profile_id": "L-10"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 82,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 56,
+      "profile_id": "L-10"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 72,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 57,
+      "profile_id": "L-10"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 86,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 58,
+      "profile_id": "L-10"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 66,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 59,
+      "profile_id": "L-10"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 60,
+      "profile_id": "L-10"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 51,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 61,
+      "profile_id": "L-11"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 44,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 62,
+      "profile_id": "L-11"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 32,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 63,
+      "profile_id": "L-11"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 36,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 64,
+      "profile_id": "L-11"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 38,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 65,
+      "profile_id": "L-11"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 66,
+      "profile_id": "L-12"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 84,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 67,
+      "profile_id": "L-12"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 76,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 68,
+      "profile_id": "L-12"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 70,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 69,
+      "profile_id": "L-12"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 70,
+      "profile_id": "L-12"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 65,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 71,
+      "profile_id": "L-12"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 38,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 72,
+      "profile_id": "L-13"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 56,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 73,
+      "profile_id": "L-13"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 51,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 74,
+      "profile_id": "L-13"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 50,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 75,
+      "profile_id": "L-13"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 59,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 76,
+      "profile_id": "L-13"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 62,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 77,
+      "profile_id": "L-13"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 80,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 78,
+      "profile_id": "L-14"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 73,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 79,
+      "profile_id": "L-14"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 58,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 80,
+      "profile_id": "L-14"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 92,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 81,
+      "profile_id": "L-14"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 82,
+      "profile_id": "L-14"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 87,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 83,
+      "profile_id": "L-14"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 81,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 84,
+      "profile_id": "L-15"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 74,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 85,
+      "profile_id": "L-15"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 69,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 86,
+      "profile_id": "L-15"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 72,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 87,
+      "profile_id": "L-15"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 65,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 88,
+      "profile_id": "L-15"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 64,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 89,
+      "profile_id": "L-15"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 90,
+      "profile_id": "L-16"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 92,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 91,
+      "profile_id": "L-16"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 89,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 92,
+      "profile_id": "L-16"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 90,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 93,
+      "profile_id": "L-16"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 64,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 94,
+      "profile_id": "L-16"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 89,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 95,
+      "profile_id": "L-16"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 66,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 96,
+      "profile_id": "L-17"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 81,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 97,
+      "profile_id": "L-17"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 62,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 98,
+      "profile_id": "L-17"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 99,
+      "profile_id": "L-17"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 80,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 100,
+      "profile_id": "L-17"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 78,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 101,
+      "profile_id": "L-17"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 88,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 102,
+      "profile_id": "L-18"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 60,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 103,
+      "profile_id": "L-18"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 104,
+      "profile_id": "L-18"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 90,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 105,
+      "profile_id": "L-18"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 78,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 106,
+      "profile_id": "L-18"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 86,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 107,
+      "profile_id": "L-18"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 58,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 108,
+      "profile_id": "L-19"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 58,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 109,
+      "profile_id": "L-19"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 67,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 110,
+      "profile_id": "L-19"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 72,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 111,
+      "profile_id": "L-19"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 75,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 112,
+      "profile_id": "L-19"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 59,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 113,
+      "profile_id": "L-20"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 61,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 114,
+      "profile_id": "L-20"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 74,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 115,
+      "profile_id": "L-20"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 84,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 116,
+      "profile_id": "L-20"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 85,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 117,
+      "profile_id": "L-20"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 62,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 118,
+      "profile_id": "L-21"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 77,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 119,
+      "profile_id": "L-21"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 84,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 120,
+      "profile_id": "L-21"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 60,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 121,
+      "profile_id": "L-21"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 79,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 122,
+      "profile_id": "L-21"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 79,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 123,
+      "profile_id": "L-21"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 84,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 124,
+      "profile_id": "L-22"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 58,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 125,
+      "profile_id": "L-22"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 94,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 126,
+      "profile_id": "L-22"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 82,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 127,
+      "profile_id": "L-22"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 82,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 128,
+      "profile_id": "L-22"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 89,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 129,
+      "profile_id": "L-22"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 60,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 130,
+      "profile_id": "L-23"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 58,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 131,
+      "profile_id": "L-23"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 71,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 132,
+      "profile_id": "L-23"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 61,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 133,
+      "profile_id": "L-23"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 81,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 134,
+      "profile_id": "L-23"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 78,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 135,
+      "profile_id": "L-24"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 67,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 136,
+      "profile_id": "L-24"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 66,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 137,
+      "profile_id": "L-24"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 87,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 138,
+      "profile_id": "L-24"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 92,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 139,
+      "profile_id": "L-24"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 91,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 140,
+      "profile_id": "L-24"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 76,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 141,
+      "profile_id": "L-25"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 66,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 142,
+      "profile_id": "L-25"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 80,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 143,
+      "profile_id": "L-25"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 92,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 144,
+      "profile_id": "L-25"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 74,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 145,
+      "profile_id": "L-25"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 78,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 146,
+      "profile_id": "L-25"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 33,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 147,
+      "profile_id": "L-26"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 39,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 148,
+      "profile_id": "L-26"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 32,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 149,
+      "profile_id": "L-26"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 66,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 150,
+      "profile_id": "L-26"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 38,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 151,
+      "profile_id": "L-26"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 59,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 152,
+      "profile_id": "L-26"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 42,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 153,
+      "profile_id": "L-27"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 42,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 154,
+      "profile_id": "L-27"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 61,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 155,
+      "profile_id": "L-27"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 49,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 156,
+      "profile_id": "L-27"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 50,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 157,
+      "profile_id": "L-27"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 73,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 158,
+      "profile_id": "L-28"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 94,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 159,
+      "profile_id": "L-28"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 81,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 160,
+      "profile_id": "L-28"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 69,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 161,
+      "profile_id": "L-28"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 70,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 162,
+      "profile_id": "L-28"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 163,
+      "profile_id": "L-28"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 62,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 164,
+      "profile_id": "L-29"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 83,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 165,
+      "profile_id": "L-29"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 81,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 166,
+      "profile_id": "L-29"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 67,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 167,
+      "profile_id": "L-29"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 91,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 168,
+      "profile_id": "L-29"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 169,
+      "profile_id": "L-29"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 78,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 170,
+      "profile_id": "L-30"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 82,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 171,
+      "profile_id": "L-30"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 81,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 172,
+      "profile_id": "L-30"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 82,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 173,
+      "profile_id": "L-30"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 68,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 174,
+      "profile_id": "L-30"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 76,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 175,
+      "profile_id": "L-30"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 84,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 176,
+      "profile_id": "L-31"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 58,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 177,
+      "profile_id": "L-31"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 64,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 178,
+      "profile_id": "L-31"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 72,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 179,
+      "profile_id": "L-31"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 74,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 180,
+      "profile_id": "L-31"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 65,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 181,
+      "profile_id": "L-32"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 71,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 182,
+      "profile_id": "L-32"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 65,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 183,
+      "profile_id": "L-32"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 59,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 184,
+      "profile_id": "L-32"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 59,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 185,
+      "profile_id": "L-32"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 90,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 186,
+      "profile_id": "L-32"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 64,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 187,
+      "profile_id": "L-33"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 41,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 188,
+      "profile_id": "L-33"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 35,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 189,
+      "profile_id": "L-33"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 59,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 190,
+      "profile_id": "L-33"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 63,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 191,
+      "profile_id": "L-33"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 44,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 192,
+      "profile_id": "L-33"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 65,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 193,
+      "profile_id": "L-34"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 87,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 194,
+      "profile_id": "L-34"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 60,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 195,
+      "profile_id": "L-34"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 60,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 196,
+      "profile_id": "L-34"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 76,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 197,
+      "profile_id": "L-34"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 85,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 198,
+      "profile_id": "L-34"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 72,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 199,
+      "profile_id": "L-35"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 78,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 200,
+      "profile_id": "L-35"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 70,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 201,
+      "profile_id": "L-35"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 87,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 202,
+      "profile_id": "L-35"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 66,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 203,
+      "profile_id": "L-35"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 78,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 204,
+      "profile_id": "L-35"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 51,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S1",
+      "attempt_id": 205,
+      "profile_id": "L-36"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 56,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S2",
+      "attempt_id": 206,
+      "profile_id": "L-36"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 55,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S3",
+      "attempt_id": 207,
+      "profile_id": "L-36"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 53,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S4",
+      "attempt_id": 208,
+      "profile_id": "L-36"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 64,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S5",
+      "attempt_id": 209,
+      "profile_id": "L-36"
+    },
+    {
+      "at": "2026-11-09T08:00:00+00:00",
+      "score": 63,
+      "source": "seed",
+      "minutes": 0,
+      "skill_id": "S6",
+      "attempt_id": 210,
+      "profile_id": "L-36"
+    }
+  ],
+  "memory": [],
+  "skills": [
+    {
+      "id": "S1",
+      "name": "Variables and types",
+      "threshold": 60
+    },
+    {
+      "id": "S2",
+      "name": "Control flow",
+      "threshold": 60
+    },
+    {
+      "id": "S3",
+      "name": "Functions",
+      "threshold": 60
+    },
+    {
+      "id": "S4",
+      "name": "Data structures",
+      "threshold": 60
+    },
+    {
+      "id": "S5",
+      "name": "Debugging",
+      "threshold": 60
+    },
+    {
+      "id": "S6",
+      "name": "Git and version control",
+      "threshold": 60
+    }
+  ],
+  "minutes": {
+    "L-01": 0,
+    "L-02": 0,
+    "L-03": 0,
+    "L-04": 0,
+    "L-05": 0,
+    "L-06": 0,
+    "L-07": 0,
+    "L-08": 0,
+    "L-09": 0,
+    "L-10": 0,
+    "L-11": 0,
+    "L-12": 0,
+    "L-13": 0,
+    "L-14": 0,
+    "L-15": 0,
+    "L-16": 0,
+    "L-17": 0,
+    "L-18": 0,
+    "L-19": 0,
+    "L-20": 0,
+    "L-21": 0,
+    "L-22": 0,
+    "L-23": 0,
+    "L-24": 0,
+    "L-25": 0,
+    "L-26": 0,
+    "L-27": 0,
+    "L-28": 0,
+    "L-29": 0,
+    "L-30": 0,
+    "L-31": 0,
+    "L-32": 0,
+    "L-33": 0,
+    "L-34": 0,
+    "L-35": 0,
+    "L-36": 0
+  },
+  "profiles": [
+    {
+      "id": "L-01",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 01",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-02",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 02",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-03",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 03",
+      "mentor_skills": [],
+      "first_login_day": 7
+    },
+    {
+      "id": "L-04",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 04",
+      "mentor_skills": [],
+      "first_login_day": 6
+    },
+    {
+      "id": "L-05",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 05",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-06",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 06",
+      "mentor_skills": [],
+      "first_login_day": 2
+    },
+    {
+      "id": "L-07",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 07",
+      "mentor_skills": [],
+      "first_login_day": 3
+    },
+    {
+      "id": "L-08",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 08",
+      "mentor_skills": [],
+      "first_login_day": 3
+    },
+    {
+      "id": "L-09",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 09",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-10",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 10",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-11",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 11",
+      "mentor_skills": [],
+      "first_login_day": 2
+    },
+    {
+      "id": "L-12",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 12",
+      "mentor_skills": [],
+      "first_login_day": 3
+    },
+    {
+      "id": "L-13",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 13",
+      "mentor_skills": [],
+      "first_login_day": 4
+    },
+    {
+      "id": "L-14",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 14",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-15",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 15",
+      "mentor_skills": [],
+      "first_login_day": 4
+    },
+    {
+      "id": "L-16",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 16",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-17",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 17",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-18",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 18",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-19",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 19",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-20",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 20",
+      "mentor_skills": [],
+      "first_login_day": 3
+    },
+    {
+      "id": "L-21",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 21",
+      "mentor_skills": [],
+      "first_login_day": 4
+    },
+    {
+      "id": "L-22",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 22",
+      "mentor_skills": [],
+      "first_login_day": 2
+    },
+    {
+      "id": "L-23",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 23",
+      "mentor_skills": [],
+      "first_login_day": 2
+    },
+    {
+      "id": "L-24",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 24",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-25",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 25",
+      "mentor_skills": [],
+      "first_login_day": 2
+    },
+    {
+      "id": "L-26",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 26",
+      "mentor_skills": [],
+      "first_login_day": 2
+    },
+    {
+      "id": "L-27",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 27",
+      "mentor_skills": [],
+      "first_login_day": 2
+    },
+    {
+      "id": "L-28",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 28",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-29",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 29",
+      "mentor_skills": [],
+      "first_login_day": 2
+    },
+    {
+      "id": "L-30",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 30",
+      "mentor_skills": [],
+      "first_login_day": 2
+    },
+    {
+      "id": "L-31",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 31",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-32",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 32",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-33",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 33",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-34",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 34",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "L-35",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 35",
+      "mentor_skills": [],
+      "first_login_day": 4
+    },
+    {
+      "id": "L-36",
+      "kind": "learner",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 0,
+      "display_name": "Learner 36",
+      "mentor_skills": [],
+      "first_login_day": 1
+    },
+    {
+      "id": "M-A",
+      "kind": "mentor",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 6,
+      "display_name": "Mentor A",
+      "mentor_skills": [
+        "S1",
+        "S2",
+        "S3",
+        "S5"
+      ],
+      "first_login_day": 1
+    },
+    {
+      "id": "M-B",
+      "kind": "mentor",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 6,
+      "display_name": "Mentor B",
+      "mentor_skills": [
+        "S2",
+        "S3",
+        "S4",
+        "S6"
+      ],
+      "first_login_day": 1
+    },
+    {
+      "id": "M-C",
+      "kind": "mentor",
+      "prefs": {
+        "format": "text",
+        "language": "en"
+      },
+      "claimed": false,
+      "capacity": 6,
+      "display_name": "Mentor C",
+      "mentor_skills": [
+        "S1",
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "first_login_day": 1
+    }
+  ],
+  "availability": [
+    {
+      "day": "Mon",
+      "end": "12:00",
+      "start": "09:00",
+      "mentor_id": "M-A"
+    },
+    {
+      "day": "Wed",
+      "end": "16:00",
+      "start": "13:00",
+      "mentor_id": "M-A"
+    },
+    {
+      "day": "Thu",
+      "end": "12:00",
+      "start": "09:00",
+      "mentor_id": "M-B"
+    },
+    {
+      "day": "Tue",
+      "end": "12:00",
+      "start": "09:00",
+      "mentor_id": "M-B"
+    },
+    {
+      "day": "Fri",
+      "end": "12:00",
+      "start": "09:00",
+      "mentor_id": "M-C"
+    },
+    {
+      "day": "Mon",
+      "end": "16:00",
+      "start": "13:00",
+      "mentor_id": "M-C"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+name: Mission Studio — launch and HTTP smoke test
+
+on:
+  push:
+    branches: [feat/mission-engine]
+    paths:
+      - '.github/workflows/studio-launch-smoke.yml'
+      - 'web/**'
+      - 'apps/studio/**'
+      - 'engine/**'
+      - 'domains/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Build, launch localhost server, verify HTTP and synthetic run
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Install server dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install and build React Mission Studio
+        working-directory: apps/studio
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+      - name: Launch server and verify routes with no model keys
+        env:
+          PORT: '4173'
+          MODEL_PROFILE: demo
+        run: |
+          set -euo pipefail
+          npm run studio > /tmp/tace-studio.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true; cat /tmp/tace-studio.log' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4173/api/scenarios -o /tmp/scenarios.json; then break; fi
+            sleep 1
+          done
+          node --input-type=module -e "import fs from 'node:fs';const s=JSON.parse(fs.readFileSync('/tmp/scenarios.json','utf8'));if(!Array.isArray(s)||!s.some(x=>x.id==='inject_overlap')) process.exit(1);console.log('Scenario API OK, count=',s.length)"
+          curl -fSs http://127.0.0.1:4173/ -o /tmp/studio.html
+          grep -q 'id="root"' /tmp/studio.html
+          curl -fSs http://127.0.0.1:4173/classic -o /tmp/classic.html
+          grep -qi '<html' /tmp/classic.html
+          echo 'React app, classic fallback, and scenario API respond over HTTP'
+          curl -fsS -H 'Content-Type: application/json' -d '{"scenario":"inject_overlap","model":"off","pace":0}' http://127.0.0.1:4173/api/runs -o /tmp/started.json
+          cat /tmp/started.json
+          node --input-type=module -e "import fs from 'node:fs';let o=JSON.parse(fs.readFileSync('/tmp/started.json'));if(!o.runId)process.exit(1)"
+          RUN_ID=$(node --input-type=module -e "import fs from 'node:fs';console.log(JSON.parse(fs.readFileSync('/tmp/started.json')).runId)")
+          for i in $(seq 1 90); do
+            if test -f "runs/$RUN_ID/events.jsonl" && grep -q '"type":"RUN_FINISHED"' "runs/$RUN_ID/events.jsonl"; then break; fi
+            sleep 1
+          done
+          test -f "runs/$RUN_ID/events.jsonl"
+          grep -q '"type":"VERIFICATION_FAILED"' "runs/$RUN_ID/events.jsonl"
+          grep -q '"type":"ARTIFACT_REPAIRED"' "runs/$RUN_ID/events.jsonl"
+          grep -q '"type":"VERIFICATION_PASSED"' "runs/$RUN_ID/events.jsonl"
+          grep -q '"status":"VERIFIED"' "runs/$RUN_ID/events.jsonl"
+          test -f "runs/$RUN_ID/artifacts/mentor-schedule.v2.csv"
+          curl -fSs "http://127.0.0.1:4173/api/runs/$RUN_ID/file?path=artifacts/mentor-schedule.v2.csv" -o /tmp/repaired.csv
+          test -s /tmp/repaired.csv
+          echo "T.A.C.E localhost server launched; real synthetic fail→repair→verify and file download passed"

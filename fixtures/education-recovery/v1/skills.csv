@@ -1,0 +1,7 @@
+skill_id,name,threshold
+S1,Variables and types,60
+S2,Control flow,60
+S3,Functions,60
+S4,Data structures,60
+S5,Debugging,60
+S6,Git and version control,60

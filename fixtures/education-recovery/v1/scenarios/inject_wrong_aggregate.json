@@ -1,0 +1,216 @@
+{
+  "id": "inject_wrong_aggregate",
+  "title": "Self-correction: the report counts missing scores as zero",
+  "goalText": "Using the results for our 36 bootcamp learners, find who is falling behind and why, plan support for each gap, book our 3 mentors without clashes, and draft messages to learners and mentors. Do not send anything.",
+  "intakeSources": [
+    "trainees",
+    "assessments",
+    "skills",
+    "mentors",
+    "availability",
+    "interventions"
+  ],
+  "proposal": {
+    "schemaVersion": "g02-goal-proposal-v0.2",
+    "intent": {
+      "summary": "Find learners who are slipping, plan support, book mentors and draft messages without sending them",
+      "modes": [
+        "ANALYZE",
+        "CREATE",
+        "COORDINATE"
+      ]
+    },
+    "relationToPrior": "NEW_GOAL",
+    "deliverables": [
+      {
+        "id": "gap_analysis",
+        "description": "Per-learner skill gaps with source rows",
+        "formatHint": "csv"
+      },
+      {
+        "id": "performance_summary",
+        "description": "Cohort performance summary",
+        "formatHint": "md"
+      },
+      {
+        "id": "improvement_plan",
+        "description": "Support plan linked to verified gaps",
+        "formatHint": "json"
+      },
+      {
+        "id": "mentor_schedule",
+        "description": "Clash-free mentor sessions",
+        "formatHint": "csv"
+      },
+      {
+        "id": "message_drafts",
+        "description": "Unsent message drafts for review",
+        "formatHint": "md"
+      }
+    ],
+    "subgoals": [
+      {
+        "id": "analyse",
+        "outcome": "Find skill gaps and at-risk learners",
+        "dependsOn": [],
+        "deliverableIds": [
+          "gap_analysis",
+          "performance_summary"
+        ],
+        "sourceSlots": [
+          0,
+          1,
+          2
+        ],
+        "capabilityKinds": [
+          "READ_SOURCE",
+          "WRITE_ARTIFACT"
+        ],
+        "effectKinds": [
+          "READ_ONLY",
+          "LOCAL_ARTIFACT"
+        ]
+      },
+      {
+        "id": "plan",
+        "outcome": "Match each verified gap to a support activity",
+        "dependsOn": [
+          "analyse"
+        ],
+        "deliverableIds": [
+          "improvement_plan"
+        ],
+        "sourceSlots": [
+          5
+        ],
+        "capabilityKinds": [
+          "READ_SOURCE",
+          "WRITE_ARTIFACT"
+        ],
+        "effectKinds": [
+          "READ_ONLY",
+          "LOCAL_ARTIFACT"
+        ]
+      },
+      {
+        "id": "schedule",
+        "outcome": "Book mentor sessions without clashes",
+        "dependsOn": [
+          "plan"
+        ],
+        "deliverableIds": [
+          "mentor_schedule"
+        ],
+        "sourceSlots": [
+          3,
+          4
+        ],
+        "capabilityKinds": [
+          "READ_SOURCE",
+          "SCHEDULING",
+          "WRITE_ARTIFACT"
+        ],
+        "effectKinds": [
+          "READ_ONLY",
+          "LOCAL_ARTIFACT"
+        ]
+      },
+      {
+        "id": "drafts",
+        "outcome": "Draft messages to learners and mentors, do not send",
+        "dependsOn": [
+          "schedule"
+        ],
+        "deliverableIds": [
+          "message_drafts"
+        ],
+        "sourceSlots": [],
+        "capabilityKinds": [
+          "MESSAGE_DRAFT",
+          "WRITE_ARTIFACT"
+        ],
+        "effectKinds": [
+          "LOCAL_ARTIFACT"
+        ]
+      }
+    ],
+    "sourceSlots": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "capabilityNeeds": [
+      {
+        "kind": "READ_SOURCE",
+        "reason": "Read the synthetic cohort files"
+      },
+      {
+        "kind": "WRITE_ARTIFACT",
+        "reason": "Write local result files"
+      },
+      {
+        "kind": "SCHEDULING",
+        "reason": "Place mentor sessions in availability windows"
+      },
+      {
+        "kind": "MESSAGE_DRAFT",
+        "reason": "Write drafts for a person to review"
+      }
+    ],
+    "effectClaims": [
+      {
+        "kind": "READ_ONLY",
+        "description": "Read synthetic inputs without changing them"
+      },
+      {
+        "kind": "LOCAL_ARTIFACT",
+        "description": "Write local files only; nothing is sent"
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "id": "gaps_match",
+        "deliverableId": "gap_analysis",
+        "check": "Every gap matches a source row below threshold",
+        "method": "SOURCE_CROSSCHECK",
+        "evidenceExpectation": "Recomputed gaps equal reported gaps"
+      },
+      {
+        "id": "totals_match",
+        "deliverableId": "performance_summary",
+        "check": "Cohort numbers match the raw scores",
+        "method": "SOURCE_CROSSCHECK",
+        "evidenceExpectation": "Recomputed means and counts equal reported ones"
+      },
+      {
+        "id": "plan_refs",
+        "deliverableId": "improvement_plan",
+        "check": "Every support item points to a verified gap and a known activity",
+        "method": "SOURCE_CROSSCHECK",
+        "evidenceExpectation": "All plan items reference existing gaps and intervention ids"
+      },
+      {
+        "id": "no_clash",
+        "deliverableId": "mentor_schedule",
+        "check": "No mentor is double-booked and capacity holds",
+        "method": "SCHEDULE_CONFLICT_CHECK",
+        "evidenceExpectation": "Zero overlaps, all sessions inside availability"
+      },
+      {
+        "id": "unsent",
+        "deliverableId": "message_drafts",
+        "check": "Every draft is unsent and matches a booked session",
+        "method": "HUMAN_REVIEW",
+        "evidenceExpectation": "All drafts marked UNSENT"
+      }
+    ],
+    "uncertainties": []
+  },
+  "inject": {
+    "kind": "wrong_aggregate",
+    "skill_id": "S3"
+  }
+}

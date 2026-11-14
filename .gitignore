@@ -1,0 +1,10 @@
+runs/
+node_modules/
+*.sqlite
+*.sqlite-journal
+.DS_Store
+# local secrets: your model key lives here, never in git
+.env
+.env.*
+!.env.example
+apps/lms/dist/

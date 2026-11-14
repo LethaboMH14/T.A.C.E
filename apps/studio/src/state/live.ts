@@ -271,63 +271,46 @@ export function useLiveFeed(enabled: boolean): LiveState {
 
   useEffect(() => {
     if (!enabled) return;
-    let es: EventSource | null = null;
+    // Plain JSON polling every 2 s (GET /api/lms/poll). It works through proxies and tunnels that hold back
+    // event streams, and it passes the highest ids already shown so nothing is replayed.
     let timer: ReturnType<typeof setTimeout> | null = null;
     let attempt = 0;
     let stopped = false;
+    let first = true;
 
-    const connect = () => {
+    const tick = async () => {
       if (stopped) return;
       const c = cursors(itemsRef.current);
-      const qs = c.attempt || c.help ? `?after_attempt=${c.attempt}&after_help=${c.help}` : '';
-      dispatch({ type: 'connection', connection: attempt === 0 ? 'connecting' : 'reconnecting' });
-      const source = new EventSource(`/api/lms/live${qs}`);
-      es = source;
-      source.onopen = () => {
-        attempt = 0;
-        dispatch({ type: 'connection', connection: 'live' });
-      };
-      source.onmessage = (m) => {
-        try {
-          const item = parseLiveItem(JSON.parse(m.data));
+      if (first) dispatch({ type: 'connection', connection: 'connecting' });
+      try {
+        const res = await fetch(`/api/lms/poll?after_attempt=${c.attempt || 0}&after_help=${c.help || 0}`, { cache: 'no-store' });
+        if (res.status === 401) { void probeAuth(); throw new Error('auth'); }
+        const body = (await res.json()) as { items?: unknown[]; counts?: unknown; error?: string };
+        if (!res.ok) {
+          if (body && typeof body.error === 'string') dispatch({ type: 'server-error', message: body.error });
+          throw new Error('poll');
+        }
+        for (const raw of body.items ?? []) {
+          const item = parseLiveItem(raw);
           if (item) dispatch({ type: 'item', item });
-        } catch {
-          /* ignore a malformed frame */
         }
-      };
-      source.addEventListener('counts', (m) => {
-        try {
-          const counts = parseCounts(JSON.parse((m as MessageEvent).data));
-          if (counts) dispatch({ type: 'counts', counts });
-        } catch {
-          /* ignore */
-        }
-      });
-      // 'error' is both the server's named event (it has data) and the browser's connection failure (it has none).
-      source.addEventListener('error', (m) => {
-        const data = (m as MessageEvent).data;
-        if (typeof data === 'string' && data) {
-          try {
-            const message = (JSON.parse(data) as { message?: unknown }).message;
-            dispatch({ type: 'server-error', message: typeof message === 'string' ? message : 'The portal reported an error.' });
-          } catch {
-            dispatch({ type: 'server-error', message: 'The portal reported an error.' });
-          }
-          return;
-        }
-        source.close();
-        es = null;
+        const counts = parseCounts(body.counts);
+        if (counts) dispatch({ type: 'counts', counts });
+        if (first || attempt > 0) dispatch({ type: 'connection', connection: 'live' });
+        first = false;
+        attempt = 0;
+        timer = setTimeout(tick, 2000);
+      } catch {
+        if (stopped) return;
         dispatch({ type: 'connection', connection: 'reconnecting' });
-        void probeAuth();
-        timer = setTimeout(connect, backoffMs(attempt++));
-      });
+        timer = setTimeout(tick, backoffMs(attempt++));
+      }
     };
 
-    connect();
+    void tick();
     return () => {
       stopped = true;
       if (timer) clearTimeout(timer);
-      es?.close();
       dispatch({ type: 'connection', connection: 'idle' });
     };
   }, [enabled]);

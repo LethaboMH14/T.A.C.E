@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Activity, BookOpen, ChevronDown, ListTree, Radio, ShieldCheck } from 'lucide-react';
+import { Activity, BookOpen, ChevronDown, ListTree, Maximize2, Minimize2, Radio, ShieldCheck } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MissionHeader } from '@/components/MissionHeader';
 import { QuestionCard } from '@/components/QuestionCard';
@@ -28,6 +28,7 @@ export function MissionWorkspace({ mission, runId }: { mission: Mission; runId: 
   const [selection, setSelection] = useState<InspectorSelection>(null);
   const [tab, setTab] = useState('story');
   const [panelOpen, setPanelOpen] = useState(true);
+  const [panelTall, setPanelTall] = useState(false); // 'Bigger' gives the details most of the screen
 
   // A notice asked for a node of this run: open it in the inspector.
   useEffect(() => {
@@ -71,7 +72,7 @@ export function MissionWorkspace({ mission, runId }: { mission: Mission; runId: 
             setTab(v);
             setPanelOpen(true);
           }}
-          className={cn('flex shrink-0 flex-col border-t border-line bg-bg max-[719px]:h-auto max-[719px]:min-h-0', panelOpen ? 'h-[34%] min-h-[200px]' : 'h-auto', 'min-[1440px]:h-auto min-[1440px]:min-h-0 min-[1440px]:w-[460px] min-[1440px]:border-l min-[1440px]:border-t-0')}
+          className={cn('flex shrink-0 flex-col border-t border-line bg-bg max-[719px]:h-auto max-[719px]:min-h-0', panelOpen ? (panelTall ? 'h-[72%] min-h-[320px]' : 'h-[34%] min-h-[200px]') : 'h-auto', 'min-[1440px]:h-auto min-[1440px]:min-h-0 min-[1440px]:w-[460px] min-[1440px]:border-l min-[1440px]:border-t-0')}
         >
           <div className="flex shrink-0 items-center justify-between gap-2 px-4 py-2 max-[719px]:overflow-x-auto">
             <TabsList aria-label="Mission detail">
@@ -81,6 +82,16 @@ export function MissionWorkspace({ mission, runId }: { mission: Mission; runId: 
               <TabsTrigger value="timeline"><ListTree className="h-4 w-4" aria-hidden />Timeline</TabsTrigger>
               <TabsTrigger value="review"><ShieldCheck className="h-4 w-4" aria-hidden />Review</TabsTrigger>
             </TabsList>
+            <button
+              type="button"
+              onClick={() => { setPanelOpen(true); setPanelTall((t) => !t); }}
+              aria-pressed={panelTall}
+              title={panelTall ? 'Make the details smaller' : 'Make the details bigger'}
+              className="ml-auto flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-field px-2 text-[13px] font-medium text-ink-2 hover:bg-sunken"
+            >
+              {panelTall ? <Minimize2 className="h-4 w-4" aria-hidden /> : <Maximize2 className="h-4 w-4" aria-hidden />}
+              {panelTall ? 'Smaller' : 'Bigger'}
+            </button>
             <button
               type="button"
               onClick={() => setPanelOpen((o) => !o)}

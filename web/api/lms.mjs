@@ -199,6 +199,34 @@ function live(req, res, ctx, url) {
   return true;
 }
 
+// ---------- GET /api/lms/poll?after_attempt=&after_help=  (plain JSON; works through proxies that buffer streams)
+async function poll(req, res, ctx, url) {
+  const c = lmsOf(ctx);
+  if (!c.adminConfigured) return ctx.send(res, 503, { configured: c.configured, error: 'LMS admin is not configured' });
+  const qa = url.searchParams.get('after_attempt') || '0'; const qh = url.searchParams.get('after_help') || '0';
+  const afterA = /^\d{1,15}$/.test(qa) ? Number(qa) : 0; const afterH = /^\d{1,15}$/.test(qh) ? Number(qh) : 0;
+  try {
+    const [f, ps] = await Promise.all([
+      c.admin('lms_admin_feed', { p_after_attempt: afterA, p_after_help: afterH }),
+      c.rpc('lms_list_profiles'),
+    ]);
+    const names = new Map(ps.map((p) => [p.id, p.display_name]));
+    const items = [];
+    for (const a of Array.isArray(f.attempts) ? f.attempts : []) {
+      const learner = a.profile_id ?? a.trainee_id ?? null;
+      items.push({ type: 'attempt', id: a.attempt_id ?? a.id ?? null, learner, name: names.get(learner) ?? learner, skill: a.skill_id ?? null, score: a.score ?? null, source: a.source ?? null, at: a.at ?? null });
+    }
+    for (const h of Array.isArray(f.help) ? f.help : []) {
+      const learner = h.profile_id ?? h.trainee_id ?? null;
+      items.push({ type: 'help', id: h.help_id ?? h.request_id ?? h.id ?? null, learner, name: names.get(learner) ?? learner, skill: h.skill_id ?? null, category: h.category ?? null, text: h.text ?? null, at: h.at ?? null });
+    }
+    const f0 = afterA || afterH ? await c.admin('lms_admin_feed', { p_after_attempt: 0, p_after_help: 0 }) : f;
+    return ctx.send(res, 200, { items, counts: { claimed: f.claimed ?? null, attempts: f0.attempts.length, help: f0.help.length } });
+  } catch (e) {
+    return ctx.send(res, 502, { error: e.message });
+  }
+}
+
 // ---------- POST /api/lms/run
 async function runLive(req, res, ctx) {
   const body = await ctx.readJson(req, res);
@@ -453,6 +481,7 @@ export async function handle(req, res, url, parts, ctx) {
     const route = parts.slice(2).join('/');
     if (req.method === 'GET' && route === 'status') { await status(req, res, ctx); return true; }
     if (req.method === 'GET' && route === 'live') { live(req, res, ctx, url); return true; }
+    if (req.method === 'GET' && route === 'poll') { await poll(req, res, ctx, url); return true; }
     if (req.method === 'POST' && route === 'run') { await runLive(req, res, ctx); return true; }
     if (req.method === 'POST' && route === 'reset') { await reset(req, res, ctx); return true; }
     ctx.send(res, 404, { error: 'unknown LMS endpoint' });

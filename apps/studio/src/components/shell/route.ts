@@ -1,11 +1,12 @@
 // Hash routes for the workspace. Pure parse/format so they can be tested without a browser.
 //   #/mission/<runId>   #/mission            (no run yet)
-//   #/missions          #/agents            #/evidence/<runId>   #/files/<runId>   #/models
+//   #/live              #/missions          #/agents            #/evidence/<runId>   #/files/<runId>   #/models
 // Anything else parses to { name: 'home' }; App then sends the person to the latest run.
 
 export type Route =
   | { name: 'home' }
   | { name: 'mission'; runId: string | null }
+  | { name: 'live' }
   | { name: 'missions' }
   | { name: 'agents' }
   | { name: 'evidence'; runId: string | null }
@@ -27,6 +28,8 @@ export function parseRoute(hash: string): Route {
   switch (head) {
     case 'mission':
       return { name: 'mission', runId };
+    case 'live':
+      return { name: 'live' };
     case 'missions':
       return { name: 'missions' };
     case 'agents':
@@ -46,6 +49,8 @@ export function routeHash(route: Route): string {
   switch (route.name) {
     case 'mission':
       return route.runId ? `#/mission/${encodeURIComponent(route.runId)}` : '#/mission';
+    case 'live':
+      return '#/live';
     case 'missions':
       return '#/missions';
     case 'agents':

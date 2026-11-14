@@ -92,7 +92,7 @@ export interface Mission {
   // profile and chain: RUN_STARTED.agents (router order of preference; MODEL_CALL names who actually answered)
   agents: { mode: 'model' | 'code'; provider?: string; model?: string; note?: string; profile?: string | null; chain?: string[] } | null;
   planted: string[];                       // plain sentences from RUN_STARTED
-  plantedHeading: string | null;           // "Planted on purpose for this demo" | "Changed for this scenario"
+  plantedHeading: string | null;           // "Planted on purpose" | "Changed for this scenario"
   deliverables: string[];
   unsupported: string[];
   goalSource: 'model' | 'fixture' | null;
@@ -117,6 +117,9 @@ export interface Mission {
   passed: { round: number; passed: number; total: number } | null;
   files: Record<string, { name: string; versions: (ArtifactRef & { seq: number; by: string })[] }>;
   stage: Record<'goal' | 'plan' | 'execute' | 'verify' | 'deliver', StageState>;
+  lmsSnapshot: LmsSnapshot | null;         // LMS_SNAPSHOT: the live class data frozen for this run
+  delivered: { count: number; learners: number; mentors: number } | null;   // MESSAGES_DELIVERED
+  notified: { email: { sent: number; failed: number }; sms: { sent: number; failed: number } } | null;   // NOTIFICATIONS_SENT
   feed: FeedItem[];
   started: number | null;                  // epoch ms of the first event
   lastTs: number | null;                   // epoch ms of the latest event
@@ -131,6 +134,13 @@ export interface Mission {
     repairs: number;
     reason: string | null;
   } | null;
+}
+
+export interface LmsSnapshot {
+  at: string | null;
+  files: { name: string; rows: number; digest: string }[];
+  learners: number | null;
+  helpRequests: number | null;
 }
 
 export interface ScenarioInfo {

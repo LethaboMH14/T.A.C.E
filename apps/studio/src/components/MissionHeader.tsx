@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Check, TriangleAlert } from 'lucide-react';
+import { Check, Inbox, TriangleAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Mission, StageState } from '@/state';
 
@@ -49,7 +49,7 @@ function countLine(m: Mission): ReactNode {
   if (m.finished && m.finished.checksTotal) {
     bits.push(<span key="c"><b>{m.finished.checksPassed}/{m.finished.checksTotal}</b> checks</span>);
   }
-  if (!bits.length) return 'Every number on this page comes from the run’s own files and ledger.';
+  if (!bits.length) return 'Numbers appear here as the plan runs.';
   return bits.map((b, i) => (
     <span key={i}>
       {i > 0 ? <span className="mx-2 text-line-strong">/</span> : null}
@@ -107,7 +107,7 @@ export function MissionHeader({ mission: m }: { mission: Mission }) {
     idle: 'bg-line-strong',
   };
 
-  const title = m.runId === null ? 'Pick a scenario and run the mission' : m.title || 'Loading…';
+  const title = m.runId === null ? 'No mission open' : m.title || 'Loading…';
   // Profile from RUN_STARTED; "answered by" from the MODEL_CALL events that actually succeeded.
   const answeredBy = [...new Set(m.modelCalls.filter((c) => c.ok && c.provider).map((c) => c.provider as string))];
   const agentChip =
@@ -127,7 +127,7 @@ export function MissionHeader({ mission: m }: { mission: Mission }) {
             'radial-gradient(40% 120% at 88% 0%, rgba(219, 97, 230, .16), transparent 70%), radial-gradient(36% 110% at 68% 100%, rgba(125, 158, 250, .18), transparent 70%), radial-gradient(30% 90% at 100% 80%, rgba(143, 102, 237, .14), transparent 70%)',
         }}
       />
-      <div className="relative mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-7 px-6 py-5 max-[1000px]:grid-cols-1 max-[1000px]:gap-3.5 max-[860px]:p-4">
+      <div className="relative mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-7 px-6 py-4 max-[1000px]:grid-cols-1 max-[1000px]:gap-3.5 max-[860px]:p-4">
         <div className="min-w-0">
           <p className="mb-1 text-[12.5px] text-ink-3">
             <span className="mono" data-testid="run-id">{m.runId ?? 'No run yet'}</span>
@@ -140,7 +140,7 @@ export function MissionHeader({ mission: m }: { mission: Mission }) {
             <p className="mt-2.5 flex max-w-[76ch] items-start gap-2 rounded-field bg-run-weak px-3 py-[7px] text-[13px] leading-[1.45] text-[#7A4700]">
               <TriangleAlert className="mt-px h-4 w-4 shrink-0" aria-hidden />
               <span>
-                {m.plantedHeading}: {m.planted.join('; ')}. It is declared in the scenario file and in the ledger.
+                {m.plantedHeading}: {m.planted.join('; ')}.
               </span>
             </p>
           ) : null}
@@ -190,6 +190,12 @@ export function MissionHeader({ mission: m }: { mission: Mission }) {
             <span className={cn('h-2 w-2 rounded-full', dotClass[status.state] ?? dotClass.idle)} />
             {status.text}
           </span>
+          {m.delivered ? (
+            <span data-testid="header-delivered" className="inline-flex h-[26px] items-center gap-1.5 rounded-full border border-ok-line bg-ok-weak px-2.5 text-[12.5px] font-semibold text-ok">
+              <Inbox className="h-3.5 w-3.5" aria-hidden />
+              Delivered
+            </span>
+          ) : null}
           <span className="mono text-[13px] text-ink-3">{clock}</span>
           {agentChip ? (
             <span className="inline-flex items-center rounded-full bg-sunken px-2.5 py-0.5 text-[12.5px] text-ink-2">

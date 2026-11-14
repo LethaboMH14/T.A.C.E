@@ -10,14 +10,27 @@ import { ModelsView } from '@/views/ModelsView';
 import { AgentsView } from '@/views/AgentsView';
 import { EvidenceView } from '@/views/EvidenceView';
 import { FilesView } from '@/views/FilesView';
+import { LiveView } from '@/views/LiveView';
+import { NotificationBell, Toasts } from '@/components/notify/NotificationCentre';
+import { UserMenu } from '@/components/auth/UserMenu';
 import { Command } from 'lucide-react';
 import { api, useMission } from '@/state';
+import { useLiveFeed } from '@/state/live';
+import { useLmsStatus } from '@/state/lms';
+import { useRunNotifications } from '@/state/notifications';
 
 export default function App() {
   const [route, setRoute] = useState<Route>(() => parseRoute(window.location.hash));
   // The run the workspace is about. Views without a run in their hash (agents, models, missions) keep it.
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [navCollapsed, setNavCollapsed] = useState(() => {
+    try { return window.localStorage.getItem('tace.nav.collapsed') === '1'; } catch { return false; }
+  });
+  const toggleNav = () => setNavCollapsed((c) => {
+    try { window.localStorage.setItem('tace.nav.collapsed', c ? '0' : '1'); } catch { /* storage unavailable */ }
+    return !c;
+  });
 
   useEffect(() => {
     const onHash = () => setRoute(parseRoute(window.location.hash));
@@ -54,11 +67,20 @@ export default function App() {
 
   const activeRunId = routeRun ?? currentRunId;
   const mission = useMission(activeRunId);
+  useRunNotifications(mission);
+
+  // The class feed stays connected on every view once the portal is configured, so the help count in the sidebar is live.
+  const { state: lmsStatus, reload: reloadLms } = useLmsStatus();
+  const lmsReady = lmsStatus.kind === 'ready' ? lmsStatus.status : null;
+  const feedAvailable = !!lmsReady && lmsReady.configured && !lmsReady.error && !!lmsReady.counts
+    && !(lmsReady.counts.attempts_live === null && lmsReady.counts.help === null);
+  const live = useLiveFeed(feedAvailable);
+  const helpCount = feedAvailable ? (live.counts?.help ?? lmsReady?.counts?.help ?? null) : null;
 
   return (
     <>
       <AppShell
-        sidebar={<Sidebar route={route} mission={mission} />}
+        sidebar={<Sidebar route={route} mission={mission} helpCount={helpCount} collapsed={navCollapsed} onToggleCollapsed={toggleNav} />}
         topbar={
           <>
             <div className="min-w-0 flex-1">
@@ -73,11 +95,15 @@ export default function App() {
               <Command className="h-3.5 w-3.5" aria-hidden />
               K
             </button>
+            <NotificationBell />
+            <UserMenu />
           </>
         }
       >
         {route.name === 'mission' || route.name === 'home' ? (
           <MissionWorkspace key={activeRunId ?? 'none'} mission={mission} runId={activeRunId} />
+        ) : route.name === 'live' ? (
+          <LiveView status={lmsStatus} onRetry={reloadLms} live={live} feedAvailable={feedAvailable} />
         ) : route.name === 'missions' ? (
           <MissionsView mission={mission} />
         ) : route.name === 'agents' ? (
@@ -90,6 +116,7 @@ export default function App() {
           <ModelsView />
         )}
       </AppShell>
+      <Toasts />
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} currentRunId={activeRunId} />
     </>
   );

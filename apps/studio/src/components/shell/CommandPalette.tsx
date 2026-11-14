@@ -7,6 +7,7 @@ import { go, type Route } from './route';
 import { requestProviderCheck } from './workspace-api';
 
 const VIEWS: { label: string; route: Route }[] = [
+  { label: 'Go to Live class', route: { name: 'live' } },
   { label: 'Go to Missions', route: { name: 'missions' } },
   { label: 'Go to Agents', route: { name: 'agents' } },
   { label: 'Go to Models', route: { name: 'models' } },

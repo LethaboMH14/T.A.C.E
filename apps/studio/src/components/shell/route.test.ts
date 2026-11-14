@@ -5,6 +5,7 @@ describe('hash routes', () => {
   it('parses each workspace route', () => {
     expect(parseRoute('#/mission/inject_overlap-20261113-120000')).toEqual({ name: 'mission', runId: 'inject_overlap-20261113-120000' });
     expect(parseRoute('#/mission')).toEqual({ name: 'mission', runId: null });
+    expect(parseRoute('#/live')).toEqual({ name: 'live' });
     expect(parseRoute('#/missions')).toEqual({ name: 'missions' });
     expect(parseRoute('#/agents')).toEqual({ name: 'agents' });
     expect(parseRoute('#/evidence/run-1')).toEqual({ name: 'evidence', runId: 'run-1' });
@@ -21,6 +22,7 @@ describe('hash routes', () => {
 
   it('formats and round-trips', () => {
     expect(routeHash({ name: 'mission', runId: 'a_b-1' })).toBe('#/mission/a_b-1');
+    expect(parseRoute(routeHash({ name: 'live' }))).toEqual({ name: 'live' });
     expect(parseRoute(routeHash({ name: 'files', runId: 'x' }))).toEqual({ name: 'files', runId: 'x' });
   });
 

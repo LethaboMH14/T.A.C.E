@@ -41,3 +41,13 @@ Hash routes: `#/mission/<runId>`, `#/missions`, `#/agents`, `#/evidence/<runId>`
 - **U8 timeline + views:** `src/components/Timeline.tsx` (swimlanes per role from TASK_STARTED/COMPLETED/RERUN/REVIEW/REPAIR timestamps), `src/views/AgentsView.tsx`, `src/views/EvidenceView.tsx`, `src/views/FilesView.tsx` (versions + line diff v1→v2→v3 with `diff` (jsdiff, BSD-3)), cost column wherever a price is known (`engine/providers.mjs` PROVIDERS price), otherwise "tokens only (price not published)".
 
 Libraries allowed (check the licence before install, report it): `cmdk` (MIT), `@tanstack/react-table` (MIT), `diff` (BSD-3), `@number-flow/react` (MIT, count-ups), `sonner` (MIT, toasts). Motion is installed. Respect `prefers-reduced-motion`.
+
+## Live class, sign-in and notifications (L4b)
+- Routes: `#/live`. Sign-in gate wraps the app (`components/auth`, `lib/auth.ts`); every `/api/*` 401 `AUTH_REQUIRED` returns to sign-in.
+- Live class view (`views/LiveView.tsx`, `state/live.ts`): QR + counts, feed (Needs help | By learner | By skill | Timeline), plan composer (`POST /api/lms/run`). Feed memory cap 2000; reconnect backoff 1s to 15s with `after_attempt`/`after_help` cursors.
+- By skill: the pass mark is not in the live stream, so order is help requests, then submissions, then skill id (`bySkillView(items, null)`). Pass a number once a data source for it exists.
+- Source intake (`components/live/SourceIntake.tsx`): rows from `LMS_SNAPSHOT`, settled by `SOURCE_ADMITTED` with the same file name and digest.
+- Deliver (`components/deliver`): confirm dialog reads `unsent-message-drafts.json` of the run and `GET /api/lms/status` channels; `POST /api/runs/:id/deliver`. Delivered badge from `MESSAGES_DELIVERED` (header, mission view) and `delivered` in `/api/runs` (Missions list).
+- Notifications (`state/notifications.ts`, `components/notify`): bell + toasts from live ledger events of the open run; replayed history (first 1.5 s after opening a run) is not notified.
+- Layout: collapsible navigation (state kept in localStorage), collapsible Review/Activity strip, graph re-fits on any container resize.
+- New dependency: `qrcode-generator@2.0.4`, MIT, zero dependencies, last published 2025-08-07 (checked with `npm view qrcode-generator license time.modified`). Chosen over `qrcode` (needs node-only deps for some paths, 1.5.4). Toasts are our own (no `sonner`).

@@ -47,6 +47,9 @@ export function initialMission(runId: string | null = null): Mission {
     passed: null,
     files: {},
     stage: { goal: 'idle', plan: 'idle', execute: 'idle', verify: 'idle', deliver: 'idle' },
+    lmsSnapshot: null,
+    delivered: null,
+    notified: null,
     feed: [],
     started: null,
     lastTs: null,
@@ -171,7 +174,7 @@ export function reduce(m: Mission, e: LedgerEvent): Mission {
         paceMs: d.pacedMs ?? 0,
         agents,
         planted,
-        plantedHeading: planted.length ? (d.plantedFault ? 'Planted on purpose for this demo' : 'Changed for this scenario') : null,
+        plantedHeading: planted.length ? (d.plantedFault ? 'Planted on purpose' : 'Changed for this scenario') : null,
       };
       s = withStage(s, 'goal', 'active');
       return addFeed(s, 'Mission started');
@@ -366,6 +369,38 @@ export function reduce(m: Mission, e: LedgerEvent): Mission {
       const reps = d.repairs ? ` after ${d.repairs} repair${d.repairs > 1 ? 's' : ''}` : '';
       const why = d.reason ? `: ${d.reason}` : '';
       return addFeed(s, `Mission ${d.status}${reps}${why}`, d.status === 'VERIFIED' ? 'ok' : 'bad');
+    }
+
+    case 'LMS_SNAPSHOT': {
+      const files = Array.isArray(d.files)
+        ? d.files.map((f: { name?: unknown; rows?: unknown; digest?: unknown }) => ({ name: String(f.name ?? ''), rows: Number(f.rows ?? 0), digest: String(f.digest ?? '') }))
+        : [];
+      const lmsSnapshot = {
+        at: typeof d.at === 'string' ? d.at : null,
+        files,
+        learners: Number.isFinite(d.learners) ? Number(d.learners) : null,
+        helpRequests: Number.isFinite(d.helpRequests) ? Number(d.helpRequests) : null,
+      };
+      const bits = [`${files.length} file${files.length === 1 ? '' : 's'}`];
+      if (lmsSnapshot.learners !== null) bits.push(`${lmsSnapshot.learners} learners`);
+      if (lmsSnapshot.helpRequests !== null) bits.push(`${lmsSnapshot.helpRequests} help requests`);
+      return addFeed({ ...base, lmsSnapshot }, `Class data read: ${bits.join(', ')}`);
+    }
+
+    case 'MESSAGES_DELIVERED': {
+      const delivered = { count: Number(d.count ?? 0), learners: Number(d.learners ?? 0), mentors: Number(d.mentors ?? 0) };
+      return addFeed({ ...base, delivered }, `Delivered ${delivered.learners} learner plans and ${delivered.mentors} mentor schedules to portal inboxes`, 'ok');
+    }
+
+    case 'NOTIFICATIONS_SENT': {
+      const pair = (x: { sent?: unknown; failed?: unknown } | undefined) => ({ sent: Number(x?.sent ?? 0), failed: Number(x?.failed ?? 0) });
+      const notified = { email: pair(d.email), sms: pair(d.sms) };
+      const failed = notified.email.failed + notified.sms.failed;
+      return addFeed(
+        { ...base, notified },
+        `Portal notices: ${notified.email.sent} email, ${notified.sms.sent} SMS sent${failed ? `, ${failed} failed` : ''}`,
+        failed ? 'bad' : 'ok',
+      );
     }
 
     case 'AGENT_JOINED':

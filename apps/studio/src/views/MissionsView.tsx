@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable, type ColumnFiltersState, type SortingState } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Inbox } from 'lucide-react';
 import { api, type Mission, type RunInfo } from '@/state';
 import { go } from '@/components/shell/route';
 import { cn } from '@/lib/utils';
@@ -48,7 +48,17 @@ const columns = [
     id: 'status',
     header: 'Status',
     filterFn: 'equals',
-    cell: (c) => <StatusPill status={c.getValue()} />,
+    cell: (c) => (
+      <span className="inline-flex flex-wrap items-center gap-1.5">
+        <StatusPill status={c.getValue()} />
+        {c.row.original.delivered != null ? (
+          <span data-delivered className="inline-flex h-6 items-center gap-1 rounded-full border border-ok-line bg-ok-weak px-2 text-[12px] font-semibold text-ok">
+            <Inbox className="h-3 w-3" aria-hidden />
+            Delivered
+          </span>
+        ) : null}
+      </span>
+    ),
   }),
   helper.accessor((r) => r.startedAt ?? '', {
     id: 'started',
@@ -79,7 +89,7 @@ export function MissionsView({ mission }: { mission: Mission }) {
         setRuns(list);
         setError(null);
       })
-      .catch((e: Error) => setError(`Could not load runs: ${e.message}`));
+      .catch((e: Error) => setError(`Could not load missions: ${e.message}`));
   };
 
   useEffect(load, []);
@@ -110,7 +120,7 @@ export function MissionsView({ mission }: { mission: Mission }) {
         <div>
           <h1 className="font-display text-[24px] font-bold tracking-[-0.01em] text-ink">Missions</h1>
           <p className="m-0 mt-0.5 text-[13.5px] text-ink-3">
-            {runs ? `${runs.length} run${runs.length === 1 ? '' : 's'} in the runs folder` : error ? '' : 'Loading runs…'}
+            {runs ? `${runs.length} mission${runs.length === 1 ? '' : 's'}` : error ? '' : 'Loading runs…'}
           </p>
         </div>
         <label className="flex items-center gap-2 text-[13px] text-ink-2">
@@ -193,7 +203,7 @@ export function MissionsView({ mission }: { mission: Mission }) {
         </table>
         {runs && rows.length === 0 ? (
           <p className="m-0 px-4 py-8 text-center text-[14px] text-ink-3">
-            {runs.length === 0 ? 'No runs yet. Start a mission from the prompt bar or the command palette.' : 'No run has this status.'}
+            {runs.length === 0 ? 'No missions yet. Describe a goal above or press ⌘K.' : 'No run has this status.'}
           </p>
         ) : null}
       </div>

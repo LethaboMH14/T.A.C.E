@@ -27,7 +27,23 @@
   .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
 }
 
+/* Popovers and dialogs: ease-out, short, from the trigger side. Never from scale 0. */
+@keyframes tace-pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes tace-dialog { from { opacity: 0; transform: translate(-50%, calc(-50% + 6px)); } to { opacity: 1; transform: translate(-50%, -50%); } }
+@keyframes tace-scan { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.popover-panel { animation: tace-pop 140ms var(--ease); }
+.dialog-content { animation: tace-dialog 180ms var(--ease); }
+/* Source intake: a scan line crosses a file row while the ledger has not yet admitted it. */
+.intake-scan {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba(143, 102, 237, .14) 50%, transparent 100%);
+  animation: tace-scan 1.1s linear infinite;
+}
+button:active:not(:disabled) { transform: scale(.98); }
+button, [role="button"] { transition: transform 120ms var(--ease), background-color 120ms, color 120ms; }
+
 @media (prefers-reduced-motion: reduce) {
+  .intake-scan { animation: none; }
   *, *::before, *::after {
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;

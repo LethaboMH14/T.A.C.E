@@ -1,12 +1,13 @@
-import { Activity, Bot, Cpu, FileCheck, FolderOpen, LayoutList, Workflow } from 'lucide-react';
+import { Activity, Bot, Cpu, FileCheck, FolderOpen, GraduationCap, LayoutList, PanelLeftClose, PanelLeftOpen, Workflow } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Mission } from '@/state';
 import { go, type Route } from './route';
 
-type NavName = 'mission' | 'missions' | 'agents' | 'evidence' | 'files' | 'models';
+type NavName = 'mission' | 'live' | 'missions' | 'agents' | 'evidence' | 'files' | 'models';
 
 const NAV: { name: NavName; label: string; icon: typeof Activity }[] = [
   { name: 'mission', label: 'Mission', icon: Workflow },
+  { name: 'live', label: 'Live class', icon: GraduationCap },
   { name: 'missions', label: 'Missions', icon: LayoutList },
   { name: 'agents', label: 'Agents', icon: Bot },
   { name: 'evidence', label: 'Evidence', icon: FileCheck },
@@ -29,15 +30,25 @@ export function footerLines(m: Mission | null): { headline: string; detail: stri
   };
 }
 
-export function Sidebar({ route, mission }: { route: Route; mission: Mission | null }) {
+export function Sidebar({
+  route, mission, helpCount = null, collapsed = false, onToggleCollapsed,
+}: {
+  route: Route;
+  mission: Mission | null;
+  /** Open help requests from the live class, when the feed is connected. */
+  helpCount?: number | null;
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
+}) {
   const active = route.name === 'home' ? 'mission' : route.name;
   const foot = footerLines(mission);
   return (
     <aside
       aria-label="Workspace navigation"
-      className="flex w-[232px] shrink-0 flex-col gap-1 border-r border-line bg-surface px-3 py-4 max-[999px]:w-[64px] max-[999px]:px-2 max-[719px]:w-full max-[719px]:flex-row max-[719px]:flex-wrap max-[719px]:items-center max-[719px]:gap-1 max-[719px]:border-b max-[719px]:border-r-0 max-[719px]:px-3 max-[719px]:py-2"
+      data-collapsed={collapsed ? 'true' : undefined}
+      className={cn('flex w-[232px] shrink-0 flex-col gap-1 border-r border-line bg-surface px-3 py-4 max-[999px]:w-[64px] max-[999px]:px-2 max-[719px]:w-full max-[719px]:flex-row max-[719px]:flex-wrap max-[719px]:items-center max-[719px]:gap-1 max-[719px]:border-b max-[719px]:border-r-0 max-[719px]:px-3 max-[719px]:py-2', collapsed && 'w-[64px] px-2')}
     >
-      <div className="mb-4 flex items-center gap-2.5 px-2 max-[999px]:justify-center max-[999px]:px-0 max-[719px]:mb-0 max-[719px]:mr-2">
+      <div className={cn('mb-4 flex items-center gap-2.5 px-2 max-[999px]:justify-center max-[999px]:px-0 max-[719px]:mb-0 max-[719px]:mr-2', collapsed && 'justify-center px-0')}>
         <svg className="h-[26px] w-[26px] shrink-0" viewBox="0 0 32 32" aria-hidden="true">
           <defs>
             <linearGradient id="tace-mark" x1="0" y1="0" x2="1" y2="1">
@@ -49,7 +60,7 @@ export function Sidebar({ route, mission }: { route: Route; mission: Mission | n
           <path d="M16 3 29 27H3z" fill="url(#tace-mark)" />
           <path d="M16 12.5 21.6 23H10.4z" fill="#fff" />
         </svg>
-        <span className="font-display text-[17px] font-bold leading-none tracking-[0.02em] max-[999px]:hidden">T.A.C.E</span>
+        <span className={cn('font-display text-[17px] font-bold leading-none tracking-[0.02em] max-[999px]:hidden', collapsed && 'hidden')}>T.A.C.E</span>
       </div>
 
       <nav className="flex flex-col gap-0.5 max-[719px]:flex-row max-[719px]:flex-wrap" aria-label="Views">
@@ -59,31 +70,54 @@ export function Sidebar({ route, mission }: { route: Route; mission: Mission | n
           return (
             <a
               key={item.name}
-              href={item.name === 'mission' ? (mission?.runId ? `#/mission/${encodeURIComponent(mission.runId)}` : '#/mission') : undefined}
+              href={item.name === 'mission' ? (mission?.runId ? `#/mission/${encodeURIComponent(mission.runId)}` : '#/mission') : item.name === 'live' ? '#/live' : undefined}
               aria-current={on ? 'page' : undefined}
               title={item.label}
               onClick={(e) => {
                 e.preventDefault();
                 if (item.name === 'mission') go(mission?.runId ? { name: 'mission', runId: mission.runId } : { name: 'mission', runId: null });
+                else if (item.name === 'live') go({ name: 'live' });
                 else if (item.name === 'evidence' || item.name === 'files') go({ name: item.name, runId: mission?.runId ?? null });
                 else go({ name: item.name });
               }}
               className={cn(
-                'flex h-9 cursor-pointer items-center gap-2.5 rounded-field px-2.5 text-[14px] font-medium text-ink-2 no-underline hover:bg-sunken hover:text-ink max-[999px]:justify-center max-[999px]:px-0',
+                'relative flex h-9 cursor-pointer items-center gap-2.5 rounded-field px-2.5 text-[14px] font-medium text-ink-2 no-underline hover:bg-sunken hover:text-ink max-[999px]:justify-center max-[999px]:px-0',
+                collapsed && 'justify-center px-0',
                 on && 'bg-accent-weak text-accent-ink',
               )}
             >
               <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.7} aria-hidden />
-              <span className="max-[999px]:sr-only">{item.label}</span>
+              <span className={cn('max-[999px]:sr-only', collapsed && 'sr-only')}>{item.label}</span>
+              {item.name === 'live' && helpCount ? (
+                <span
+                  className={cn('mono ml-auto rounded-full bg-run-weak px-1.5 text-[11px] font-semibold text-run max-[999px]:absolute max-[999px]:right-0.5 max-[999px]:top-0.5 max-[999px]:ml-0', collapsed && 'absolute right-0.5 top-0.5 ml-0')}
+                  aria-label={`${helpCount} help requests`}
+                >
+                  {helpCount}
+                </span>
+              ) : null}
             </a>
           );
         })}
       </nav>
 
-      <div className="mt-auto border-t border-line pt-3 text-[12.5px] leading-[1.45] text-ink-2 max-[999px]:hidden max-[719px]:hidden" data-testid="sidebar-footer">
+      <div className={cn('mt-auto border-t border-line pt-3 text-[12.5px] leading-[1.45] text-ink-2 max-[999px]:hidden max-[719px]:hidden', collapsed && 'hidden')} data-testid="sidebar-footer">
         <p className="m-0 font-semibold text-ink">{foot.headline}</p>
         {foot.detail ? <p className="m-0 mt-0.5 text-ink-3">{foot.detail}</p> : null}
       </div>
+      {onToggleCollapsed ? (
+        <button
+          type="button"
+          onClick={onToggleCollapsed}
+          aria-pressed={collapsed}
+          aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+          title={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+          className={cn('flex h-9 cursor-pointer items-center gap-2.5 rounded-field px-2.5 text-[13.5px] text-ink-3 hover:bg-sunken hover:text-ink max-[999px]:hidden', collapsed && 'justify-center px-0')}
+        >
+          {collapsed ? <PanelLeftOpen className="h-[18px] w-[18px]" strokeWidth={1.7} aria-hidden /> : <PanelLeftClose className="h-[18px] w-[18px]" strokeWidth={1.7} aria-hidden />}
+          <span className={cn(collapsed && 'sr-only')}>Collapse</span>
+        </button>
+      ) : null}
     </aside>
   );
 }

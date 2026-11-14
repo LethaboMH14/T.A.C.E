@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
-import { ReactFlow, type Edge } from '@xyflow/react';
+import { ReactFlow, useReactFlow, useStore, type Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './graph/graph.css';
 import type { Mission } from '@/state';
@@ -10,8 +10,21 @@ import { Roster } from './graph/Roster';
 // Live view: nodes are fixed, the canvas fits the plan, the page keeps its own scroll.
 const nodeTypes = { mission: MissionNode };
 const proOptions = { hideAttribution: false };
-const fitViewOptions = { padding: 0.12 };
+const fitViewOptions = { padding: 0.16 };
 const PULSE_MS = 1400;
+
+/** Re-fits the whole plan whenever the canvas changes size (inspector opened, side panel collapsed, window resized). */
+function FitOnResize() {
+  const { fitView } = useReactFlow();
+  const width = useStore((s) => s.width);
+  const height = useStore((s) => s.height);
+  useEffect(() => {
+    if (!width || !height) return;
+    const id = window.requestAnimationFrame(() => fitView({ ...fitViewOptions, duration: 0 }));
+    return () => window.cancelAnimationFrame(id);
+  }, [width, height, fitView]);
+  return null;
+}
 
 /**
  * onSelectNode(id) fires on click, and on Enter or Space while a node has keyboard focus.
@@ -111,7 +124,7 @@ export function MissionGraph({
       </h2>
 
       {hasPlan ? (
-        <div className="tace-graph w-full" style={{ height: layout.height + 16 }} onKeyDown={onKeyDown}>
+        <div className="tace-graph w-full" style={{ height: layout.height + 32 }} onKeyDown={onKeyDown}>
           <ReactFlow
             key={planKey}
             nodes={nodes}
@@ -126,10 +139,12 @@ export function MissionGraph({
             panOnScroll={false}
             zoomOnScroll={false}
             zoomOnDoubleClick={false}
-            minZoom={0.4}
+            minZoom={0.2}
             maxZoom={1.25}
             proOptions={proOptions}
-          />
+          >
+            <FitOnResize />
+          </ReactFlow>
         </div>
       ) : (
         <div className="tace-empty">

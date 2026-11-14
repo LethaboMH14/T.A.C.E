@@ -3,6 +3,7 @@
 // The UI renders this state only. It decides no status, number or colour on its own.
 
 import { useEffect, useState } from 'react';
+import { pollRun } from '@/lib/runPoll';
 import type {
   ArtifactRef, RunOverrides, Check, FeedItem, HumanQuestion, LedgerEvent, Mission, NodeInfo, NodeState, RunInfo, ScenarioInfo, StageState, Tone,
 } from './types';
@@ -412,9 +413,15 @@ export function reduce(m: Mission, e: LedgerEvent): Mission {
     case 'AGENT_MESSAGE':
       return { ...base, messages: [...base.messages, d] };
 
+    case 'MODEL_STARTED': {
+      const t = { agent: String(d.agent ?? e.role ?? 'An agent'), provider: String(d.provider ?? ''), model: String(d.model ?? '') };
+      return addFeed({ ...base, thinking: t }, `${t.agent} is thinking (${t.provider} · ${t.model})`);
+    }
+
     case 'MODEL_CALL':
       return {
         ...base,
+        thinking: null,
         modelCalls: [
           ...base.modelCalls,
           { agent: d.agent, ok: !!d.ok, ms: d.ms ?? 0, total: d.usage?.total ?? 0, error: d.error ?? null, provider: d.provider, model: d.model },
@@ -463,34 +470,17 @@ export function useMission(runId: string | null): Mission {
   useEffect(() => {
     setM(initialMission(runId));
     if (!runId) return;
-    const es = new EventSource(`/api/runs/${encodeURIComponent(runId)}/events`);
-    let finishedSeen = false;
-    es.onopen = () => setM((prev) => (prev.finished ? prev : { ...prev, stream: 'live' }));
-    es.onmessage = (msg) => {
-      let e: LedgerEvent;
-      try {
-        e = JSON.parse(msg.data) as LedgerEvent;
-      } catch {
-        return;
-      }
-      if (e.type === 'RUN_FINISHED') finishedSeen = true;
-      setM((prev) => ({ ...reduce(prev, e), stream: 'live' }));
-    };
-    es.addEventListener('end', () => {
-      finishedSeen = true;
-      es.close();
-      setM((prev) => ({ ...prev, stream: prev.finished ? 'ended' : 'stopped' }));
-    });
-    es.onerror = () => {
-      // EventSource retries on its own while CONNECTING. CLOSED means the server ended the stream.
-      if (es.readyState === EventSource.CLOSED) {
-        es.close();
-        setM((prev) => ({ ...prev, stream: prev.finished || finishedSeen ? 'ended' : 'stopped' }));
-      } else {
-        setM((prev) => (prev.finished ? prev : { ...prev, stream: 'lost' }));
-      }
-    };
-    return () => es.close();
+    // Polling, not EventSource: tunnels and CDNs buffer SSE, so a live run looked frozen until it ended.
+    return pollRun(
+      runId,
+      (events: LedgerEvent[]) => setM((prev) => events.reduce((acc, e) => reduce(acc, e), prev)),
+      (state) =>
+        setM((prev) => {
+          if (state === 'ended') return { ...prev, stream: prev.finished ? 'ended' : 'stopped' };
+          if (state === 'lost') return prev.finished ? prev : { ...prev, stream: 'lost' };
+          return { ...prev, stream: state };
+        }),
+    );
   }, [runId]);
 
   return m;

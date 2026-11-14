@@ -73,6 +73,7 @@ export async function runMission({ scenario, domain, sourcesDir, runDir, runId, 
     M.answeredBy = new Set();
     M.model = routerFromEnv(env, {
       onCall: (c) => { if (c.ok) M.answeredBy.add(`${c.provider}:${c.model}`); emit(EVENT.MODEL_CALL, c, { taskId: null, role: c.agent }); },
+      onStart: (s) => emit(EVENT.MODEL_STARTED, s, { taskId: null, role: s.agent }),
       onFallback: (f) => emit(EVENT.MODEL_FALLBACK, f, { taskId: null, role: f.agent }),
     });
   } else if (model && typeof model === 'object') {

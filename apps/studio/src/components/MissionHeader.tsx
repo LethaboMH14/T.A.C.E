@@ -85,7 +85,7 @@ export function MissionHeader({ mission: m }: { mission: Mission }) {
       : m.stream === 'stopped'
         ? { state: 'stopped', text: 'Stopped without a finish event' }
         : m.started !== null
-          ? { state: 'running', text: m.reviewState === 'failed' ? 'Problem found' : 'Running' }
+          ? { state: 'running', text: m.reviewState === 'failed' ? 'Problem found' : m.thinking ? `${m.thinking.agent} is thinking…` : 'Running' }
           : { state: 'idle', text: 'Idle' };
 
   const statusClass: Record<string, string> = {

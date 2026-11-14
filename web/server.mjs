@@ -86,6 +86,24 @@ function streamEvents(req, res, runId) {
   req.on('close', () => { clearInterval(timer); clearInterval(ping); });
 }
 
+/** Ledger events with seq > after, plus whether the run has finished. Same events as the SSE stream. */
+function pollEvents(res, runId, after) {
+  const file = path.join(runsDir, runId, 'events.jsonl');
+  const min = Number.isFinite(after) ? after : 0;
+  const events = [];
+  let finished = false;
+  if (fs.existsSync(file)) {
+    for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+      if (!line.trim()) continue;
+      let e; try { e = JSON.parse(line); } catch { continue; } // partial last line: picked up next poll
+      if (e.type === 'RUN_FINISHED') finished = true;
+      if (Number(e.seq) > min) events.push(e);
+    }
+  }
+  res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+  res.end(JSON.stringify({ events, finished, running: active.has(runId) }));
+}
+
 const PROFILES_OK = new Set(['demo', 'free', 'cheap', 'meta']);
 const DAYS_OK = new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
 /** Validate "run again with a change" overrides. Unknown keys are rejected, never ignored. */
@@ -195,6 +213,8 @@ const server = http.createServer(async (req, res) => {
         const runId = parts[2];
         if (!fs.existsSync(path.join(runsDir, runId))) return send(res, 404, { error: 'no such run' });
         if (parts[3] === 'events') return streamEvents(req, res, runId);
+        // Polling form of the same ledger: proxies like Cloudflare tunnels hold SSE back until the run ends.
+        if (parts[3] === 'poll' && req.method === 'GET') return pollEvents(res, runId, Number(url.searchParams.get('after') ?? 0));
         if (parts[3] === 'answer' && req.method === 'POST') {
           // Same rules as POST /api/runs: same-origin JSON only.
           const origin = req.headers.origin;

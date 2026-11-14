@@ -114,6 +114,7 @@ export function createRouter({
   profile,
   env = process.env,
   onCall = () => {},
+  onStart = () => {},
   onFallback = () => {},
   budget,
   fetchImpl = (...args) => fetch(...args),
@@ -187,6 +188,7 @@ export function createRouter({
       checkBudget();
       const effort = p.sendReasoningEffort ? (wantEffort ?? p.reasoningEffort ?? null) : null;
       try {
+        onStart({ agent, provider: p.name, model: modelId });
         const res = await clientFor(p, modelId).chat({ agent, ...rest, reasoningEffort: effort });
         account(p, res.usage);
         return { ...res, provider: p.name, model: modelId };

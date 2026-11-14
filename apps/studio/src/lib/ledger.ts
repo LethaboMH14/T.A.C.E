@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import type { LedgerEvent, Mission } from '@/state';
+import { pollRun } from '@/lib/runPoll';
 
 /** Roles that always sort last in lanes and cards, after the workers. */
 export const LAST_ROLES = ['Reviewer', 'Repair'] as const;
@@ -26,21 +27,8 @@ export function useLedgerEvents(runId: string | null, enabled = true): LedgerEve
   useEffect(() => {
     setEvents([]);
     if (!runId || !enabled) return;
-    const seen = new Set<number>();
-    const es = new EventSource(`/api/runs/${encodeURIComponent(runId)}/events`);
-    es.onmessage = (msg) => {
-      let e: LedgerEvent;
-      try {
-        e = JSON.parse(msg.data) as LedgerEvent;
-      } catch {
-        return;
-      }
-      if (seen.has(e.seq)) return;
-      seen.add(e.seq);
-      setEvents((prev) => [...prev, e]);
-    };
-    es.addEventListener('end', () => es.close());
-    return () => es.close();
+    // Polling (see lib/runPoll.ts): SSE is held back by tunnels until the run ends.
+    return pollRun(runId, (fresh) => setEvents((prev) => [...prev, ...fresh]), () => {});
   }, [runId, enabled]);
 
   return events;

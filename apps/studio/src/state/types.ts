@@ -104,6 +104,8 @@ export interface Mission {
   node: Record<string, NodeInfo>;          // task ids + 'goal','sources','review','repair','deliver','blocked'
   joined: { agent: string; capabilityId: string; reason: string; by: string }[];
   messages: AgentMessage[];
+  /** Set by MODEL_STARTED, cleared by the MODEL_CALL that follows: who is waiting on an AI model right now. */
+  thinking?: { agent: string; provider: string; model: string } | null;
   modelCalls: { agent: string; ok: boolean; ms: number; total: number; error: string | null; provider?: string; model?: string }[];
   fallbacks: { agent: string; from: string; to: string; reason: string }[];   // MODEL_FALLBACK: the router switched provider
   handoffs: { from: string; to: string; artifact: string; seq: number }[];

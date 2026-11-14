@@ -1,13 +1,15 @@
 // T.A.C.E LMS routes (live class portal bridge). All JSON, same-origin POSTs via ctx.readJson.
-//   GET  /api/lms/status            configured flag, public URL, counts (no secrets)
+//   GET  /api/lms/status            configured flag, public URL, counts, notification channels (no secrets)
 //   GET  /api/lms/live              Server-Sent Events: new attempts and help requests, plus a counts event
 //   POST /api/lms/run               {goal?, model?:'off'} -> export -> snapshot -> real run -> 202
-//   POST /api/runs/:id/deliver      {confirm:true} -> deliver the run's drafts to portal inboxes, remember facts
+//   POST /api/runs/:id/deliver      {confirm:true, notify?:true} -> deliver the run's drafts to portal inboxes, remember facts,
+//                                   then "check your portal" email/SMS to opted-in people only (counts only)
 //   POST /api/lms/reset             {confirm:'RESET'} -> clear audience activity (demo reset)
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { createLmsClient } from '../../engine/lms.mjs';
+import { createNotifier, notifyRecipients } from '../../engine/notify.mjs';
 import { openLedger } from '../../engine/ledger.mjs';
 import { parseCsv } from '../../engine/csv.mjs';
 import { EVENT, RUN_STATUS } from '../../engine/contracts.mjs';
@@ -87,10 +89,17 @@ function waitForRunStart(runDir, ms) {
   });
 }
 
+// ---------- notifications (Brevo): built per request from the environment, like the LMS client
+function notifierOf(ctx) { return createNotifier(ctx.env); }
+
 // ---------- GET /api/lms/status
 async function status(req, res, ctx) {
+  let notifier;
+  try { notifier = notifierOf(ctx); } catch (e) { return ctx.send(res, 500, { error: e.message }); }
+  const st = notifier.status();
+  const notifyState = { notify: { email: { connected: st.email.connected }, sms: { connected: st.sms.connected } }, portalUrl: notifier.portalUrl };
   const c = lmsOf(ctx);
-  if (!c.configured) return ctx.send(res, 200, { configured: false, url: null, counts: null });
+  if (!c.configured) return ctx.send(res, 200, { configured: false, url: null, counts: null, ...notifyState });
   try {
     const profiles = await c.rpc('lms_list_profiles');
     let attemptsLive = null; let help = null;
@@ -101,9 +110,10 @@ async function status(req, res, ctx) {
     return ctx.send(res, 200, {
       configured: true, url: c.url,
       counts: { profiles: profiles.length, claimed: profiles.filter((p) => p.claimed).length, attempts_live: attemptsLive, help },
+      ...notifyState,
     });
   } catch (e) {
-    return ctx.send(res, 502, { configured: true, url: c.url, counts: null, error: e.message });
+    return ctx.send(res, 502, { configured: true, url: c.url, counts: null, error: e.message, ...notifyState });
   }
 }
 
@@ -223,6 +233,30 @@ async function runLive(req, res, ctx) {
 }
 
 // ---------- POST /api/runs/:id/deliver
+// "Check your portal" email/SMS, after the inbox write. Only people the database says opted in are contacted.
+// The ledger and the response carry counts and error codes, never addresses.
+async function notifyDelivered(ctx, c, runDir, runId, notifyOn, ids, displayNameOf) {
+  if (!notifyOn) return { email: 'skipped', sms: 'skipped', counts: null };
+  const notifier = notifierOf(ctx);
+  const st = notifier.status();
+  if (!st.email.connected && !st.sms.connected) return { email: 'not_connected', sms: 'not_connected', counts: null };
+  const contacts = await c.admin('lms_admin_contacts', { p_ids: ids });
+  if (!Array.isArray(contacts)) throw new Error('lms_admin_contacts returned no list');
+  const people = contacts.slice().sort((a, b) => byString(a.profile_id, b.profile_id)).map((x) => ({
+    displayName: displayNameOf.get(x.profile_id), email: x.email || null, phone: x.phone || null,
+  }));
+  const { counts, errors } = await notifyRecipients(notifier, people, { concurrency: 5 });
+  appendEvent(runDir, runId, EVENT.NOTIFICATIONS_SENT, { email: counts.email, sms: counts.sms, channel: 'email_sms', approvedBy: 'coordinator' });
+  const state = (ch) => {
+    if (!st[ch].connected) return 'not_connected';
+    const { sent, failed } = counts[ch];
+    if (sent + failed === 0) return 'skipped';
+    if (failed === 0) return 'sent';
+    return sent === 0 ? 'failed' : 'partial';
+  };
+  return { email: state('email'), sms: state('sms'), counts, errors };
+}
+
 function loadSnapshot(ctx, snapEv) {
   const dir = String(snapEv.data.dir || '');
   const abs = path.resolve(ctx.repo, dir);
@@ -244,6 +278,7 @@ async function deliver(req, res, ctx, runId) {
   const body = await ctx.readJson(req, res);
   if (body === null) return;
   if (body.confirm !== true) return ctx.send(res, 400, { error: 'send {"confirm": true} to deliver this run to the portal inboxes' });
+  if (body.notify !== undefined && typeof body.notify !== 'boolean') return ctx.send(res, 400, { error: 'notify must be true or false (default true)' });
   if (ctx.active.has(runId)) return ctx.send(res, 409, { error: 'run is still in progress' });
   if (delivering.has(runId)) return ctx.send(res, 409, { error: 'delivery of this run is already in progress' });
   const c = lmsOf(ctx);
@@ -352,7 +387,17 @@ async function deliver(req, res, ctx, runId) {
         remembered = Number.isInteger(r) ? r : facts.length;
       } catch (e) { rememberError = e.message; }
     }
-    return ctx.send(res, 200, { delivered, remembered, learners: learnerDrafts.length, mentors: mentorDrafts.length, draftsDigest, rememberError });
+
+    // The inbox write has already succeeded, so a notification failure is reported in the response and never undoes it.
+    const displayNameOf = new Map([...traineeName, ...mentorName]);
+    const ids = [...new Set(messages.map((m) => m.profile_id))].sort(byString);
+    let notify;
+    try {
+      notify = await notifyDelivered(ctx, c, runDir, runId, body.notify !== false, ids, displayNameOf);
+    } catch (e) {
+      notify = { email: 'failed', sms: 'failed', counts: null, error: e.message };
+    }
+    return ctx.send(res, 200, { delivered, remembered, learners: learnerDrafts.length, mentors: mentorDrafts.length, draftsDigest, rememberError, notify });
   } catch (e) {
     return ctx.send(res, 500, { error: e.message, code: e.code ?? null });
   } finally {

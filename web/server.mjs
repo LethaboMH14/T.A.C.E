@@ -6,6 +6,7 @@
 // - GET  /api/runs/:id/events         -> Server-Sent Events: replays events.jsonl, then tails it live.
 // - GET  /api/runs/:id/file?path=...  -> a file from that run's artifacts/ (read-only, path-checked).
 // - GET  /api/sources/:file           -> an admitted fixture file (read-only), for Evidence X-Ray.
+// Coordinator sign-in: /api/auth/* (web/api/auth.mjs). Every other /api route needs the tace_staff cookie when the LMS is configured (STUDIO_LOGIN=off turns that off).
 // The page only ever shows what these files say. Nothing here can send a message anywhere.
 import http from 'node:http';
 import fs from 'node:fs';
@@ -16,7 +17,9 @@ import { EDU_DOMAIN } from '../domains/education/index.mjs';
 import { TRUSTED_FIXTURE_CONTEXT } from '../fixtures/education-recovery/scenarios.mjs';
 import { safeJoin } from '../engine/artifacts.mjs';
 import { loadScenario, stampRunId, loadLocalEnv } from '../cli/tace.mjs';
+import { createStaffGate } from './api/auth.mjs';
 loadLocalEnv();
+const staffGate = createStaffGate(process.env);
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
@@ -141,7 +144,7 @@ async function readJson(req, res, maxBytes = 4096) {
 }
 
 // API route modules: every web/api/*.mjs exports `async handle(req, res, url, parts, ctx) -> boolean` (true = handled).
-const apiCtx = { send, readJson, startRun, listRuns, runsDir, repo, active, env: process.env, RUN_ID };
+const apiCtx = { send, readJson, startRun, listRuns, runsDir, repo, active, env: process.env, RUN_ID, staffGate };
 const apiDir = path.join(here, 'api');
 const apiModules = [];
 if (fs.existsSync(apiDir)) {
@@ -156,6 +159,11 @@ const server = http.createServer(async (req, res) => {
     const parts = url.pathname.split('/').filter(Boolean);
 
     if (parts[0] === 'api') {
+      // Coordinator sign-in: every /api route except /api/auth needs a valid tace_staff cookie (when login is required).
+      if (parts[1] !== 'auth') {
+        const gate = await staffGate.check(req);
+        if (!gate.ok) return send(res, gate.status, gate.body);
+      }
       if (req.method === 'GET' && parts[1] === 'scenarios') {
         const items = fs.readdirSync(EDU_DOMAIN.scenariosDir).filter((f) => f.endsWith('.json')).sort().map((f) => {
           const s = JSON.parse(fs.readFileSync(path.join(EDU_DOMAIN.scenariosDir, f), 'utf8'));

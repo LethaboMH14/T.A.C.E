@@ -134,10 +134,16 @@ function startRun(body) {
   return { runId, scenarioId: scenario.id, pace };
 }
 
+// Browsers on this machine, plus one exact public origin when the Studio is published (STUDIO_PUBLIC_ORIGIN, e.g. a tunnel URL).
+const PUBLIC_ORIGIN = (process.env.STUDIO_PUBLIC_ORIGIN || '').replace(/\/+$/, '');
+function allowedOrigin(origin) {
+  return /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) || (PUBLIC_ORIGIN !== '' && origin === PUBLIC_ORIGIN);
+}
+
 /** Same-origin JSON body reader for API modules (≤ maxBytes). Returns the parsed object or sends the error and returns null. */
 async function readJson(req, res, maxBytes = 4096) {
   const origin = req.headers.origin;
-  if (origin && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) { send(res, 403, { error: 'cross-origin request refused' }); return null; }
+  if (origin && !allowedOrigin(origin)) { send(res, 403, { error: 'cross-origin request refused' }); return null; }
   if (!String(req.headers['content-type'] || '').startsWith('application/json')) { send(res, 415, { error: 'send JSON' }); return null; }
   let raw = ''; for await (const c of req) { raw += c; if (raw.length > maxBytes) { send(res, 413, { error: 'too large' }); return null; } }
   try { return JSON.parse(raw || '{}'); } catch { send(res, 400, { error: 'invalid JSON' }); return null; }
@@ -176,7 +182,7 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'POST') {
           // Runs can call a paid model API: only same-origin JSON requests, one run at a time.
           const origin = req.headers.origin;
-          if (origin && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return send(res, 403, { error: 'cross-origin request refused' });
+          if (origin && !allowedOrigin(origin)) return send(res, 403, { error: 'cross-origin request refused' });
           if (!String(req.headers['content-type'] || '').startsWith('application/json')) return send(res, 415, { error: 'send JSON' });
           if (active.size > 0) return send(res, 409, { error: 'a run is already in progress; wait for it to finish' });
           let raw = ''; for await (const c of req) { raw += c; if (raw.length > 4096) return send(res, 413, { error: 'too large' }); }
@@ -191,7 +197,7 @@ const server = http.createServer(async (req, res) => {
         if (parts[3] === 'answer' && req.method === 'POST') {
           // Same rules as POST /api/runs: same-origin JSON only.
           const origin = req.headers.origin;
-          if (origin && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return send(res, 403, { error: 'cross-origin request refused' });
+          if (origin && !allowedOrigin(origin)) return send(res, 403, { error: 'cross-origin request refused' });
           if (!String(req.headers['content-type'] || '').startsWith('application/json')) return send(res, 415, { error: 'send JSON' });
           let raw = ''; for await (const c of req) { raw += c; if (raw.length > 4096) return send(res, 413, { error: 'too large' }); }
           let body; try { body = JSON.parse(raw || '{}'); } catch { return send(res, 400, { error: 'bad JSON' }); }

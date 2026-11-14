@@ -10,6 +10,9 @@ export const NODE_H = 58;
 export const ROW = 84;
 export const HG = 20;
 export const TOP = 18;
+export const LEFT = 18;
+export const COL = NODE_W + 34; // column pitch, left to right
+export const VG = 18;            // vertical gap between nodes in a column
 
 export type EdgeKind = 'flow' | 'sink' | 'loop' | 'stop';
 
@@ -137,7 +140,8 @@ export function computeLayout(input: LayoutInput): GraphLayout {
     addEdge('sources', 'blocked', 'stop');
   }
 
-  // Position: centred rows of fixed-width nodes, canvas as wide as the widest row.
+  // Position: left to right. Each logical row becomes a column of fixed-size nodes, centred vertically,
+  // so the graph is wide and short and sits beside the other panels instead of pushing them down.
   const byRow = new Map<number, Draft[]>();
   for (const d of drafts) {
     const list = byRow.get(d.row) ?? [];
@@ -145,23 +149,22 @@ export function computeLayout(input: LayoutInput): GraphLayout {
     byRow.set(d.row, list);
   }
   const rowKeys = [...byRow.keys()].sort((a, b) => a - b);
-  const rowWidth = (n: number) => n * NODE_W + (n - 1) * HG;
-  const canvasW = Math.max(NODE_W, ...rowKeys.map((r) => rowWidth(byRow.get(r)!.length)));
+  const colHeight = (n: number) => n * NODE_H + (n - 1) * VG;
+  const canvasH = Math.max(NODE_H, ...rowKeys.map((r) => colHeight(byRow.get(r)!.length)));
   const nodes: LayoutNode[] = [];
-  for (const r of rowKeys) {
+  rowKeys.forEach((r, ci) => {
     const list = byRow.get(r)!;
-    let x = (canvasW - rowWidth(list.length)) / 2;
+    let y = TOP + (canvasH - colHeight(list.length)) / 2;
     for (const d of list) {
-      nodes.push({ ...d, x, y: TOP + r * ROW, w: NODE_W, h: NODE_H });
-      x += NODE_W + HG;
+      nodes.push({ ...d, x: LEFT + ci * COL, y, w: NODE_W, h: NODE_H });
+      y += NODE_H + VG;
     }
-  }
-  const maxRow = rowKeys.length ? rowKeys[rowKeys.length - 1] : 0;
+  });
   return {
     nodes,
     edges,
-    width: canvasW,
-    height: TOP + maxRow * ROW + NODE_H + 22,
+    width: LEFT + Math.max(0, rowKeys.length - 1) * COL + NODE_W + LEFT,
+    height: TOP + canvasH + 22,
     rows: rowKeys.length,
   };
 }

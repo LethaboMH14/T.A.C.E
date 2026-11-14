@@ -31,15 +31,16 @@ describe('computeLayout', () => {
     const small = computeLayout(reportOnly);
     const big = computeLayout(fullPlan);
     expect(rowCount(small)).toBeLessThan(rowCount(big));
-    expect(small.height).toBeLessThan(big.height);
+    expect(small.width).toBeLessThan(big.width);
   });
 
-  it('review and repair share a row, with review on the left', () => {
+  it('review and repair share a column, with review above', () => {
     const l = computeLayout(fullPlan);
     const review = l.nodes.find((n) => n.id === 'review')!;
     const repair = l.nodes.find((n) => n.id === 'repair')!;
     expect(review.row).toBe(repair.row);
-    expect(review.x).toBeLessThan(repair.x);
+    expect(review.x).toBe(repair.x);
+    expect(review.y).toBeLessThan(repair.y);
     const deliver = l.nodes.find((n) => n.id === 'deliver')!;
     expect(deliver.row).toBeGreaterThan(review.row);
   });
@@ -62,15 +63,17 @@ describe('computeLayout', () => {
     expect(l.edges).toContainEqual({ id: 'sources--blocked', source: 'sources', target: 'blocked', kind: 'stop' });
   });
 
-  it('is deterministic and centres each row on the canvas', () => {
+  it('is deterministic and centres each column vertically', () => {
     const a = computeLayout(fullPlan);
     const b = computeLayout(fullPlan);
     expect(a).toEqual(b);
     for (const r of new Set(a.nodes.map((n) => n.row))) {
       const row = a.nodes.filter((n) => n.row === r);
-      const left = row[0].x;
-      const right = row[row.length - 1].x + row[row.length - 1].w;
-      expect(Math.abs(left - (a.width - right))).toBeLessThan(1e-9);
+      const mid = (row[0].y + row[row.length - 1].y + row[row.length - 1].h) / 2;
+      const first = a.nodes.filter((n) => n.row === a.nodes[0].row);
+      const mid0 = (first[0].y + first[first.length - 1].y + first[first.length - 1].h) / 2;
+      expect(Math.abs(mid - mid0)).toBeLessThan(1e-9);
+      expect(new Set(row.map((n) => n.x)).size).toBe(1);
     }
   });
 

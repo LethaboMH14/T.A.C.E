@@ -31,10 +31,10 @@ function MissionNodeImpl({ data }: NodeProps<MissionFlowNode>) {
   const Icon = iconFor(data.role);
   return (
     <div className="tace-node" data-state={data.state} aria-label={`${data.role}: ${data.sub}, ${data.state}`}>
-      <Handle id="in" type="target" position={Position.Top} style={{ ...handleStyle, left: '50%' }} isConnectable={false} />
-      <Handle id="out" type="source" position={Position.Bottom} style={{ ...handleStyle, left: '50%' }} isConnectable={false} />
-      <Handle id="loopOut" type="source" position={Position.Bottom} style={{ ...handleStyle, left: '72%' }} isConnectable={false} />
-      <Handle id="loopIn" type="target" position={Position.Bottom} style={{ ...handleStyle, left: '28%' }} isConnectable={false} />
+      <Handle id="in" type="target" position={Position.Left} style={{ ...handleStyle, top: '50%' }} isConnectable={false} />
+      <Handle id="out" type="source" position={Position.Right} style={{ ...handleStyle, top: '50%' }} isConnectable={false} />
+      <Handle id="loopOut" type="source" position={Position.Bottom} style={{ ...handleStyle, left: '50%' }} isConnectable={false} />
+      <Handle id="loopIn" type="target" position={Position.Top} style={{ ...handleStyle, left: '50%' }} isConnectable={false} />
       <span className="tace-glyph">
         <Icon aria-hidden strokeWidth={1.7} />
       </span>

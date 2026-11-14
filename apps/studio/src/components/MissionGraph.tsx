@@ -118,7 +118,7 @@ export function MissionGraph({
   );
 
   return (
-    <section className="rounded-card border border-line bg-surface p-4 shadow" aria-labelledby="h-graph">
+    <section className="min-h-[200px] shrink-0 rounded-card border border-line bg-surface p-4 shadow" aria-labelledby="h-graph">
       <h2 id="h-graph" className="mb-3 text-[15px] font-semibold text-ink">
         Execution graph
       </h2>

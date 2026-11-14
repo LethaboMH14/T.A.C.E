@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Activity, ChevronDown, ListTree, Radio, ShieldCheck } from 'lucide-react';
+import { Activity, BookOpen, ChevronDown, ListTree, Radio, ShieldCheck } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MissionHeader } from '@/components/MissionHeader';
 import { QuestionCard } from '@/components/QuestionCard';
@@ -10,6 +10,7 @@ import { ActivityFeed } from '@/components/ActivityFeed';
 import { AgentRoom } from '@/components/AgentRoom';
 import { ModelMeter } from '@/components/ModelMeter';
 import { ReviewPanel } from '@/components/ReviewPanel';
+import { StoryPanel } from '@/components/story/StoryPanel';
 import { Timeline } from '@/components/Timeline';
 import { SourceIntake } from '@/components/live/SourceIntake';
 import { DeliverBar } from '@/components/deliver/DeliverBar';
@@ -25,7 +26,7 @@ import type { Mission } from '@/state';
  */
 export function MissionWorkspace({ mission, runId }: { mission: Mission; runId: string | null }) {
   const [selection, setSelection] = useState<InspectorSelection>(null);
-  const [tab, setTab] = useState('activity');
+  const [tab, setTab] = useState('story');
   const [panelOpen, setPanelOpen] = useState(true);
 
   // A notice asked for a node of this run: open it in the inspector.
@@ -56,7 +57,8 @@ export function MissionWorkspace({ mission, runId }: { mission: Mission; runId: 
       <section className="flex min-h-0 min-w-0 flex-1 flex-col max-[719px]:flex-none">
         <MissionHeader mission={mission} />
 
-        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-4 max-[719px]:overflow-visible">
+        <div className="flex min-h-0 flex-1 flex-col min-[1440px]:flex-row max-[719px]:flex-none">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-auto p-4 max-[719px]:overflow-visible">
           <QuestionCard mission={mission} />
           <SourceIntake mission={mission} />
           <DeliverBar mission={mission} />
@@ -69,10 +71,11 @@ export function MissionWorkspace({ mission, runId }: { mission: Mission; runId: 
             setTab(v);
             setPanelOpen(true);
           }}
-          className={cn('flex shrink-0 flex-col border-t border-line bg-bg max-[719px]:h-auto max-[719px]:min-h-0', panelOpen ? 'h-[36%] min-h-[240px]' : 'h-auto')}
+          className={cn('flex shrink-0 flex-col border-t border-line bg-bg max-[719px]:h-auto max-[719px]:min-h-0', panelOpen ? 'h-[34%] min-h-[200px]' : 'h-auto', 'min-[1440px]:h-auto min-[1440px]:min-h-0 min-[1440px]:w-[460px] min-[1440px]:border-l min-[1440px]:border-t-0')}
         >
           <div className="flex shrink-0 items-center justify-between gap-2 px-4 py-2 max-[719px]:overflow-x-auto">
             <TabsList aria-label="Mission detail">
+              <TabsTrigger value="story"><BookOpen className="h-4 w-4" aria-hidden />Story</TabsTrigger>
               <TabsTrigger value="activity"><Activity className="h-4 w-4" aria-hidden />Activity</TabsTrigger>
               <TabsTrigger value="agents"><Radio className="h-4 w-4" aria-hidden />Agent room</TabsTrigger>
               <TabsTrigger value="timeline"><ListTree className="h-4 w-4" aria-hidden />Timeline</TabsTrigger>
@@ -89,6 +92,9 @@ export function MissionWorkspace({ mission, runId }: { mission: Mission; runId: 
               <ChevronDown className={cn('h-4 w-4 transition-transform duration-150 ease-out motion-reduce:transition-none', !panelOpen && 'rotate-180')} aria-hidden />
             </button>
           </div>
+          <TabsContent value="story" className={cn('min-h-0 flex-1 overflow-auto p-4 outline-none max-[719px]:overflow-visible', !panelOpen && 'hidden')}>
+            <StoryPanel mission={mission} onSelectNode={(id) => setSelection({ type: 'node', id })} />
+          </TabsContent>
           <TabsContent value="activity" className={cn('min-h-0 flex-1 overflow-auto p-4 outline-none max-[719px]:overflow-visible', !panelOpen && 'hidden')}>
             <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4 max-[1000px]:grid-cols-1">
               <div className="flex min-w-0 flex-col gap-4">
@@ -111,6 +117,7 @@ export function MissionWorkspace({ mission, runId }: { mission: Mission; runId: 
             <ReviewPanel mission={mission} />
           </TabsContent>
         </Tabs>
+        </div>
       </section>
 
       {selection ? (

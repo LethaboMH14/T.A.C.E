@@ -83,7 +83,7 @@ const plainStrategy = (s: string): string =>
     rerun_producer: 're-run the step that made the file',
   } as Record<string, string>)[s] ?? s;
 
-function summarySentence(role: string | null, id: string, s: any): string {
+export function summarySentence(role: string | null, id: string, s: any): string {
   if (!s) return `${role} finished`;
   switch (id) {
     case 'compute_gaps':

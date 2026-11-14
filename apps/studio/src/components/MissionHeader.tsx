@@ -127,17 +127,17 @@ export function MissionHeader({ mission: m }: { mission: Mission }) {
             'radial-gradient(40% 120% at 88% 0%, rgba(219, 97, 230, .16), transparent 70%), radial-gradient(36% 110% at 68% 100%, rgba(125, 158, 250, .18), transparent 70%), radial-gradient(30% 90% at 100% 80%, rgba(143, 102, 237, .14), transparent 70%)',
         }}
       />
-      <div className="relative mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-7 px-6 py-4 max-[1000px]:grid-cols-1 max-[1000px]:gap-3.5 max-[860px]:p-4">
+      <div className="relative mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-7 px-6 py-2.5 max-[1000px]:grid-cols-1 max-[1000px]:gap-3.5 max-[860px]:p-4">
         <div className="min-w-0">
-          <p className="mb-1 text-[12.5px] text-ink-3">
+          <p className="mb-0.5 text-[12.5px] text-ink-3">
             <span className="mono" data-testid="run-id">{m.runId ?? 'No run yet'}</span>
           </p>
-          <h1 className="font-display text-[30px] font-bold leading-[1.12] tracking-[-0.02em] text-balance max-[860px]:text-2xl">
+          <h1 title={title} className="truncate font-display text-[22px] font-bold leading-[1.2] tracking-[-0.02em]">
             {title}
           </h1>
-          <p className="mt-2 text-[14.5px] text-ink-2">{countLine(m)}</p>
+          <p className="mt-1 truncate text-[14px] text-ink-2">{countLine(m)}</p>
           {m.planted.length ? (
-            <p className="mt-2.5 flex max-w-[76ch] items-start gap-2 rounded-field bg-run-weak px-3 py-[7px] text-[13px] leading-[1.45] text-[#7A4700]">
+            <p className="mt-1.5 flex max-w-[76ch] items-start gap-2 rounded-field bg-run-weak px-3 py-[7px] text-[13px] leading-[1.45] text-[#7A4700]">
               <TriangleAlert className="mt-px h-4 w-4 shrink-0" aria-hidden />
               <span>
                 {m.plantedHeading}: {m.planted.join('; ')}.

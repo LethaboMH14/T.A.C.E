@@ -8,7 +8,7 @@
 ![node](https://img.shields.io/badge/node-%E2%89%A5%2022.13-339933)
 ![license](https://img.shields.io/badge/license-MIT-blue)
 
-<img src="docs/media/studio-mission.png" alt="Mission Studio: the plan graph, the Reviewer's red flag on a double-booked mentor, and the repaired schedule" width="900">
+<img src="docs/media/studio-mission.jpg" alt="Mission Studio: a verified self-correction run with the left-to-right plan graph and live activity" width="900">
 
 </div>
 
@@ -46,12 +46,10 @@ The faults in the demo scenarios are **planted on purpose**. They are declared i
 
 | | |
 |---|---|
-| ![Failure Autopsy](docs/media/studio-autopsy.png) | ![Evidence X-Ray](docs/media/studio-evidence.png) |
-| **Failure Autopsy.** The red check, the root cause, the repair diff, the green re-check. | **Evidence X-Ray.** Click a number, see the source rows it came from. |
-| ![Live class feed](docs/media/studio-live-class.png) | ![Learner portal on a phone](docs/media/portal-phone.png) |
-| **Live class.** Learners' help requests arrive grouped by need. | **Portal, phone.** Quiz, help in your own words, voice input, inbox. |
-| ![Learner portal on a laptop](docs/media/portal-desktop.png) | |
-| **Portal, laptop.** Same app, sidebar layout. | |
+| ![Reviewer catches a double-booking](docs/media/studio-autopsy.jpg) | ![Live class feed](docs/media/studio-live-class.jpg) |
+| **Review.** The Reviewer re-opens the saved schedule, finds Mentor B booked twice, and the repair is re-checked from scratch. | **Live class.** Join QR, live counts, and learners' help requests grouped by need. |
+| ![Run on live class data](docs/media/studio-live-run.jpg) | |
+| **Run on live class data.** 36 learners from the portal, 19 of 19 checks passed, ready for the coordinator to approve. | Learner portal: open https://lethabomh14.github.io/T.A.C.E/ on a phone or laptop. |
 
 ## Run it in 2 minutes
 

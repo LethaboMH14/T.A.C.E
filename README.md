@@ -19,10 +19,12 @@
 | | |
 |---|---|
 | Learner portal (open on your phone) | https://lethabomh14.github.io/T.A.C.E/ |
+| Demo recording (Loom) | https://www.loom.com/share/64b892caa03446e0852f329a569231ce |
+| Coordinator Studio (live during the demo, sign-in required) | https://nova-depends-souls-palestinian.trycloudflare.com |
 | Source | https://github.com/LethaboMH14/T.A.C.E (branch `feat/mission-engine`) |
 | CI | [runtime workflow](https://github.com/LethaboMH14/T.A.C.E/actions/workflows/runtime.yml) |
 
-Mission Studio runs on the presenter's laptop (`npm run studio`); it is not hosted.
+Mission Studio runs on the presenter's laptop (`npm run studio`). During the demo it is published through a Cloudflare tunnel with coordinator sign-in; that link works only while the laptop is on.
 
 ## What it does
 

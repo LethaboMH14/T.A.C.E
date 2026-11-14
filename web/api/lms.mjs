@@ -335,12 +335,36 @@ async function deliver(req, res, ctx, runId) {
     for (const d of learnerDrafts) {
       const pref = prefOf.get(d.to_id) || { format: 'text', language: 'en' };
       const row = sessionById.get(d.session_id);
+      // The inbox message reads as a short letter: the reviewed draft, then why, then what to work on this week.
+      // Every sentence comes from the verified draft; nothing new is written here.
+      const work = Array.isArray(d.what_to_work_on) ? d.what_to_work_on.filter((x) => typeof x === 'string' && x) : [];
+      const letter = [
+        d.body,
+        typeof d.why === 'string' && d.why ? `Why this plan: ${d.why}` : null,
+        work.length ? `This week, work on: ${work.join(', ')}.` : null,
+        'Your study steps are below. Reply to your coordinator if anything here is wrong.',
+      ].filter(Boolean).join('\n\n');
+      const skillById = new Map(skillsFor(d.to_id).map((s) => [s.skill_id, s]));
+      const niceDate = (iso) => { const t = Date.parse(`${iso}T00:00:00Z`); return Number.isFinite(t) ? new Date(t).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', timeZone: 'UTC' }) : iso; };
+      const when = row ? `Before your session on ${row.day} ${niceDate(row.date)} at ${row.start}` : undefined;
+      const withWho = row ? (mentorName.get(row.mentor_id) ?? row.mentor_id) : undefined;
+      const draftSteps = Array.isArray(d.steps) ? d.steps.map((s) => {
+        if (!s || typeof s !== 'object') return null;
+        if (s.type === 'if_then_plan') return { type: s.type, title: s.text, why: 'Deciding in advance makes it easier to follow through.' };
+        const sk = skillById.get(s.skill_id);
+        return {
+          type: s.type, title: s.title, body: s.body, when, with: withWho,
+          why: sk && sk.score !== null ? `Your ${sk.name} score is ${sk.score}; the pass mark is ${sk.threshold}.` : undefined,
+        };
+      }).filter(Boolean) : [];
       messages.push({
-        profile_id: d.to_id, kind: 'plan', subject: d.subject, body: d.body,
+        profile_id: d.to_id, kind: 'plan', subject: d.subject, body: letter,
         format: pref.format || 'text', language: pref.language || 'en',
         payload: {
           skills: skillsFor(d.to_id),
-          steps: planItems.filter((i) => i.trainee_id === d.to_id).map((i) => ({ skill_id: i.skill_id, title: i.title, reason: i.reason })),
+          // Prefer the draft's own study steps (worked example, quick quiz, if-then plan); fall back to the plan items.
+          steps: draftSteps.length ? draftSteps
+            : planItems.filter((i) => i.trainee_id === d.to_id).map((i) => ({ skill_id: i.skill_id, title: i.title, why: i.reason, when, with: withWho })),
           session: row ? { mentor: mentorName.get(row.mentor_id) ?? row.mentor_id, day_label: dayLabel(row), start: row.start, end: row.end } : null,
           machine_translated: false,
         },
